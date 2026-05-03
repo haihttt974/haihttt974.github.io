@@ -1,15 +1,46 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Clock, Tag } from "lucide-react";
+import { ArrowRight, Clock, Tag, Eye } from "lucide-react";
 import { blogPosts, categories } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { fetchViews, fetchAllViews } from "@/lib/umamiViews";
 
 export const FeaturedPosts = () => {
+  const [viewsMap, setViewsMap] = useState<Record<string, number>>({});
   const featuredPosts = blogPosts.filter((post) => post.featured).slice(0, 3);
 
   const getCategoryName = (categoryId: string) => {
     return categories.find((c) => c.id === categoryId)?.name || categoryId;
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const updateFeaturedViews = async () => {
+      try {
+        const allViews = await fetchAllViews();
+        if (!cancelled) {
+          const mappedViews: Record<string, number> = {};
+          featuredPosts.forEach(post => {
+            const path = `/blog/${post.id}`;
+            mappedViews[post.id] = allViews[path] || 0;
+          });
+          setViewsMap(mappedViews);
+        }
+      } catch (err) {
+        console.error("Error updating featured views:", err);
+      }
+    };
+
+    updateFeaturedViews();
+    const interval = setInterval(updateFeaturedViews, 60000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <section className="py-20">
@@ -46,6 +77,10 @@ export const FeaturedPosts = () => {
                   <div className="flex items-center text-muted-foreground text-sm">
                     <Clock className="h-4 w-4 mr-1" />
                     {post.readTime}
+                  </div>
+                  <div className="flex items-center text-muted-foreground text-sm">
+                    <Eye className="h-4 w-4 mr-1" />
+                    {(viewsMap[post.id] ?? 0).toLocaleString("vi-VN")}
                   </div>
                 </div>
 

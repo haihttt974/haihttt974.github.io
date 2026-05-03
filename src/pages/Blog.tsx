@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { fetchViews } from "@/lib/umamiViews";
+import { fetchViews, fetchAllViews } from "@/lib/umamiViews";
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,21 +34,32 @@ const Blog = () => {
   useEffect(() => {
     let cancelled = false;
 
-    Promise.all(
-      filteredPosts.map(async (post) => {
-        const path = `/blog/${post.id}`;
-        const views = await fetchViews(path);
-        return [post.id, views] as const;
-      })
-    ).then((entries) => {
-      if (cancelled) return;
-      setViewsMap((prev) => ({ ...prev, ...Object.fromEntries(entries) }));
-    });
+    const updateAllViews = async () => {
+      try {
+        const allViews = await fetchAllViews();
+        
+        if (!cancelled) {
+          // Map từ path (/blog/id) về post.id để dễ dàng hiển thị
+          const mappedViews: Record<string, number> = {};
+          blogPosts.forEach(post => {
+            const path = `/blog/${post.id}`;
+            mappedViews[post.id] = allViews[path] || 0;
+          });
+          setViewsMap(mappedViews);
+        }
+      } catch (err) {
+        console.error("Error updating all views:", err);
+      }
+    };
+
+    updateAllViews();
+    const interval = setInterval(updateAllViews, 60000);
 
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
-  }, [filteredPosts]);
+  }, []);
 
   return (
     <Layout>

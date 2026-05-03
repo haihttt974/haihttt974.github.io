@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye } from "lucide-react";
-import { fetchViews } from "@/lib/umamiViews";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { blogPosts, categories } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { fetchViews } from "@/lib/umamiViews";
 
 const BlogPost = () => {
   const { id } = useParams();
@@ -14,15 +14,26 @@ const BlogPost = () => {
   const post = blogPosts.find((p) => p.id === id || (p as any).slug === id);
 
   useEffect(() => {
-    if (!id) return;
+    if (!post) return;
 
-    const hash = window.location.hash || "";          // "#/blog/abc"
-    const umamiPath = hash.startsWith("#") ? hash.slice(1) : hash; // "/blog/abc"
+    const path = `/blog/${post.id}`;
 
-    fetchViews(umamiPath || "/")
-      .then((v) => setViews(v))
-      .catch(() => setViews(0));
-  }, [id]);
+    const updateViews = async () => {
+      try {
+        const v = await fetchViews(path);
+        setViews(v);
+      } catch (err) {
+        console.error("Error fetching views:", err);
+        if (views === null) setViews(0);
+      }
+    };
+
+    updateViews();
+    // Poll for real-time updates every 30 seconds
+    const interval = setInterval(updateViews, 30000);
+
+    return () => clearInterval(interval);
+  }, [post, id]);
 
   if (!post) {
     return (

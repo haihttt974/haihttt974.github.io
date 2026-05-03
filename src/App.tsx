@@ -1,9 +1,8 @@
-// import UmamiRouteTracker from "@/components/analytics/UmamiRouteTracker"
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { EffectsProvider } from "@/contexts/EffectsContext";
 import { EffectsController } from "@/components/effects/EffectsController";
 import { EffectsRenderer } from "@/components/effects/EffectsRenderer";
@@ -16,16 +15,16 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <EffectsProvider>
-        <Toaster />
-        <Sonner />
-        <EffectsRenderer />
-        <EffectsController />
-        <Router>
-          {/* <UmamiRouteTracker /> */}
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <EffectsProvider>
+          <Toaster />
+          <Sonner />
+          <EffectsRenderer />
+          <EffectsController />
+
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/blog" element={<Blog />} />
@@ -34,10 +33,8 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Router>
-      </EffectsProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
-
-export default App;
+        </EffectsProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+}
