@@ -19,15 +19,7 @@ export async function fetchAllViews(): Promise<Record<string, number>> {
     if (!res.ok) return {};
     
     const data = await res.json();
-    const metrics = data.allViews || [];
-    
-    // Chuyển đổi mảng [{x: "/path", y: 123}] thành object {"/path": 123}
-    const viewsMap: Record<string, number> = {};
-    metrics.forEach((item: any) => {
-      if (item.x) viewsMap[item.x] = item.y;
-    });
-    
-    return viewsMap;
+    return data.allViews || {}; // Worker giờ đã trả về object chuẩn {"/path": 123}
   } catch (err) {
     console.error("Error fetching all views:", err);
     return {};

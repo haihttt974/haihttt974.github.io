@@ -39,8 +39,8 @@ const Blog = () => {
         const allViews = await fetchAllViews();
         
         if (!cancelled) {
-          // Map từ path (/blog/id) về post.id để dễ dàng hiển thị
           const mappedViews: Record<string, number> = {};
+          
           blogPosts.forEach(post => {
             const path = `/blog/${post.id}`;
             mappedViews[post.id] = allViews[path] || 0;
