@@ -1,57 +1,31 @@
 import { Link } from "react-router-dom";
-import { Code2, Layers, Building2, Shapes, CheckCircle, Map, ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { categories } from "@/data/blogData";
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Code2,
-  Layers,
-  Building2,
-  Shapes,
-  CheckCircle,
-  Map,
-};
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const CategoryGrid = () => {
-  return (
-    <section className="py-20 bg-card/30">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Khám phá các <span className="text-gradient">chủ đề</span>
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Từ ngôn ngữ lập trình đến system design, tìm hiểu mọi khía cạnh của software development
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category, index) => {
-            const IconComponent = iconMap[category.icon];
-            return (
-              <Link
-                key={category.id}
-                to={`/blog?category=${category.id}`}
-                className="group card-gradient border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg animate-slide-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className={`inline-flex p-3 rounded-lg ${category.color} mb-4`}>
-                  {IconComponent && <IconComponent className="h-6 w-6 text-white" />}
-                </div>
-                <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {category.description}
-                </p>
-                <div className="flex items-center text-primary text-sm font-medium">
-                  Xem bài viết
-                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+ const { t } = useLanguage();
+ return (
+  <section className="border-b border-border/70 bg-card/25 py-20 md:py-28">
+    <div className="container mx-auto px-4">
+      <div className="mb-10 max-w-3xl">
+        <p className="eyebrow mb-4">{t("home.map.eyebrow")}</p>
+        <h2 className="text-4xl md:text-6xl">{t("home.map.title1")} <span className="text-gradient">{t("home.map.title2")}</span></h2>
+        <p className="mt-5 max-w-xl text-muted-foreground">{t("home.map.desc")}</p>
       </div>
-    </section>
+      <div className="grid border-l border-t border-border/70 md:grid-cols-2 lg:grid-cols-3">
+        {categories.map((category, index) => (
+          <Link key={category.id} to={`/blog?category=${category.id}`} className="group min-h-56 border-b border-r border-border/70 bg-background/30 p-6 transition-colors hover:bg-primary/[.04]">
+            <div className="flex items-start justify-between">
+              <span className="font-mono text-[10px] text-primary">MAP / 0{index + 1}</span>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-primary" />
+            </div>
+            <h3 className="mt-12 text-xl group-hover:text-primary">{t(`category.${category.id}`)}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{category.description}</p>
+          </Link>
+        ))}
+      </div>
+    </div>
+  </section>
   );
 };

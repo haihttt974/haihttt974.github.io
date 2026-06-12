@@ -1,96 +1,46 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Github, ExternalLink } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Github } from "lucide-react";
 import { projects } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const FeaturedProjects = () => {
-  const featuredProjects = projects.filter((p) => p.featured).slice(0, 2);
+  const { t } = useLanguage();
+  const featuredProjects = projects.filter((project) => project.featured).slice(0, 3);
 
   return (
-    <section className="py-20 bg-card/30">
+    <section className="border-b border-border/70 py-20 md:py-28">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-12">
+        <div className="mb-12 grid gap-6 md:grid-cols-[1fr_.7fr] md:items-end">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Dự án <span className="text-gradient">nổi bật</span>
-            </h2>
-            <p className="text-muted-foreground">
-              Những dự án cá nhân tôi đã xây dựng
-            </p>
+            <p className="eyebrow mb-4">{t("home.work.eyebrow")}</p>
+            <h2 className="text-4xl md:text-6xl">{t("home.work.title1")}<br /><span className="text-muted-foreground">{t("home.work.title2")}</span></h2>
           </div>
-          <Button asChild variant="outline" className="hidden md:flex">
-            <Link to="/projects">
-              Xem tất cả
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="md:justify-self-end">
+            <p className="mb-4 max-w-md text-sm leading-relaxed text-muted-foreground">{t("home.work.desc")}</p>
+            <Link to="/projects" className="inline-flex items-center gap-2 font-mono text-xs text-primary">{t("home.work.archive")} <ArrowRight className="h-4 w-4" /></Link>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-4">
           {featuredProjects.map((project, index) => (
-            <article
-              key={project.id}
-              className="group card-gradient border border-border/50 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <div className="aspect-video bg-muted flex items-center justify-center border-b border-border/50">
-                <div className="text-6xl font-mono text-primary/30">
-                  {`<${project.title.charAt(0)} />`}
-                </div>
+            <article key={project.id} className="group journal-card grid gap-0 transition-transform duration-300 hover:-translate-y-1 md:grid-cols-[110px_1fr_1fr_auto]">
+              <div className="flex items-center border-b border-border/70 p-5 font-mono text-4xl text-primary/70 md:border-b-0 md:border-r">0{index + 1}</div>
+              <div className="border-b border-border/70 p-5 md:border-b-0 md:border-r md:p-7">
+                <p className="mb-2 font-mono text-[9px] uppercase tracking-[.18em] text-muted-foreground">{t("home.work.case")} / {project.id}</p>
+                <h3 className="text-xl transition-colors group-hover:text-primary md:text-2xl">{project.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{project.description}</p>
               </div>
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                  {project.title}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {project.description}
-                </p>
-
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {project.technologies.map((tech) => (
-                    <Badge key={tech} variant="secondary">
-                      {tech}
-                    </Badge>
-                  ))}
-                </div>
-
-                <div className="flex gap-4">
-                  {project.github && (
-                    <a
-                      href={project.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Github className="h-5 w-5 mr-2" />
-                      Source Code
-                    </a>
-                  )}
-                  {project.demo && (
-                    <a
-                      href={project.demo}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <ExternalLink className="h-5 w-5 mr-2" />
-                      Live Demo
-                    </a>
-                  )}
-                </div>
+              <div className="border-b border-border/70 p-5 md:border-b-0 md:border-r md:p-7">
+                <p className="mb-4 font-mono text-[9px] uppercase tracking-[.18em] text-muted-foreground">{t("home.work.tools")}</p>
+                <div className="flex flex-wrap gap-2">{project.technologies.map((tech) => <Badge key={tech} variant="secondary" className="font-mono text-[9px]">{tech}</Badge>)}</div>
+              </div>
+              <div className="flex items-center gap-2 p-5 md:flex-col md:justify-center">
+                {project.github && <a href={project.github} target="_blank" rel="noreferrer" aria-label="Source code" className="rounded-lg border border-border p-3 text-muted-foreground transition-colors hover:border-primary hover:text-primary"><Github className="h-4 w-4" /></a>}
+                {project.demo && <a href={project.demo} target="_blank" rel="noreferrer" aria-label="Live demo" className="rounded-lg border border-border p-3 text-muted-foreground transition-colors hover:border-primary hover:text-primary"><ArrowUpRight className="h-4 w-4" /></a>}
               </div>
             </article>
           ))}
-        </div>
-
-        <div className="mt-8 text-center md:hidden">
-          <Button asChild variant="outline">
-            <Link to="/projects">
-              Xem tất cả dự án
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
         </div>
       </div>
     </section>

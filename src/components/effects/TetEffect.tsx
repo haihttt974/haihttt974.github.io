@@ -1,129 +1,51 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
-interface Petal {
-  x: number;
-  y: number;
-  size: number;
-  speed: number;
-  rotation: number;
-  rotationSpeed: number;
-  opacity: number;
-  color: string;
-}
+interface Petal { x: number; y: number; size: number; speed: number; sway: number; rotation: number; rotationSpeed: number; opacity: number; }
 
 export const TetEffect = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const petalsRef = useRef<Petal[]>([]);
-  const animationRef = useRef<number>();
-
-  const colors = [
-    '#FFD700', // Gold
-    '#FF6B6B', // Red
-    '#FF69B4', // Pink (mai flower)
-  ];
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // Initialize petals
-    const initPetals = () => {
-      const count = Math.floor(window.innerWidth / 20);
-      petalsRef.current = Array.from({ length: count }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height - canvas.height,
-        size: Math.random() * 8 + 4,
-        speed: Math.random() * 1.5 + 0.5,
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.02,
-        opacity: Math.random() * 0.5 + 0.3,
-        color: colors[Math.floor(Math.random() * colors.length)],
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+    let frame = 0;
+    let petals: Petal[] = [];
+    const resize = () => {
+      canvas.width = window.innerWidth * devicePixelRatio;
+      canvas.height = window.innerHeight * devicePixelRatio;
+      context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      petals = Array.from({ length: Math.min(70, Math.floor(window.innerWidth / 18)) }, () => ({
+        x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
+        size: Math.random() * 7 + 4, speed: Math.random() * .55 + .25, sway: Math.random() * 6,
+        rotation: Math.random() * Math.PI, rotationSpeed: (Math.random() - .5) * .025, opacity: Math.random() * .5 + .25,
       }));
     };
-
-    initPetals();
-
-    const drawPetal = (petal: Petal) => {
-      ctx.save();
-      ctx.translate(petal.x, petal.y);
-      ctx.rotate(petal.rotation);
-      ctx.globalAlpha = petal.opacity;
-
-      // Draw cherry blossom petal shape
-      ctx.beginPath();
-      ctx.moveTo(0, -petal.size);
-      ctx.bezierCurveTo(
-        petal.size / 2, -petal.size / 2,
-        petal.size / 2, petal.size / 2,
-        0, petal.size
-      );
-      ctx.bezierCurveTo(
-        -petal.size / 2, petal.size / 2,
-        -petal.size / 2, -petal.size / 2,
-        0, -petal.size
-      );
-      ctx.fillStyle = petal.color;
-      ctx.fill();
-
-      ctx.restore();
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      petalsRef.current.forEach((petal) => {
-        petal.y += petal.speed;
-        petal.x += Math.sin(petal.y * 0.01) * 0.5;
-        petal.rotation += petal.rotationSpeed;
-
-        if (petal.y > canvas.height + 20) {
-          petal.y = -20;
-          petal.x = Math.random() * canvas.width;
-        }
-
-        drawPetal(petal);
+    const draw = () => {
+      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      petals.forEach((petal) => {
+        petal.y += petal.speed; petal.x += Math.sin(petal.y * .012 + petal.sway) * .35; petal.rotation += petal.rotationSpeed;
+        if (petal.y > window.innerHeight + 20) { petal.y = -20; petal.x = Math.random() * window.innerWidth; }
+        context.save(); context.translate(petal.x, petal.y); context.rotate(petal.rotation); context.globalAlpha = petal.opacity;
+        const gradient = context.createLinearGradient(0, -petal.size, 0, petal.size);
+        gradient.addColorStop(0, "#ffe59a"); gradient.addColorStop(1, "#f05252");
+        context.fillStyle = gradient; context.beginPath(); context.ellipse(0, 0, petal.size * .48, petal.size, 0, 0, Math.PI * 2); context.fill(); context.restore();
       });
-
-      animationRef.current = requestAnimationFrame(animate);
+      frame = requestAnimationFrame(draw);
     };
-
-    animate();
-
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
+    resize(); draw(); window.addEventListener("resize", resize);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", resize); };
   }, []);
 
   return (
-    <>
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-50"
-      />
-      {/* Tet decorations */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 via-red-500 to-yellow-500 z-40" />
-      
-      {/* Corner decorations */}
-      <div className="fixed top-4 left-4 text-3xl z-40 pointer-events-none animate-bounce" style={{ animationDuration: '2s' }}>
-        🧧
-      </div>
-      <div className="fixed top-4 right-4 text-3xl z-40 pointer-events-none animate-bounce" style={{ animationDelay: '0.3s', animationDuration: '2s' }}>
-        🏮
-      </div>
-    </>
+    <div className="effect-scene effect-scene-tet fixed inset-0 z-0 overflow-hidden">
+      <div className="tet-sun" />
+      <div className="tet-disc tet-disc-a" />
+      <div className="tet-disc tet-disc-b" />
+      <div className="tet-knot tet-knot-left"><span /><span /><span /></div>
+      <div className="tet-knot tet-knot-right"><span /><span /><span /></div>
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      <div className="effect-label left-5 top-24">LUNAR SEASON / SƠN MÀI</div>
+    </div>
   );
 };

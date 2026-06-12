@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export type EffectType = 'none' | 'christmas' | 'tet' | 'parallax';
 
@@ -10,7 +10,16 @@ interface EffectsContextType {
 const EffectsContext = createContext<EffectsContextType | undefined>(undefined);
 
 export const EffectsProvider = ({ children }: { children: ReactNode }) => {
-  const [currentEffect, setCurrentEffect] = useState<EffectType>('none');
+  const [currentEffect, setCurrentEffect] = useState<EffectType>(() => {
+    const savedEffect = localStorage.getItem('haiit-preferred-effect') as EffectType | null;
+    return savedEffect && ['none', 'christmas', 'tet', 'parallax'].includes(savedEffect)
+      ? savedEffect
+      : 'none';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('haiit-preferred-effect', currentEffect);
+  }, [currentEffect]);
 
   return (
     <EffectsContext.Provider value={{ currentEffect, setCurrentEffect }}>

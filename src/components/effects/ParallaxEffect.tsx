@@ -1,103 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export const ParallaxEffect = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const x = (e.clientX / window.innerWidth - 0.5) * 2;
-      const y = (e.clientY / window.innerHeight - 0.5) * 2;
-      setMousePosition({ x, y });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const move = (event: PointerEvent) => setPosition({
+      x: event.clientX / window.innerWidth - 0.5,
+      y: event.clientY / window.innerHeight - 0.5,
+    });
+    window.addEventListener("pointermove", move, { passive: true });
+    return () => window.removeEventListener("pointermove", move);
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {/* Layer 1 - Slowest, furthest */}
-      <div
-        className="absolute inset-0"
-        style={{
-          transform: `translate(${mousePosition.x * 10}px, ${mousePosition.y * 10}px)`,
-          transition: 'transform 0.3s ease-out',
-        }}
-      >
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={`l1-${i}`}
-            className="absolute w-64 h-64 rounded-full opacity-5"
-            style={{
-              background: 'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
-              left: `${(i * 25) % 100}%`,
-              top: `${(i * 20 + 10) % 100}%`,
-            }}
-          />
+    <div className="effect-scene effect-scene-3d fixed inset-0 z-0 overflow-hidden">
+      <div className="effect-3d-grid" style={{ transform: `perspective(700px) rotateX(64deg) translate3d(${position.x * 24}px, ${position.y * 16}px, 0)` }} />
+      <div className="effect-3d-orb effect-3d-orb-a" style={{ transform: `translate3d(${position.x * -55}px, ${position.y * -40}px, 0)` }} />
+      <div className="effect-3d-orb effect-3d-orb-b" style={{ transform: `translate3d(${position.x * 75}px, ${position.y * 55}px, 0)` }} />
+      <div className="effect-3d-ring effect-3d-ring-a" />
+      <div className="effect-3d-ring effect-3d-ring-b" />
+      <div className="effect-particles">
+        {Array.from({ length: 26 }, (_, index) => (
+          <i key={index} style={{ "--i": index } as React.CSSProperties} />
         ))}
       </div>
-
-      {/* Layer 2 - Medium */}
-      <div
-        className="absolute inset-0"
-        style={{
-          transform: `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px)`,
-          transition: 'transform 0.2s ease-out',
-        }}
-      >
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={`l2-${i}`}
-            className="absolute w-2 h-2 rounded-full bg-primary/20"
-            style={{
-              left: `${(i * 13 + 5) % 100}%`,
-              top: `${(i * 17 + 15) % 100}%`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Layer 3 - Fastest, closest */}
-      <div
-        className="absolute inset-0"
-        style={{
-          transform: `translate(${mousePosition.x * 40}px, ${mousePosition.y * 40}px)`,
-          transition: 'transform 0.1s ease-out',
-        }}
-      >
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={`l3-${i}`}
-            className="absolute w-1 h-1 rounded-full bg-primary/30"
-            style={{
-              left: `${(i * 8 + 2) % 100}%`,
-              top: `${(i * 9 + 5) % 100}%`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Gradient orbs */}
-      <div
-        className="absolute w-96 h-96 rounded-full opacity-10"
-        style={{
-          background: 'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 60%)',
-          left: '10%',
-          top: '20%',
-          transform: `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`,
-          transition: 'transform 0.4s ease-out',
-        }}
-      />
-      <div
-        className="absolute w-72 h-72 rounded-full opacity-10"
-        style={{
-          background: 'radial-gradient(circle, hsl(280, 100%, 60%) 0%, transparent 60%)',
-          right: '15%',
-          bottom: '25%',
-          transform: `translate(${-mousePosition.x * 25}px, ${-mousePosition.y * 25}px)`,
-          transition: 'transform 0.5s ease-out',
-        }}
-      />
+      <div className="effect-label left-5 top-24">DEPTH FIELD / ACTIVE</div>
     </div>
   );
 };

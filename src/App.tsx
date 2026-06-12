@@ -6,6 +6,9 @@ import { Routes, Route } from "react-router-dom";
 import { EffectsProvider } from "@/contexts/EffectsContext";
 import { EffectsController } from "@/components/effects/EffectsController";
 import { EffectsRenderer } from "@/components/effects/EffectsRenderer";
+import { ThemeProvider } from "next-themes";
+import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -17,24 +20,29 @@ const queryClient = new QueryClient();
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <EffectsProvider>
-          <Toaster />
-          <Sonner />
-          <EffectsRenderer />
-          <EffectsController />
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="haiit-theme">
+      <ThemeColorSync />
+      <LanguageProvider>
+       <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <EffectsProvider>
+            <Toaster />
+            <Sonner />
+            <EffectsRenderer />
+            <EffectsController />
 
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<BlogPost />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </EffectsProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogPost />} />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/about" element={<About />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </EffectsProvider>
+        </TooltipProvider>
+       </QueryClientProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

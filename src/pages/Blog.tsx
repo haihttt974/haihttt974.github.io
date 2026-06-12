@@ -2,14 +2,16 @@ import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Clock, Tag, Filter } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { blogPosts, categories } from "@/data/blogData";
+import { blogPosts, categories, localizeBlogPost } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
-import { fetchViews, fetchAllViews } from "@/lib/umamiViews";
+import { fetchAllViews } from "@/lib/umamiViews";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Blog = () => {
+  const { t, locale, language } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewsMap, setViewsMap] = useState<Record<string, number>>({});
@@ -17,18 +19,18 @@ const Blog = () => {
   const selectedCategory = searchParams.get("category") || "all";
 
   const filteredPosts = useMemo(() => {
-    return blogPosts.filter((post) => {
+    return blogPosts.map((post) => localizeBlogPost(post, language)).filter((post) => {
       const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
       const matchesSearch = 
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch;
-    });
-  }, [selectedCategory, searchQuery]);
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [selectedCategory, searchQuery, language]);
 
   const getCategoryName = (categoryId: string) => {
-    return categories.find((c) => c.id === categoryId)?.name || categoryId;
+    return categories.some((c) => c.id === categoryId) ? t(`category.${categoryId}`) : categoryId;
   };
 
   useEffect(() => {
@@ -67,10 +69,10 @@ const Blog = () => {
         {/* Header */}
         <div className="max-w-3xl mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-gradient">Blog</span>
+            <span className="text-gradient">{t("blog.title")}</span>
           </h1>
           <p className="text-xl text-muted-foreground">
-            Kiến thức lập trình, kinh nghiệm thực tế và những bài học từ hành trình phát triển phần mềm.
+            {t("blog.desc")}
           </p>
         </div>
 
@@ -80,7 +82,7 @@ const Blog = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Tìm kiếm bài viết..."
+              placeholder={t("blog.search")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -93,7 +95,7 @@ const Blog = () => {
               size="sm"
               onClick={() => setSearchParams({})}
             >
-              Tất cả
+              {t("blog.all")}
             </Button>
             {categories.map((category) => (
               <Button
@@ -102,7 +104,7 @@ const Blog = () => {
                 size="sm"
                 onClick={() => setSearchParams({ category: category.id })}
               >
-                {category.name}
+                {t(`category.${category.id}`)}
               </Button>
             ))}
           </div>
@@ -130,7 +132,7 @@ const Blog = () => {
 
                   <div className="flex items-center text-muted-foreground text-sm">
                     <Eye className="h-4 w-4 mr-1" />
-                    {(viewsMap[post.id] ?? 0).toLocaleString("vi-VN")}
+                    {(viewsMap[post.id] ?? 0).toLocaleString(locale)}
                   </div>
                 </div>
 
@@ -158,13 +160,13 @@ const Blog = () => {
 
                   <div className="flex items-center justify-between pt-4 border-t border-border/50">
                     <span className="text-sm text-muted-foreground">
-                      {new Date(post.date).toLocaleDateString("vi-VN")}
+                      {new Date(post.date).toLocaleDateString(locale)}
                     </span>
                     <Link
                       to={`/blog/${post.id}`}
                       className="text-primary text-sm font-medium"
                     >
-                      Đọc thêm →
+                      {t("blog.readMore")}
                     </Link>
                   </div>
                 </div>
@@ -174,9 +176,9 @@ const Blog = () => {
         ) : (
           <div className="text-center py-20">
             <Filter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Không tìm thấy bài viết</h3>
+            <h3 className="text-xl font-semibold mb-2">{t("blog.empty")}</h3>
             <p className="text-muted-foreground">
-              Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+              {t("blog.emptyDesc")}
             </p>
           </div>
         )}

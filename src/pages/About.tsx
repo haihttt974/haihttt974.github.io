@@ -17,8 +17,10 @@ import { aboutData } from "@/data/blogData"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useMemo, useRef } from "react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 const About = () => {
+  const { t } = useLanguage()
   const cvRef = useRef<HTMLElement | null>(null)
 
   const iconMap = useMemo<Record<string, React.ReactNode>>(
@@ -74,7 +76,7 @@ const About = () => {
 
           <Button size="lg" className="glow-primary" onClick={scrollToCV}>
             <Download className="mr-2 h-5 w-5" />
-            Xem CV của tôi
+            {t("about.cv")}
           </Button>
         </div>
 
@@ -83,7 +85,7 @@ const About = () => {
             <section className="card-gradient rounded-xl border border-border/50 p-6 md:p-8">
               <h2 className="mb-6 flex items-center text-2xl font-semibold">
                 <Code2 className="mr-3 h-6 w-6 text-primary" />
-                Về tôi
+                {t("about.me")}
               </h2>
               <div className="whitespace-pre-line leading-relaxed text-muted-foreground">
                 {aboutData.bio}
@@ -93,7 +95,7 @@ const About = () => {
             <section className="card-gradient rounded-xl border border-border/50 p-6 md:p-8">
               <h2 className="mb-6 flex items-center text-2xl font-semibold">
                 <Briefcase className="mr-3 h-6 w-6 text-primary" />
-                Kinh nghiệm
+                {t("about.experience")}
               </h2>
               <div className="space-y-6">
                 {aboutData.experience.map((exp, index) => (
@@ -130,7 +132,7 @@ const About = () => {
             ))}
 
             <section className="card-gradient rounded-xl border border-border/50 p-6">
-              <h2 className="mb-4 text-xl font-semibold">Liên hệ</h2>
+              <h2 className="mb-4 text-xl font-semibold">{t("about.contact")}</h2>
               <div className="space-y-3">
                 <a
                   href={`mailto:${aboutData.social.email}`}
@@ -147,14 +149,14 @@ const About = () => {
             </section>
 
             <section className="card-gradient rounded-xl border border-primary/50 p-6 text-center">
-              <h3 className="mb-2 font-semibold">Muốn hợp tác?</h3>
+              <h3 className="mb-2 font-semibold">{t("about.collab")}</h3>
               <p className="mb-4 text-sm text-muted-foreground">
-                Tôi luôn sẵn sàng thảo luận về các dự án thú vị.
+                {t("about.collabDesc")}
               </p>
               <Button asChild className="w-full">
                 <a href={`mailto:${aboutData.social.email}`}>
                   <Mail className="mr-2 h-4 w-4" />
-                  Liên hệ ngay
+                  {t("about.contactNow")}
                 </a>
               </Button>
             </section>
@@ -177,7 +179,7 @@ const About = () => {
               <Button asChild variant="outline" size="sm">
                 <a href="/cv.pdf" download>
                   <Download className="mr-2 h-4 w-4" />
-                  Tải PDF
+                  {t("about.download")}
                 </a>
               </Button>
             </div>
@@ -205,7 +207,7 @@ const About = () => {
               </div>
 
               <div>
-                <h4 className="mb-4 text-lg font-semibold">Kỹ năng kỹ thuật</h4>
+                <h4 className="mb-4 text-lg font-semibold">{t("about.skills")}</h4>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   {aboutData.skills.map((skillGroup, index) => (
                     <div key={index}>
@@ -221,7 +223,7 @@ const About = () => {
               </div>
 
               <div>
-                <h4 className="mb-4 text-lg font-semibold">Dự án tiêu biểu (từ GitHub)</h4>
+                <h4 className="mb-4 text-lg font-semibold">{t("about.featured")}</h4>
                 <div className="space-y-4">
                   <div className="rounded-lg bg-muted/30 p-4">
                     <div className="mb-2 flex items-center justify-between">
@@ -266,7 +268,7 @@ const About = () => {
               </div>
 
               <div>
-                <h4 className="mb-4 text-lg font-semibold">Hoạt động khác</h4>
+                <h4 className="mb-4 text-lg font-semibold">{t("about.other")}</h4>
                 <div className="rounded-lg bg-muted/30 p-4">
                   <h5 className="mb-1 font-medium">Gia sư Toán học</h5>
                   <p className="text-sm text-muted-foreground">

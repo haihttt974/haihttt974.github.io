@@ -1,89 +1,116 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
 @layer base {
   :root {
-    --background: 220 20% 4%;
-    --foreground: 210 20% 98%;
-
-    --card: 220 20% 7%;
-    --card-foreground: 210 20% 98%;
-
-    --popover: 220 20% 7%;
-    --popover-foreground: 210 20% 98%;
-
-    --primary: 185 80% 50%;
-    --primary-foreground: 220 20% 4%;
-
-    --secondary: 220 15% 12%;
-    --secondary-foreground: 210 20% 98%;
-
-    --muted: 220 15% 15%;
-    --muted-foreground: 220 10% 55%;
-
-    --accent: 185 80% 50%;
-    --accent-foreground: 220 20% 4%;
-
+    --background: 45 35% 96%;
+    --foreground: 216 28% 9%;
+    --card: 45 29% 99%;
+    --card-foreground: 216 28% 9%;
+    --popover: 45 29% 99%;
+    --popover-foreground: 216 28% 9%;
+    --primary: 82 70% 35%;
+    --primary-foreground: 45 35% 98%;
+    --secondary: 44 20% 91%;
+    --secondary-foreground: 216 28% 9%;
+    --muted: 44 18% 91%;
+    --muted-foreground: 216 12% 42%;
+    --accent: 18 83% 55%;
+    --accent-foreground: 45 35% 98%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 20% 98%;
-
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 185 80% 50%;
-
-    --radius: 0.5rem;
-
-    /* Custom tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(185 80% 50%), hsl(200 80% 60%));
-    --gradient-hero: linear-gradient(180deg, hsl(220 20% 4%) 0%, hsl(220 25% 8%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(220 20% 8%) 0%, hsl(220 20% 6%) 100%);
-    --glow-primary: 0 0 40px hsl(185 80% 50% / 0.3);
-    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.3);
-    
-    /* Category colors */
-    --category-languages: 340 80% 55%;
-    --category-frameworks: 280 80% 60%;
-    --category-architecture: 200 80% 55%;
-    --category-patterns: 150 70% 45%;
-    --category-practices: 40 90% 55%;
-    --category-roadmap: 15 90% 55%;
-
-    --sidebar-background: 220 20% 6%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 185 80% 50%;
-    --sidebar-primary-foreground: 220 20% 4%;
-    --sidebar-accent: 220 15% 12%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 185 80% 50%;
+    --destructive-foreground: 45 35% 98%;
+    --border: 216 15% 79%;
+    --input: 216 15% 79%;
+    --ring: 82 70% 35%;
+    --radius: 0.75rem;
+    --gradient-primary: linear-gradient(120deg, hsl(82 70% 35%), hsl(48 85% 43%));
+    --gradient-hero: linear-gradient(180deg, hsl(45 35% 96%), hsl(44 24% 92%));
+    --gradient-card: linear-gradient(145deg, hsl(45 29% 99%), hsl(44 25% 94%));
+    --glow-primary: 0 0 50px hsl(82 70% 35% / 0.13);
+    --shadow-card: 0 20px 60px hsl(216 25% 12% / 0.1);
+    --category-languages: 349 76% 58%;
+    --category-frameworks: 270 70% 63%;
+    --category-architecture: 195 78% 47%;
+    --category-patterns: 152 65% 43%;
+    --category-practices: 40 91% 56%;
+    --category-roadmap: 18 90% 60%;
+    --sidebar-background: 45 29% 98%;
+    --sidebar-foreground: 216 28% 9%;
+    --sidebar-primary: 82 70% 35%;
+    --sidebar-primary-foreground: 45 35% 98%;
+    --sidebar-accent: 44 20% 91%;
+    --sidebar-accent-foreground: 216 28% 9%;
+    --sidebar-border: 216 15% 79%;
+    --sidebar-ring: 82 70% 35%;
   }
 
   .dark {
-    --background: 220 20% 4%;
-    --foreground: 210 20% 98%;
+    --background: 216 28% 5%;
+    --foreground: 42 33% 94%;
+    --card: 216 24% 8%;
+    --card-foreground: 42 33% 94%;
+    --popover: 216 24% 8%;
+    --popover-foreground: 42 33% 94%;
+    --primary: 77 82% 58%;
+    --primary-foreground: 216 28% 5%;
+    --secondary: 215 19% 13%;
+    --secondary-foreground: 42 33% 94%;
+    --muted: 215 18% 12%;
+    --muted-foreground: 216 10% 62%;
+    --accent: 18 92% 63%;
+    --accent-foreground: 216 28% 5%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 42 33% 94%;
+    --border: 215 17% 18%;
+    --input: 215 17% 18%;
+    --ring: 77 82% 58%;
+    --gradient-primary: linear-gradient(120deg, hsl(77 82% 58%), hsl(50 92% 62%));
+    --gradient-hero: linear-gradient(180deg, hsl(216 28% 5%), hsl(215 27% 7%));
+    --gradient-card: linear-gradient(145deg, hsl(216 24% 9%), hsl(216 25% 6%));
+    --glow-primary: 0 0 50px hsl(77 82% 58% / 0.16);
+    --shadow-card: 0 20px 70px hsl(216 40% 2% / 0.45);
+    --sidebar-background: 216 24% 7%;
+    --sidebar-foreground: 42 33% 94%;
+    --sidebar-primary: 77 82% 58%;
+    --sidebar-primary-foreground: 216 28% 5%;
+    --sidebar-accent: 215 19% 13%;
+    --sidebar-accent-foreground: 42 33% 94%;
+    --sidebar-border: 215 17% 18%;
+    --sidebar-ring: 77 82% 58%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    min-width: 320px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background-image:
+      radial-gradient(circle at 8% 12%, hsl(77 82% 58% / 0.06), transparent 24rem),
+      radial-gradient(circle at 92% 30%, hsl(18 92% 63% / 0.05), transparent 26rem);
   }
 
   h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
     @apply font-semibold tracking-tight;
   }
 
   code, pre, .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  ::selection {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
   }
 }
 
@@ -93,82 +120,233 @@
     background-image: var(--gradient-primary);
   }
 
-  .glow-primary {
-    box-shadow: var(--glow-primary);
+  .glow-primary { box-shadow: var(--glow-primary); }
+  .card-gradient { background: var(--gradient-card); }
+  .hero-gradient { background: var(--gradient-hero); }
+  .category-languages { background: hsl(var(--category-languages)); }
+  .category-frameworks { background: hsl(var(--category-frameworks)); }
+  .category-architecture { background: hsl(var(--category-architecture)); }
+  .category-patterns { background: hsl(var(--category-patterns)); }
+  .category-practices { background: hsl(var(--category-practices)); }
+  .category-roadmap { background: hsl(var(--category-roadmap)); }
+
+  .page-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.28) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.28) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 92%);
   }
 
-  .card-gradient {
-    background: var(--gradient-card);
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-primary;
   }
 
-  .hero-gradient {
-    background: var(--gradient-hero);
+  .eyebrow::before {
+    content: "";
+    @apply h-px w-7 bg-primary;
   }
 
-  .category-languages {
-    background: hsl(var(--category-languages));
+  .journal-card {
+    @apply relative overflow-hidden rounded-xl border border-border/70 bg-card/70 backdrop-blur-sm;
+    box-shadow: var(--shadow-card);
   }
 
-  .category-frameworks {
-    background: hsl(var(--category-frameworks));
+  .journal-card::before {
+    content: "";
+    @apply absolute inset-x-0 top-0 h-px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.55), transparent);
   }
 
-  .category-architecture {
-    background: hsl(var(--category-architecture));
+  .section-rule {
+    @apply border-t border-border/70;
   }
 
-  .category-patterns {
-    background: hsl(var(--category-patterns));
+  .portrait-stage {
+    --portrait-x: 0px;
+    --portrait-y: 0px;
+    --spot-x: 50%;
+    --spot-y: 50%;
+    animation: portraitFloat 6s ease-in-out infinite;
   }
 
-  .category-practices {
-    background: hsl(var(--category-practices));
+  .portrait-image {
+    transform: translate(var(--portrait-x), var(--portrait-y)) scale(1.045);
+    transition: transform 350ms cubic-bezier(.22, 1, .36, 1);
   }
 
-  .category-roadmap {
-    background: hsl(var(--category-roadmap));
+  .portrait-light {
+    background: radial-gradient(circle at var(--spot-x) var(--spot-y), hsl(var(--primary) / .2), transparent 32%);
+    mix-blend-mode: screen;
   }
+
+  .portrait-crosshair::before,
+  .portrait-crosshair::after {
+    content: "";
+    @apply absolute bg-white/20;
+  }
+
+  .portrait-crosshair::before {
+    @apply left-1/2 top-[-2rem] h-[calc(100%+4rem)] w-px;
+  }
+
+  .portrait-crosshair::after {
+    @apply left-[-2rem] top-1/2 h-px w-[calc(100%+4rem)];
+  }
+
+  .portrait-index {
+    animation: indexDrift 4s ease-in-out infinite;
+  }
+
+  .hero-orbit::before,
+  .hero-orbit::after {
+    content: "";
+    @apply absolute rounded-full border border-primary/10;
+  }
+
+  .hero-orbit::before { @apply inset-6; }
+  .hero-orbit::after { @apply inset-16; }
+
+  .hero-orbit {
+    animation: orbitSpin 18s linear infinite;
+  }
+
+  .hero-marquee-track {
+    animation: marquee 24s linear infinite;
+  }
+
+  .effect-scene {
+    @apply pointer-events-none;
+    animation: effectReveal .8s ease-out both;
+  }
+
+  .effect-scene::after {
+    content: "";
+    @apply absolute inset-0;
+    background: linear-gradient(to bottom, transparent 35%, hsl(var(--background) / .7));
+  }
+
+  .effect-label {
+    @apply absolute z-20 rounded-md border border-primary/25 bg-background/60 px-3 py-2 font-mono text-[8px] uppercase tracking-[.2em] text-primary backdrop-blur-md;
+  }
+
+  .effect-cycle {
+    transition: transform .3s ease, border-color .3s ease, background-color .3s ease;
+  }
+
+  .effect-cycle:hover { transform: translateY(-3px); }
+
+  .effect-scene-3d {
+    background: radial-gradient(circle at 50% 10%, hsl(190 90% 50% / .1), transparent 45%);
+  }
+
+  .effect-3d-grid {
+    @apply absolute -bottom-[38%] -left-[10%] h-[95%] w-[120%];
+    background-image: linear-gradient(hsl(190 90% 55% / .16) 1px, transparent 1px), linear-gradient(90deg, hsl(190 90% 55% / .16) 1px, transparent 1px);
+    background-size: 54px 54px;
+    mask-image: linear-gradient(to top, black, transparent 82%);
+    transition: transform .3s ease-out;
+  }
+
+  .effect-3d-orb {
+    @apply absolute rounded-full blur-2xl;
+    transition: transform .4s ease-out;
+    animation: orbPulse 5s ease-in-out infinite;
+  }
+
+  .effect-3d-orb-a { @apply left-[10%] top-[18%] h-52 w-52; background: hsl(190 90% 52% / .12); }
+  .effect-3d-orb-b { @apply right-[9%] top-[30%] h-64 w-64; background: hsl(280 85% 60% / .1); animation-delay: -2s; }
+  .effect-3d-ring { @apply absolute rounded-full border border-primary/20; animation: ringOrbit 13s linear infinite; }
+  .effect-3d-ring-a { @apply right-[12%] top-[13%] h-52 w-52; }
+  .effect-3d-ring-b { @apply left-[14%] top-[38%] h-32 w-32; animation-direction: reverse; animation-duration: 9s; }
+  .effect-particles i {
+    --angle: calc(var(--i) * 13.85deg);
+    @apply absolute left-1/2 top-1/2 h-1 w-1 rounded-full bg-primary;
+    transform: rotate(var(--angle)) translateX(calc(120px + var(--i) * 5px));
+    opacity: .18;
+    animation: particleBlink 3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -.12s);
+  }
+
+  .effect-scene-tet {
+    background: radial-gradient(circle at 85% 20%, hsl(42 95% 55% / .15), transparent 28%), linear-gradient(135deg, hsl(0 75% 28% / .1), transparent 55%);
+  }
+
+  .tet-sun { @apply absolute right-[10%] top-[13%] h-48 w-48 rounded-full; background: radial-gradient(circle, hsl(42 95% 62% / .32), hsl(8 85% 52% / .1) 58%, transparent 70%); animation: orbPulse 4s ease-in-out infinite; }
+  .tet-disc { @apply absolute rounded-full border border-amber-400/20; box-shadow: inset 0 0 40px hsl(42 95% 55% / .05); animation: ringOrbit 18s linear infinite; }
+  .tet-disc-a { @apply -left-28 top-[20%] h-72 w-72; }
+  .tet-disc-b { @apply -right-20 bottom-[12%] h-52 w-52; animation-direction: reverse; }
+  .tet-knot { @apply absolute top-0 z-10 flex flex-col items-center; animation: knotSway 4s ease-in-out infinite; transform-origin: top; }
+  .tet-knot-left { @apply left-[12%]; }
+  .tet-knot-right { @apply right-[18%]; animation-delay: -1.5s; }
+  .tet-knot::before { content: ""; @apply h-28 w-px bg-gradient-to-b from-amber-300/70 to-red-500/30; }
+  .tet-knot span { @apply -mt-1 block h-5 w-5 rotate-45 border border-amber-300/60 bg-red-600/20 backdrop-blur; }
+
+  .effect-scene-christmas {
+    background: radial-gradient(circle at 78% 18%, hsl(45 95% 78% / .14), transparent 24%), linear-gradient(180deg, hsl(218 60% 12% / .25), transparent 65%);
+  }
+
+  .christmas-aurora { @apply absolute left-[-10%] top-[8%] h-[45%] w-[120%] blur-3xl; border-radius: 50%; mix-blend-mode: screen; animation: aurora 9s ease-in-out infinite alternate; }
+  .christmas-aurora-a { background: linear-gradient(100deg, transparent 10%, hsl(155 85% 50% / .13), hsl(190 90% 60% / .08), transparent 78%); }
+  .christmas-aurora-b { background: linear-gradient(80deg, transparent 18%, hsl(340 85% 60% / .08), hsl(155 85% 50% / .1), transparent 80%); animation-delay: -4s; }
+  .christmas-moon { @apply absolute right-[12%] top-[14%] h-28 w-28 rounded-full; background: hsl(45 90% 90% / .18); box-shadow: 0 0 80px hsl(45 90% 80% / .15); }
+  .christmas-lights { @apply absolute left-[-2%] top-7 z-20 flex w-[104%] justify-around; }
+  .christmas-lights::before { content: ""; @apply absolute left-0 top-0 h-px w-full bg-foreground/20; transform: rotate(-1deg); }
+  .christmas-lights i { --color: hsl(calc(var(--i) * 48) 85% 62%); @apply relative mt-[-2px] h-2.5 w-2.5 rounded-full; background: var(--color); box-shadow: 0 0 14px var(--color), 0 0 26px var(--color); animation: lightTwinkle 1.8s ease-in-out infinite; animation-delay: calc(var(--i) * -.13s); }
+  .christmas-horizon { @apply absolute inset-x-0 bottom-0 h-[30%]; background: linear-gradient(to top, hsl(200 60% 90% / .08), transparent); clip-path: polygon(0 70%, 12% 45%, 25% 72%, 40% 35%, 55% 67%, 72% 38%, 87% 65%, 100% 42%, 100% 100%, 0 100%); }
 }
 
 @layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.6s ease-out forwards;
-  }
-
-  .animate-glow-pulse {
-    animation: glowPulse 3s ease-in-out infinite;
-  }
+  .animate-fade-in { animation: fadeIn .55s ease-out both; }
+  .animate-slide-up { animation: slideUp .65s cubic-bezier(.22,1,.36,1) both; }
+  .animate-glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes glowPulse {
-    0%, 100% {
-      box-shadow: 0 0 20px hsl(185 80% 50% / 0.2);
-    }
-    50% {
-      box-shadow: 0 0 40px hsl(185 80% 50% / 0.4);
+    0%, 100% { box-shadow: 0 0 20px hsl(77 82% 58% / .12); }
+    50% { box-shadow: 0 0 45px hsl(77 82% 58% / .28); }
+  }
+
+  @keyframes portraitFloat {
+    0%, 100% { transform: translateY(0) rotate(.15deg); }
+    50% { transform: translateY(-7px) rotate(-.15deg); }
+  }
+
+  @keyframes indexDrift {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  @keyframes orbitSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  @keyframes effectReveal { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
+  @keyframes orbPulse { 50% { transform: scale(1.12); opacity: .7; } }
+  @keyframes ringOrbit { to { transform: rotate(360deg); } }
+  @keyframes particleBlink { 50% { opacity: .8; transform: rotate(var(--angle)) translateX(calc(130px + var(--i) * 5px)) scale(1.8); } }
+  @keyframes knotSway { 50% { transform: rotate(4deg); } }
+  @keyframes aurora { from { transform: translateX(-4%) skewY(-4deg); opacity: .5; } to { transform: translateX(5%) skewY(3deg); opacity: 1; } }
+  @keyframes lightTwinkle { 50% { opacity: .3; transform: scale(.65); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
     }
   }
 }

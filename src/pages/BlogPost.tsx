@@ -2,21 +2,25 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
-import { blogPosts, categories } from "@/data/blogData";
+import { blogPosts, categories, localizeBlogPost } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { fetchViews } from "@/lib/umamiViews";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { ArticleContent } from "@/components/blog/ArticleContent";
 
 const BlogPost = () => {
+  const { t, locale, language } = useLanguage();
   const { id } = useParams();
   const [views, setViews] = useState<number | null>(null);
 
-  const post = blogPosts.find((p) => p.id === id || (p as any).slug === id);
+  const sourcePost = blogPosts.find((p) => p.id === id);
+  const post = sourcePost ? localizeBlogPost(sourcePost, language) : undefined;
 
   useEffect(() => {
-    if (!post) return;
+    if (!sourcePost) return;
 
-    const path = `/blog/${post.id}`;
+    const path = `/blog/${sourcePost.id}`;
 
     const updateViews = async () => {
       try {
@@ -24,7 +28,7 @@ const BlogPost = () => {
         setViews(v);
       } catch (err) {
         console.error("Error fetching views:", err);
-        if (views === null) setViews(0);
+        setViews((currentViews) => currentViews ?? 0);
       }
     };
 
@@ -33,20 +37,20 @@ const BlogPost = () => {
     const interval = setInterval(updateViews, 30000);
 
     return () => clearInterval(interval);
-  }, [post, id]);
+  }, [sourcePost]);
 
   if (!post) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl font-bold mb-4">Bài viết không tồn tại</h1>
+          <h1 className="text-4xl font-bold mb-4">{t("post.notFound")}</h1>
           <p className="text-muted-foreground mb-8">
-            Bài viết bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.
+            {t("post.notFoundDesc")}
           </p>
           <Button asChild>
             <Link to="/blog">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Quay lại Blog
+              {t("post.back")}
             </Link>
           </Button>
         </div>
@@ -54,7 +58,7 @@ const BlogPost = () => {
     );
   }
 
-  const categoryName = categories.find((c) => c.id === post.category)?.name || post.category;
+  const categoryName = categories.some((c) => c.id === post.category) ? t(`category.${post.category}`) : post.category;
 
   return (
     <Layout>
@@ -65,7 +69,7 @@ const BlogPost = () => {
           className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors mb-8"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Quay lại Blog
+          {t("post.back")}
         </Link>
 
         {/* Header */}
@@ -83,7 +87,7 @@ const BlogPost = () => {
           <div className="flex flex-wrap items-center gap-6 text-muted-foreground">
             <div className="flex items-center">
               <Calendar className="h-4 w-4 mr-2" />
-              {new Date(post.date).toLocaleDateString("vi-VN", {
+              {new Date(post.date).toLocaleDateString(locale, {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -96,7 +100,7 @@ const BlogPost = () => {
 
             <div className="flex items-center">
               <Eye className="h-4 w-4 mr-2" />
-              {views === null ? "—" : `${views.toLocaleString("vi-VN")} lượt xem`}
+              {views === null ? "—" : `${views.toLocaleString(locale)} ${t("post.views")}`}
             </div>
           </div>
         </header>
@@ -104,12 +108,8 @@ const BlogPost = () => {
         {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
           <div className="lg:col-span-3">
-            <div className="prose prose-invert prose-lg max-w-none">
-              <div className="card-gradient border border-border/50 rounded-xl p-8 md:p-12">
-                <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
-                  {post.content}
-                </div>
-              </div>
+            <div className="card-gradient rounded-xl border border-border/50 p-6 md:p-12">
+              <ArticleContent content={post.content} />
             </div>
           </div>
 
@@ -120,7 +120,7 @@ const BlogPost = () => {
               <div className="card-gradient border border-border/50 rounded-xl p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
                   <Tag className="h-4 w-4 mr-2" />
-                  Tags
+                  {t("post.tags")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
@@ -135,12 +135,12 @@ const BlogPost = () => {
               <div className="card-gradient border border-border/50 rounded-xl p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
                   <Share2 className="h-4 w-4 mr-2" />
-                  Chia sẻ
+                  {t("post.share")}
                 </h3>
                 <Button variant="outline" className="w-full" onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
                 }}>
-                  Copy Link
+                  {t("post.copy")}
                 </Button>
               </div>
             </div>

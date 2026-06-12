@@ -3,23 +3,25 @@ import { Layout } from "@/components/layout/Layout";
 import { projects, aboutData } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Projects = () => {
+  const { t } = useLanguage();
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="max-w-3xl mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-gradient">Projects</span>
+            <span className="text-gradient">{t("project.title")}</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-4">
-            Các dự án cá nhân từ GitHub của tôi, từ ý tưởng đến sản phẩm hoàn chỉnh.
+            {t("project.desc")}
           </p>
           <Button asChild variant="outline">
             <a href={aboutData.social.github} target="_blank" rel="noopener noreferrer">
               <Github className="h-4 w-4 mr-2" />
-              Xem thêm trên GitHub
+              {t("project.github")}
             </a>
           </Button>
         </div>
@@ -28,7 +30,7 @@ const Projects = () => {
         <div className="mb-12">
           <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
             <Star className="h-5 w-5 text-yellow-500" />
-            Dự án nổi bật
+            {t("project.featured")}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {projects.filter(p => p.featured).map((project, index) => (
@@ -46,7 +48,7 @@ const Projects = () => {
                   {project.demo && (
                     <div className="absolute top-4 right-4">
                       <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                        Live Demo
+                        {t("project.demo")}
                       </Badge>
                     </div>
                   )}
@@ -58,7 +60,7 @@ const Projects = () => {
                     <h3 className="text-2xl font-semibold group-hover:text-primary transition-colors">
                       {project.title}
                     </h3>
-                    <Badge className="bg-primary/20 text-primary">Featured</Badge>
+                    <Badge className="bg-primary/20 text-primary">{t("project.featured")}</Badge>
                   </div>
 
                   <p className="text-muted-foreground mb-4">
@@ -88,7 +90,7 @@ const Projects = () => {
                           rel="noopener noreferrer"
                         >
                           <Github className="h-4 w-4 mr-2" />
-                          Source Code
+                          {t("project.source")}
                         </a>
                       </Button>
                     )}
@@ -100,7 +102,7 @@ const Projects = () => {
                           rel="noopener noreferrer"
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
-                          Live Demo
+                          {t("project.demo")}
                         </a>
                       </Button>
                     )}
@@ -115,7 +117,7 @@ const Projects = () => {
         <div>
           <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
             <GitFork className="h-5 w-5 text-primary" />
-            Tất cả dự án
+            {t("project.all")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.filter(p => !p.featured).map((project, index) => (
