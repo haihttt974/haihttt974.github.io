@@ -162,6 +162,10 @@
     @apply border-t border-border/70;
   }
 
+  .brand-logo {
+    box-shadow: inset 0 0 18px hsl(var(--primary) / .08), 0 0 20px hsl(var(--primary) / .06);
+  }
+
   .portrait-stage {
     --portrait-x: 0px;
     --portrait-y: 0px;
@@ -294,6 +298,168 @@
   .christmas-lights::before { content: ""; @apply absolute left-0 top-0 h-px w-full bg-foreground/20; transform: rotate(-1deg); }
   .christmas-lights i { --color: hsl(calc(var(--i) * 48) 85% 62%); @apply relative mt-[-2px] h-2.5 w-2.5 rounded-full; background: var(--color); box-shadow: 0 0 14px var(--color), 0 0 26px var(--color); animation: lightTwinkle 1.8s ease-in-out infinite; animation-delay: calc(var(--i) * -.13s); }
   .christmas-horizon { @apply absolute inset-x-0 bottom-0 h-[30%]; background: linear-gradient(to top, hsl(200 60% 90% / .08), transparent); clip-path: polygon(0 70%, 12% 45%, 25% 72%, 40% 35%, 55% 67%, 72% 38%, 87% 65%, 100% 42%, 100% 100%, 0 100%); }
+
+  /* 3D / Cyber Observatory */
+  .effect-scene-3d {
+    --mx: 0;
+    --my: 0;
+    --px: 50vw;
+    --py: 50vh;
+    --back-shift: 0px;
+    --floor-shift: 0px;
+    --hud-shift: 0px;
+    --core-rx: -18deg;
+    --core-ry: 35deg;
+    perspective: 1000px;
+    background:
+      radial-gradient(circle at var(--px) var(--py), hsl(78 90% 60% / .08), transparent 22rem),
+      radial-gradient(circle at 50% 45%, hsl(190 90% 50% / .1), transparent 34rem),
+      linear-gradient(180deg, hsl(225 60% 6% / .34), transparent 75%);
+  }
+
+  .cyber-spotlight {
+    @apply absolute left-1/2 top-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl;
+    background: conic-gradient(from 30deg, hsl(190 90% 55% / .09), transparent 25%, hsl(78 85% 55% / .06), transparent 60%, hsl(280 85% 62% / .08));
+    animation: cyberBreath 7s ease-in-out infinite;
+  }
+
+  .cyber-grid {
+    @apply absolute left-1/2 w-[130%] -translate-x-1/2;
+    background-image: linear-gradient(hsl(190 90% 60% / .14) 1px, transparent 1px), linear-gradient(90deg, hsl(190 90% 60% / .14) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse, black, transparent 70%);
+    transition: transform .35s ease-out;
+  }
+
+  .cyber-grid-back { @apply top-[-28%] h-[65%]; transform: translateX(calc(-50% + var(--back-shift))) perspective(700px) rotateX(-63deg); }
+  .cyber-grid-floor { @apply bottom-[-34%] h-[85%]; transform: translateX(calc(-50% + var(--floor-shift))) perspective(650px) rotateX(65deg); animation: gridTravel 7s linear infinite; }
+
+  .cyber-core {
+    @apply absolute left-1/2 top-[43%] h-28 w-28;
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%) rotateX(var(--core-rx)) rotateY(var(--core-ry));
+    animation: coreFloat 6s ease-in-out infinite;
+  }
+
+  .cyber-core-face {
+    @apply absolute inset-0 border border-cyan-300/45;
+    background: linear-gradient(135deg, hsl(190 90% 58% / .13), hsl(78 90% 58% / .04));
+    box-shadow: inset 0 0 35px hsl(190 90% 55% / .12), 0 0 18px hsl(190 90% 55% / .08);
+    backdrop-filter: blur(3px);
+  }
+
+  .cyber-core-front { transform: translateZ(56px); }
+  .cyber-core-back { transform: rotateY(180deg) translateZ(56px); }
+  .cyber-core-left { transform: rotateY(-90deg) translateZ(56px); }
+  .cyber-core-right { transform: rotateY(90deg) translateZ(56px); }
+  .cyber-core-top { transform: rotateX(90deg) translateZ(56px); }
+  .cyber-core-bottom { transform: rotateX(-90deg) translateZ(56px); }
+
+  .cyber-portal {
+    @apply absolute left-1/2 top-[43%] rounded-full border border-cyan-300/25;
+    box-shadow: 0 0 35px hsl(190 90% 55% / .1), inset 0 0 35px hsl(190 90% 55% / .08);
+  }
+
+  .cyber-portal::before, .cyber-portal::after { content: ""; @apply absolute rounded-full border border-primary/20; }
+  .cyber-portal::before { @apply inset-4; }
+  .cyber-portal::after { @apply inset-10; }
+  .cyber-portal-a { @apply h-72 w-72; transform: translate(-50%, -50%) rotateX(70deg); animation: portalSpin 12s linear infinite; }
+  .cyber-portal-b { @apply h-[28rem] w-[28rem]; transform: translate(-50%, -50%) rotateY(70deg); animation: portalSpinReverse 17s linear infinite; }
+
+  .cyber-hud {
+    @apply absolute top-[36%] hidden w-36 border-y border-cyan-300/20 py-3 font-mono text-[8px] uppercase tracking-[.18em] text-cyan-200/60 lg:block;
+    transform: translateY(var(--hud-shift));
+  }
+  .cyber-hud-left { @apply left-[8%]; }
+  .cyber-hud-right { @apply right-[8%] text-right; }
+  .cyber-hud b { @apply mt-2 block text-lg font-normal text-primary/70; }
+  .cyber-hud i { @apply mt-3 block h-px w-full; background: repeating-linear-gradient(90deg, hsl(190 90% 60% / .4) 0 8px, transparent 8px 12px); animation: hudScan 2s linear infinite; }
+
+  /* Tet / Lacquer Garden */
+  .effect-scene-tet {
+    background:
+      radial-gradient(circle at 72% 24%, hsl(44 100% 62% / .16), transparent 24rem),
+      linear-gradient(135deg, hsl(3 88% 30% / .2), transparent 58%),
+      repeating-linear-gradient(105deg, transparent 0 90px, hsl(42 85% 55% / .025) 90px 91px);
+  }
+
+  .lacquer-glow { @apply absolute inset-0; background: radial-gradient(ellipse at 50% 110%, hsl(8 90% 45% / .18), transparent 62%); animation: lacquerPulse 6s ease-in-out infinite; }
+  .lacquer-sun {
+    @apply absolute right-[11%] top-[15%] flex h-48 w-48 items-center justify-center rounded-full border border-amber-200/25 font-serif text-6xl text-amber-100/35;
+    background: radial-gradient(circle at 35% 30%, hsl(46 100% 82% / .32), hsl(17 95% 55% / .15) 55%, transparent 72%);
+    box-shadow: 0 0 80px hsl(40 95% 58% / .12), inset 0 0 30px hsl(46 100% 80% / .12);
+    animation: lunarSun 7s ease-in-out infinite;
+  }
+  .lacquer-sun::before, .lacquer-sun::after { content: ""; @apply absolute rounded-full border border-amber-200/15; }
+  .lacquer-sun::before { @apply -inset-5; }
+  .lacquer-sun::after { @apply -inset-10; }
+  .lacquer-mountain { @apply absolute inset-x-0 bottom-0; transform-origin: bottom; }
+  .lacquer-mountain-back { @apply h-[38%]; background: hsl(5 50% 18% / .18); clip-path: polygon(0 72%, 11% 42%, 19% 67%, 31% 29%, 43% 70%, 56% 38%, 67% 68%, 78% 25%, 91% 62%, 100% 40%, 100% 100%, 0 100%); animation: mountainDrift 12s ease-in-out infinite alternate; }
+  .lacquer-mountain-front { @apply h-[27%]; background: linear-gradient(to top, hsl(4 55% 12% / .2), hsl(8 70% 28% / .1)); clip-path: polygon(0 68%, 14% 34%, 27% 72%, 40% 43%, 52% 70%, 68% 30%, 82% 67%, 100% 39%, 100% 100%, 0 100%); animation: mountainDrift 9s ease-in-out infinite alternate-reverse; }
+
+  .blossom-branch { @apply absolute z-10 h-2 w-[35%] rounded-full; background: linear-gradient(90deg, hsl(25 50% 18% / .75), hsl(30 50% 32% / .35)); transform-origin: left; }
+  .blossom-branch-left { @apply -left-12 top-[23%]; transform: rotate(18deg); }
+  .blossom-branch-right { @apply -right-20 top-[38%]; transform: rotate(198deg); }
+  .blossom-branch::after { content: ""; @apply absolute left-[22%] top-0 h-1 w-[70%] rounded-full; background: hsl(28 50% 25% / .5); transform: rotate(-22deg); transform-origin: left; }
+  .blossom-branch i {
+    --x: calc(var(--i) * 11%);
+    @apply absolute h-5 w-5 rounded-full;
+    left: var(--x); top: calc((var(--i) % 3) * 13px - 18px);
+    background: radial-gradient(circle, #fff5b8 0 15%, #ffc35c 17% 35%, #ef6b64 38% 58%, transparent 61%);
+    filter: drop-shadow(0 0 7px hsl(42 100% 65% / .35));
+    animation: blossomBreath 3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -.28s);
+  }
+
+  .lunar-lantern { @apply absolute top-0 z-20 flex w-20 flex-col items-center pt-24; animation: lanternSway 5s ease-in-out infinite; transform-origin: top; }
+  .lunar-lantern::before { content: ""; @apply absolute top-0 h-24 w-px bg-gradient-to-b from-amber-200/70 to-red-500/40; }
+  .lunar-lantern::after { content: ""; @apply absolute top-20 h-28 w-20 rounded-[45%] border border-amber-200/50; background: repeating-linear-gradient(90deg, hsl(6 90% 48% / .38) 0 8px, hsl(38 95% 56% / .2) 8px 9px); box-shadow: 0 0 35px hsl(20 100% 55% / .25), inset 0 0 22px hsl(42 100% 66% / .25); }
+  .lunar-lantern span { @apply relative z-10 mt-7 font-serif text-2xl text-amber-100/80; }
+  .lunar-lantern i { @apply absolute top-[12rem] h-14 w-px bg-gradient-to-b from-amber-300/70 to-transparent; }
+  .lunar-lantern-a { @apply left-[12%]; }
+  .lunar-lantern-b { @apply left-[25%] scale-75; animation-delay: -2s; }
+  .lunar-seal { @apply absolute bottom-[12%] right-[8%] z-20 flex h-16 w-16 items-center justify-center border border-red-300/40 text-center font-mono text-[9px] tracking-[.2em] text-red-200/60; transform: rotate(-6deg); box-shadow: inset 0 0 18px hsl(0 80% 55% / .12); }
+
+  /* Christmas / Nordic Night */
+  .effect-scene-christmas {
+    background:
+      radial-gradient(circle at 72% 24%, hsl(44 100% 88% / .13), transparent 21rem),
+      linear-gradient(180deg, hsl(224 65% 7% / .38), hsl(205 55% 12% / .16) 60%, transparent);
+  }
+  .nordic-stars i {
+    --x: calc((var(--i) * 37) % 100);
+    --y: calc((var(--i) * 61) % 62);
+    @apply absolute h-1 w-1 rounded-full bg-white;
+    left: calc(var(--x) * 1%); top: calc(var(--y) * 1%);
+    box-shadow: 0 0 8px hsl(190 80% 85% / .8);
+    animation: starPulse 2.5s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -.17s);
+  }
+  .nordic-aurora { @apply absolute -left-[15%] top-[5%] h-[48%] w-[130%] rounded-[50%] blur-3xl; mix-blend-mode: screen; transform-origin: center; }
+  .nordic-aurora-a { background: linear-gradient(105deg, transparent 8%, hsl(150 90% 52% / .13), hsl(185 90% 60% / .08), transparent 78%); animation: nordicAurora 10s ease-in-out infinite alternate; }
+  .nordic-aurora-b { background: linear-gradient(80deg, transparent 14%, hsl(285 85% 62% / .08), hsl(160 90% 56% / .1), transparent 82%); animation: nordicAurora 13s ease-in-out infinite alternate-reverse; }
+  .nordic-aurora-c { @apply top-[18%]; background: linear-gradient(110deg, transparent 20%, hsl(200 90% 65% / .08), transparent 72%); animation: nordicAurora 8s ease-in-out infinite alternate; animation-delay: -4s; }
+
+  .glass-bauble {
+    @apply absolute right-[12%] top-[16%] z-20 flex h-44 w-44 items-center justify-center rounded-full border border-white/25;
+    background: radial-gradient(circle at 30% 24%, hsl(0 0% 100% / .42), transparent 8%), radial-gradient(circle at 40% 35%, hsl(190 80% 75% / .12), hsl(340 75% 55% / .13) 62%, transparent 72%);
+    box-shadow: inset -18px -20px 35px hsl(220 70% 12% / .18), inset 12px 12px 30px hsl(0 0% 100% / .08), 0 0 60px hsl(185 80% 70% / .13);
+    animation: baubleFloat 6s ease-in-out infinite;
+    backdrop-filter: blur(2px);
+  }
+  .glass-bauble::before { content: ""; @apply absolute -top-28 h-24 w-px bg-gradient-to-b from-white/10 to-white/45; }
+  .glass-bauble-cap { @apply absolute -top-5 h-6 w-12 rounded-t-lg border border-amber-200/30; background: linear-gradient(90deg, hsl(42 70% 40% / .3), hsl(45 85% 78% / .45), hsl(42 70% 40% / .3)); }
+  .glass-bauble-star { @apply text-5xl text-amber-100/70; filter: drop-shadow(0 0 16px hsl(45 100% 72% / .65)); animation: starPulse 2s ease-in-out infinite; }
+  .glass-bauble i { @apply absolute inset-5 rounded-full border border-white/10; }
+
+  .nordic-pines { @apply absolute inset-x-0 bottom-0 flex items-end justify-around; }
+  .nordic-pines i { --height: calc(80px + (var(--i) % 4) * 28px); width: calc(var(--height) * .62); height: var(--height); background: currentColor; clip-path: polygon(50% 0, 72% 32%, 62% 32%, 86% 65%, 70% 65%, 100% 100%, 0 100%, 30% 65%, 14% 65%, 38% 32%, 28% 32%); }
+  .nordic-pines-back { @apply bottom-[8%] text-cyan-950/20; filter: blur(1px); }
+  .nordic-pines-front { @apply z-10 text-slate-950/30; }
+  .winter-ground { @apply absolute inset-x-0 bottom-0 h-[18%]; background: linear-gradient(to top, hsl(195 70% 88% / .13), transparent); clip-path: ellipse(75% 65% at 50% 100%); }
+  .christmas-light-strand { @apply absolute left-[-2%] top-8 z-30 flex w-[104%] justify-around; }
+  .christmas-light-strand::before { content: ""; @apply absolute left-0 top-0 h-px w-full bg-white/20; transform: rotate(-1deg); }
+  .christmas-light-strand i { --bulb: hsl(calc(var(--i) * 47) 88% 65%); @apply relative h-2.5 w-2.5 rounded-full; background: var(--bulb); box-shadow: 0 0 12px var(--bulb), 0 0 28px var(--bulb); animation: festiveBulb 2.2s ease-in-out infinite; animation-delay: calc(var(--i) * -.14s); }
 }
 
 @layer utilities {
@@ -341,6 +507,28 @@
   @keyframes knotSway { 50% { transform: rotate(4deg); } }
   @keyframes aurora { from { transform: translateX(-4%) skewY(-4deg); opacity: .5; } to { transform: translateX(5%) skewY(3deg); opacity: 1; } }
   @keyframes lightTwinkle { 50% { opacity: .3; transform: scale(.65); } }
+  @keyframes cyberBreath { 50% { transform: translate(-50%, -50%) scale(1.12) rotate(12deg); opacity: .65; } }
+  @keyframes gridTravel { to { background-position: 0 56px, 56px 0; } }
+  @keyframes coreFloat {
+    0%, 100% { margin-top: 0; }
+    50% { margin-top: -18px; }
+  }
+  @keyframes portalSpin {
+    to { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); }
+  }
+  @keyframes portalSpinReverse {
+    to { transform: translate(-50%, -50%) rotateY(70deg) rotateZ(-360deg); }
+  }
+  @keyframes hudScan { to { background-position: 24px 0; } }
+  @keyframes lacquerPulse { 50% { opacity: .6; transform: scale(1.04); } }
+  @keyframes lunarSun { 50% { transform: translateY(-8px) scale(1.04); filter: brightness(1.15); } }
+  @keyframes mountainDrift { to { transform: scaleX(1.035) translateX(8px); } }
+  @keyframes blossomBreath { 50% { transform: scale(1.25) rotate(18deg); filter: drop-shadow(0 0 12px hsl(42 100% 68% / .6)); } }
+  @keyframes lanternSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
+  @keyframes starPulse { 50% { opacity: .3; transform: scale(.65); } }
+  @keyframes nordicAurora { from { transform: translateX(-5%) skewY(-5deg) scaleY(.8); opacity: .45; } to { transform: translateX(6%) skewY(4deg) scaleY(1.2); opacity: 1; } }
+  @keyframes baubleFloat { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(12px) rotate(3deg); } }
+  @keyframes festiveBulb { 50% { opacity: .28; transform: translateY(2px) scale(.7); } }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
