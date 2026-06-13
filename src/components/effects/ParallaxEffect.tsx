@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { WebGLCubeScene } from "./WebGLCubeScene";
 
 interface NodePoint {
   x: number;
@@ -69,7 +70,7 @@ export const ParallaxEffect = () => {
     };
 
     const createNodes = () => {
-      const count = Math.min(76, Math.max(34, Math.floor(width / 20)));
+      const count = Math.min(92, Math.max(42, Math.floor(width / 18)));
       nodes = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -208,25 +209,31 @@ export const ParallaxEffect = () => {
       <canvas ref={canvasRef} className="cyber-network absolute inset-0" />
       <div className="cyber-atmosphere cyber-atmosphere-a" />
       <div className="cyber-atmosphere cyber-atmosphere-b" />
+      <div className="cyber-aurora cyber-aurora-a" />
+      <div className="cyber-aurora cyber-aurora-b" />
+      <div className="cyber-depth-lines" />
+      <div className="cyber-signal-field">
+        <i /><i /><i /><i /><i /><i /><i /><i />
+      </div>
       <div className="cyber-spotlight" />
       <div className="cyber-grid cyber-grid-back" />
       <div className="cyber-grid cyber-grid-floor" />
+      <WebGLCubeScene />
       <div className="cyber-observatory">
-        <div className="cyber-orbit cyber-orbit-a"><i /><i /><i /></div>
-        <div className="cyber-orbit cyber-orbit-b"><i /><i /></div>
-        <div className="cyber-core">
-          <div className="cyber-core-face cyber-core-front" /><div className="cyber-core-face cyber-core-back" />
-          <div className="cyber-core-face cyber-core-left" /><div className="cyber-core-face cyber-core-right" />
-          <div className="cyber-core-face cyber-core-top" /><div className="cyber-core-face cyber-core-bottom" />
-          <div className="cyber-core-inner" />
+        <div className="cyber-axis">
+          <i /><i /><i />
         </div>
-        <div className="cyber-portal cyber-portal-a" /><div className="cyber-portal cyber-portal-b" />
+        <div className="cyber-beacons">
+          <i /><i /><i /><i /><i /><i />
+        </div>
+        <div className="cyber-core-plinth"><i /><i /><i /></div>
       </div>
       <div className="cyber-glass cyber-glass-a"><span>VECTOR</span><b>12.08</b><i /></div>
       <div className="cyber-glass cyber-glass-b"><span>ORBIT</span><b>STABLE</b><i /></div>
       <div className="cyber-hud cyber-hud-left"><span>SYS / DEPTH</span><b>03.24</b><i /></div>
       <div className="cyber-hud cyber-hud-right"><span>FIELD / LIVE</span><b>97.4%</b><i /></div>
       <div className="cyber-cursor-halo" />
+      <div className="cyber-vignette" />
       <div className="cyber-scanlines" />
       <div className="effect-label left-5 top-24">CYBER OBSERVATORY / INTERACTIVE</div>
     </div>

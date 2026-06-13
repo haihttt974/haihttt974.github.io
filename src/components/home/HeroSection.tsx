@@ -93,7 +93,7 @@ export const HeroSection = () => {
 
         <aside ref={portraitRef} className="portrait-stage journal-card group mx-auto aspect-[4/5] w-full max-w-[440px] animate-slide-up lg:self-center" style={{ animationDelay: ".12s" }}>
           <div className="portrait-index absolute -left-4 top-12 z-20 hidden rounded-md border border-primary/30 bg-background/90 px-3 py-2 font-mono text-[9px] uppercase tracking-[.18em] text-primary backdrop-blur md:block">
-            ID / HDH-974
+            ID / LDH-974
           </div>
           <div className="portrait-crosshair pointer-events-none absolute left-1/2 top-1/2 z-20 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
           <img

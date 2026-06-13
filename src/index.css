@@ -331,6 +331,16 @@
 
   .cyber-network { opacity: .82; }
 
+  .cyber-webgl {
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .cyber-webgl canvas {
+    @apply h-full w-full;
+    display: block;
+  }
+
   .cyber-atmosphere {
     @apply absolute rounded-full blur-3xl;
     transition: transform .8s cubic-bezier(.2, .7, .2, 1);
@@ -349,6 +359,52 @@
     transform: translate3d(var(--near-x), var(--near-y), 0);
     animation-delay: -5s;
   }
+
+  .cyber-aurora {
+    @apply absolute left-[-12%] w-[124%] blur-3xl;
+    mix-blend-mode: screen;
+    transform-origin: center;
+    pointer-events: none;
+  }
+
+  .cyber-aurora-a {
+    @apply top-[7%] h-[24%];
+    background: linear-gradient(105deg, transparent 8%, hsl(190 88% 60% / .02) 28%, hsl(190 88% 60% / .085) 48%, hsl(78 82% 60% / .035) 65%, transparent 88%);
+    animation: cyberAurora 12s ease-in-out infinite alternate;
+  }
+
+  .cyber-aurora-b {
+    @apply bottom-[8%] h-[19%];
+    background: linear-gradient(82deg, transparent 12%, hsl(270 80% 65% / .035) 34%, hsl(190 88% 60% / .065) 55%, transparent 86%);
+    animation: cyberAurora 16s ease-in-out infinite alternate-reverse;
+  }
+
+  .cyber-depth-lines {
+    @apply absolute inset-0;
+    background:
+      linear-gradient(112deg, transparent 0 23%, hsl(190 80% 65% / .045) 23.1%, transparent 23.25%),
+      linear-gradient(68deg, transparent 0 76%, hsl(78 75% 65% / .035) 76.1%, transparent 76.25%),
+      repeating-linear-gradient(90deg, transparent 0 12.4%, hsl(190 75% 65% / .018) 12.5%, transparent 12.65%);
+    mask-image: linear-gradient(to bottom, black, transparent 74%);
+    animation: depthLinesShift 14s ease-in-out infinite alternate;
+  }
+
+  .cyber-signal-field { @apply absolute inset-0 overflow-hidden; }
+  .cyber-signal-field i {
+    @apply absolute h-px w-20;
+    background: linear-gradient(90deg, transparent, hsl(190 90% 72% / .4), transparent);
+    filter: drop-shadow(0 0 5px hsl(190 85% 65% / .25));
+    opacity: 0;
+    animation: signalSweep 8s linear infinite;
+  }
+  .cyber-signal-field i:nth-child(1) { left: 8%; top: 19%; animation-delay: -1s; }
+  .cyber-signal-field i:nth-child(2) { left: 68%; top: 14%; width: 5rem; animation-delay: -4.5s; }
+  .cyber-signal-field i:nth-child(3) { left: 21%; top: 63%; width: 3.5rem; animation-delay: -6.5s; }
+  .cyber-signal-field i:nth-child(4) { left: 82%; top: 72%; animation-delay: -2.8s; }
+  .cyber-signal-field i:nth-child(5) { left: 45%; top: 27%; width: 4rem; animation-delay: -7.2s; }
+  .cyber-signal-field i:nth-child(6) { left: 12%; top: 82%; animation-delay: -5.4s; }
+  .cyber-signal-field i:nth-child(7) { left: 74%; top: 43%; width: 6rem; animation-delay: -3.6s; }
+  .cyber-signal-field i:nth-child(8) { left: 37%; top: 91%; width: 4.5rem; animation-delay: -.4s; }
 
   .cyber-spotlight {
     @apply absolute left-1/2 top-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl;
@@ -369,78 +425,201 @@
 
   .cyber-observatory {
     @apply absolute left-1/2 top-[43%] h-[30rem] w-[30rem];
+    perspective: 760px;
+    perspective-origin: 50% 42%;
     transform-style: preserve-3d;
     transform: translate3d(calc(-50% + var(--scene-x)), calc(-50% + var(--scene-y)), 0) rotateX(var(--scene-rx)) rotateY(var(--scene-ry));
     transition: transform .3s ease-out;
+    z-index: 4;
+    pointer-events: none;
   }
 
   .cyber-core {
-    @apply absolute left-1/2 top-1/2 h-28 w-28;
+    @apply absolute left-1/2 top-1/2 h-32 w-32;
     transform-style: preserve-3d;
     transform: translate(-50%, -50%) rotateX(var(--core-rx)) rotateY(var(--core-ry));
-    animation: coreFloat 6s ease-in-out infinite;
+    animation: coreFloat 8s ease-in-out infinite;
+    will-change: transform;
   }
 
   .cyber-core-face {
-    @apply absolute inset-0 border border-cyan-300/35;
-    background: linear-gradient(135deg, hsl(190 80% 58% / .105), hsl(78 70% 58% / .025));
-    box-shadow: inset 0 0 35px hsl(190 75% 55% / .09), 0 0 18px hsl(190 75% 55% / .055);
-    backdrop-filter: blur(3px);
+    @apply absolute inset-0 border border-cyan-200/60;
+    backface-visibility: hidden;
+    background: linear-gradient(145deg, hsl(190 72% 34% / .72), hsl(224 72% 10% / .88));
+    box-shadow: inset 0 0 28px hsl(190 85% 72% / .14), 0 0 18px hsl(190 80% 58% / .18), 8px 12px 24px hsl(225 85% 5% / .3);
+    overflow: hidden;
   }
 
-  .cyber-core-front { transform: translateZ(56px); }
-  .cyber-core-back { transform: rotateY(180deg) translateZ(56px); }
-  .cyber-core-left { transform: rotateY(-90deg) translateZ(56px); }
-  .cyber-core-right { transform: rotateY(90deg) translateZ(56px); }
-  .cyber-core-top { transform: rotateX(90deg) translateZ(56px); }
-  .cyber-core-bottom { transform: rotateX(-90deg) translateZ(56px); }
+  .cyber-core-face::before {
+    content: "";
+    @apply absolute inset-2 border border-dashed border-cyan-200/20 opacity-40;
+  }
+
+  .cyber-core-face::after {
+    content: "";
+    @apply absolute -right-4 -top-4 h-8 w-8 rotate-45 border-b border-l border-cyan-300/60 bg-cyan-300/10;
+  }
+
+  .cyber-core-front { transform: translateZ(64px); background: linear-gradient(145deg, hsl(190 75% 38% / .78), hsl(224 74% 11% / .92)); }
+  .cyber-core-back { transform: rotateY(180deg) translateZ(64px); }
+  .cyber-core-left { transform: rotateY(-90deg) translateZ(64px); background: linear-gradient(145deg, hsl(224 65% 20% / .9), hsl(230 72% 7% / .96)); }
+  .cyber-core-right { transform: rotateY(90deg) translateZ(64px); background: linear-gradient(145deg, hsl(190 78% 44% / .68), hsl(218 78% 12% / .92)); }
+  .cyber-core-top { transform: rotateX(90deg) translateZ(64px); background: linear-gradient(145deg, hsl(78 74% 56% / .72), hsl(190 76% 38% / .72)); border-color: hsl(78 80% 76% / .7); }
+  .cyber-core-bottom { transform: rotateX(-90deg) translateZ(64px); background: hsl(228 76% 6% / .96); }
 
   .cyber-core-inner {
-    @apply absolute left-1/2 top-1/2 h-12 w-12 rounded-lg border border-lime-200/25;
-    background: radial-gradient(circle at 35% 30%, hsl(78 80% 70% / .22), hsl(190 75% 55% / .08) 55%, transparent 72%);
-    box-shadow: 0 0 32px hsl(190 75% 55% / .11);
+    @apply absolute left-1/2 top-1/2 h-14 w-14 border border-lime-300/35;
+    background: radial-gradient(circle at center, hsl(78 90% 65% / .4), transparent 80%);
+    box-shadow: 0 0 45px hsl(78 90% 60% / .3);
     transform: translate3d(-50%, -50%, 0);
-    animation: coreInner 4s ease-in-out infinite;
+    animation: coreInner 5s ease-in-out infinite;
   }
 
-  .cyber-portal {
-    @apply absolute left-1/2 top-1/2 rounded-full border border-cyan-300/20;
-    box-shadow: 0 0 35px hsl(190 75% 55% / .07), inset 0 0 35px hsl(190 75% 55% / .055);
-  }
-
-  .cyber-portal::before, .cyber-portal::after { content: ""; @apply absolute rounded-full border border-primary/20; }
-  .cyber-portal::before { @apply inset-4; }
-  .cyber-portal::after { @apply inset-10; }
-  .cyber-portal-a { @apply h-72 w-72; transform: translate(-50%, -50%) rotateX(70deg); animation: portalSpin 12s linear infinite; }
-  .cyber-portal-b { @apply h-[28rem] w-[28rem]; transform: translate(-50%, -50%) rotateY(70deg); animation: portalSpinReverse 17s linear infinite; }
-
-  .cyber-orbit {
-    @apply absolute left-1/2 top-1/2 rounded-full border border-cyan-200/20;
+  .cyber-satellites {
+    @apply absolute inset-0;
     transform-style: preserve-3d;
+    pointer-events: none;
   }
 
-  .cyber-orbit-a {
-    @apply h-80 w-80;
-    transform: translate(-50%, -50%) rotateX(64deg) rotateY(-10deg);
-    animation: orbitDriftA 15s linear infinite;
+  .cyber-axis {
+    @apply absolute inset-0;
+    transform-style: preserve-3d;
+    opacity: .42;
+    pointer-events: none;
+  }
+  .cyber-axis i { @apply absolute left-1/2 top-1/2 h-px w-[30rem]; transform-origin: left center; background: linear-gradient(90deg, hsl(190 85% 70% / .34), transparent 76%); }
+  .cyber-axis i:nth-child(1) { transform: rotateZ(0deg); }
+  .cyber-axis i:nth-child(2) { transform: rotateZ(120deg); background: linear-gradient(90deg, hsl(78 80% 70% / .25), transparent 76%); }
+  .cyber-axis i:nth-child(3) { transform: rotateZ(240deg); }
+
+  .cyber-beacons {
+    @apply absolute inset-0;
+    transform-style: preserve-3d;
+    pointer-events: none;
+  }
+  .cyber-beacons i {
+    @apply absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-cyan-100/80;
+    box-shadow: 0 0 8px hsl(190 90% 70% / .8), 0 0 24px hsl(190 90% 60% / .35);
+    animation: beaconPulse 3s ease-in-out infinite;
+  }
+  .cyber-beacons i:nth-child(1) { transform: translate3d(265px, -105px, 20px); }
+  .cyber-beacons i:nth-child(2) { transform: translate3d(-238px, 88px, -30px); animation-delay: -.5s; }
+  .cyber-beacons i:nth-child(3) { transform: translate3d(210px, 125px, -45px); animation-delay: -1s; }
+  .cyber-beacons i:nth-child(4) { transform: translate3d(-188px, -132px, 35px); animation-delay: -1.5s; }
+  .cyber-beacons i:nth-child(5) { transform: translate3d(92px, -168px, -25px); animation-delay: -2s; }
+  .cyber-beacons i:nth-child(6) { transform: translate3d(-72px, 175px, 25px); animation-delay: -2.5s; }
+
+  .cyber-flight-guides {
+    @apply absolute inset-0;
+    transform-style: preserve-3d;
+    pointer-events: none;
   }
 
-  .cyber-orbit-b {
-    @apply h-[24rem] w-[24rem];
-    transform: translate(-50%, -50%) rotateY(68deg) rotateX(12deg);
-    animation: orbitDriftB 21s linear infinite;
+  .cyber-flight-guides i {
+    @apply absolute left-1/2 top-1/2 rounded-full border border-dashed border-cyan-200/20;
+    transform-style: preserve-3d;
+    box-shadow: inset 0 0 24px hsl(190 80% 60% / .02);
+    opacity: .72;
+  }
+  .cyber-flight-guides i:nth-child(1) { @apply h-[13rem] w-[27rem]; border-style: dotted; transform: translate(-50%, -50%) rotateX(68deg) rotateY(-8deg); }
+  .cyber-flight-guides i:nth-child(2) { @apply h-[18rem] w-[32rem]; border-color: hsl(78 75% 68% / .05); border-style: dotted; transform: translate(-50%, -50%) rotateX(76deg) rotateY(15deg) rotateZ(-12deg); }
+  .cyber-flight-guides i:nth-child(3) { @apply h-[23rem] w-[37rem]; border-color: hsl(190 75% 68% / .04); border-style: dotted; transform: translate(-50%, -50%) rotateX(58deg) rotateY(-24deg) rotateZ(14deg); }
+
+  .cyber-satellite-path {
+    --sat-dist: 180px;
+    --sat-size: 24px;
+    --sat-half: 12px;
+    @apply absolute left-1/2 top-1/2 h-0 w-0;
+    transform-style: preserve-3d;
+    animation: visibleOrbitNear var(--sat-duration) linear infinite;
+    animation-delay: var(--sat-delay);
+    z-index: 2;
   }
 
-  .cyber-orbit i {
-    @apply absolute left-1/2 top-1/2 h-2 w-2 rounded-full border border-cyan-100/40 bg-cyan-200/20;
-    box-shadow: 0 0 14px hsl(190 80% 65% / .2);
+  .cyber-satellite-lane-1 { animation-name: visibleOrbitNear; }
+  .cyber-satellite-lane-2 { animation-name: visibleOrbitMid; animation-direction: reverse; }
+  .cyber-satellite-lane-3 { animation-name: visibleOrbitOuter; }
+
+  .cyber-satellite-depth {
+    @apply absolute;
+    width: var(--sat-size);
+    height: var(--sat-size);
+    transform-style: preserve-3d;
+    animation: spaceDepth var(--sat-duration) ease-in-out infinite;
+    animation-delay: var(--sat-delay);
+    will-change: transform, opacity;
+    transform-origin: center;
+    image-rendering: auto;
   }
 
-  .cyber-orbit-a i:nth-child(1) { transform: rotate(15deg) translateX(160px); }
-  .cyber-orbit-a i:nth-child(2) { transform: rotate(142deg) translateX(160px) scale(.7); }
-  .cyber-orbit-a i:nth-child(3) { transform: rotate(266deg) translateX(160px) scale(.5); }
-  .cyber-orbit-b i:nth-child(1) { transform: rotate(72deg) translateX(192px) scale(.8); }
-  .cyber-orbit-b i:nth-child(2) { transform: rotate(232deg) translateX(192px) scale(.55); }
+  .cyber-satellite {
+    @apply absolute;
+    width: var(--sat-size);
+    height: var(--sat-size);
+    transform-style: preserve-3d;
+    transform: rotateX(-24deg) rotateY(38deg);
+    animation: satelliteCubeTurn 16s linear infinite;
+    will-change: transform;
+    opacity: 1;
+  }
+
+  .cyber-satellite i {
+    @apply absolute inset-0 border border-cyan-100/90;
+    backface-visibility: hidden;
+    background:
+      linear-gradient(90deg, transparent 48%, hsl(190 95% 82% / .14) 49% 51%, transparent 52%),
+      linear-gradient(0deg, transparent 48%, hsl(190 95% 82% / .1) 49% 51%, transparent 52%),
+      linear-gradient(145deg, hsl(190 75% 43% / .96), hsl(224 78% 7% / .99));
+    box-shadow: inset 0 0 9px hsl(190 90% 78% / .2), 0 0 4px hsl(190 90% 68% / .35);
+  }
+
+  .cyber-face-top { transform: rotateX(90deg) translateZ(var(--sat-half, 12px)); background: linear-gradient(145deg, hsl(78 82% 66% / .94), hsl(190 80% 42% / .9)) !important; border-color: hsl(78 90% 82% / .95) !important; }
+  .cyber-face-bottom { transform: rotateX(-90deg) translateZ(var(--sat-half, 12px)); background: hsl(228 82% 4% / .99) !important; border-color: hsl(220 65% 32% / .7) !important; }
+  .cyber-face-left { transform: rotateY(-90deg) translateZ(var(--sat-half, 12px)); background: linear-gradient(145deg, hsl(226 68% 19% / .98), hsl(232 82% 5% / 1)) !important; border-color: hsl(215 70% 54% / .78) !important; }
+  .cyber-face-right { transform: rotateY(90deg) translateZ(var(--sat-half, 12px)); background: linear-gradient(145deg, hsl(187 82% 48% / .94), hsl(218 80% 8% / .98)) !important; border-color: hsl(185 92% 78% / .92) !important; }
+  .cyber-face-front { transform: translateZ(var(--sat-half, 12px)); border-color: hsl(190 95% 85% / 1) !important; }
+  .cyber-face-back { transform: rotateY(180deg) translateZ(var(--sat-half, 12px)); background: hsl(228 78% 6% / .99) !important; border-color: hsl(220 65% 38% / .72) !important; }
+
+  .cyber-satellite-core {
+    @apply absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-sm bg-lime-200;
+    transform: translate3d(-50%, -50%, 0);
+    box-shadow: 0 0 5px hsl(78 92% 72% / .95), 0 0 12px hsl(190 90% 65% / .5);
+    animation: satelliteCorePulse 2.8s ease-in-out infinite;
+  }
+
+  @keyframes visibleOrbitNear { from { transform: rotateX(68deg) rotateY(-8deg) rotateZ(0deg); } to { transform: rotateX(68deg) rotateY(-8deg) rotateZ(360deg); } }
+  @keyframes visibleOrbitMid { from { transform: rotateX(76deg) rotateY(15deg) rotateZ(-12deg); } to { transform: rotateX(76deg) rotateY(15deg) rotateZ(348deg); } }
+  @keyframes visibleOrbitOuter { from { transform: rotateX(58deg) rotateY(-24deg) rotateZ(14deg); } to { transform: rotateX(58deg) rotateY(-24deg) rotateZ(374deg); } }
+  @keyframes spaceDepth {
+    0%, 100% { transform: translate3d(var(--sat-dist), var(--sat-height), 0) scale(.92); opacity: .84; }
+    25% { transform: translate3d(var(--sat-dist), calc(var(--sat-height) - var(--sat-drift)), 72px) scale(1.16); opacity: 1; }
+    52% { transform: translate3d(var(--sat-dist), calc(var(--sat-height) + var(--sat-drift)), 12px) scale(.96); opacity: .86; }
+    76% { transform: translate3d(var(--sat-dist), calc(var(--sat-height) - var(--sat-drift-small)), -76px) scale(.74); opacity: .6; }
+  }
+  @keyframes satelliteCubeTurn {
+    from { transform: rotateX(-24deg) rotateY(38deg) rotateZ(0deg); }
+    to { transform: rotateX(156deg) rotateY(308deg) rotateZ(var(--sat-roll)); }
+  }
+  @keyframes satelliteCorePulse { 50% { transform: translate3d(-50%, -50%, 0) scale(.55); opacity: .5; } }
+  @keyframes satOrbitB { from { transform: rotateZ(0) rotateY(70deg); } to { transform: rotateZ(360deg) rotateY(70deg); } }
+  @keyframes satOrbitC { from { transform: rotateZ(0) rotateX(-45deg) rotateY(30deg); } to { transform: rotateZ(360deg) rotateX(-45deg) rotateY(30deg); } }
+  @keyframes satOrbitD { from { transform: rotateZ(0) rotateX(15deg) rotateY(-60deg); } to { transform: rotateZ(360deg) rotateX(15deg) rotateY(-60deg); } }
+  @keyframes satSpin { to { transform: translate3d(var(--sat-dist), 0, 0) rotateX(405deg) rotateY(405deg); } }
+  @keyframes guideDrift { to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); } }
+  @keyframes guideDriftB { to { transform: translate(-50%, -50%) rotateX(78deg) rotateZ(-368deg); } }
+  @keyframes guideDriftC { to { transform: translate(-50%, -50%) rotateX(74deg) rotateZ(367deg); } }
+  @keyframes beaconPulse { 50% { opacity: .25; box-shadow: 0 0 4px hsl(190 90% 70% / .35), 0 0 12px hsl(190 90% 60% / .15); } }
+
+  .cyber-core-plinth {
+    @apply absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 translate-y-20;
+    transform-style: preserve-3d;
+    pointer-events: none;
+  }
+  .cyber-core-plinth i { @apply absolute left-1/2 top-1/2 border border-cyan-200/15; transform: translate(-50%, -50%) rotateX(72deg); }
+  .cyber-core-plinth i:nth-child(1) { @apply h-20 w-20; }
+  .cyber-core-plinth i:nth-child(2) { @apply h-28 w-28; border-style: dashed; animation: plinthTurn 16s linear infinite; }
+  .cyber-core-plinth i:nth-child(3) { @apply h-36 w-36; border-color: hsl(78 75% 68% / .08); animation: plinthTurn 24s linear infinite reverse; }
+  @keyframes plinthTurn { to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); } }
 
   .cyber-glass {
     @apply absolute hidden w-40 border border-cyan-200/15 bg-background/20 p-4 font-mono text-[7px] uppercase tracking-[.18em] text-cyan-100/50 backdrop-blur-sm lg:block;
@@ -495,6 +674,12 @@
     opacity: .55;
   }
 
+  .cyber-vignette {
+    @apply absolute inset-0;
+    background: radial-gradient(ellipse at center, transparent 42%, hsl(225 65% 4% / .16) 100%);
+    pointer-events: none;
+  }
+
   /* Tet / Lacquer Garden */
   .effect-scene-tet {
     background:
@@ -505,11 +690,12 @@
 
   .lacquer-glow { @apply absolute inset-0; background: radial-gradient(ellipse at 50% 110%, hsl(8 90% 45% / .18), transparent 62%); animation: lacquerPulse 6s ease-in-out infinite; }
   .lacquer-sun {
-    @apply absolute right-[11%] top-[15%] flex h-48 w-48 items-center justify-center rounded-full border border-amber-200/25 font-serif text-6xl text-amber-100/35;
+    @apply absolute right-[11%] top-[15%] flex h-48 w-48 flex-col items-center justify-center rounded-full border border-amber-200/25 font-serif text-5xl text-amber-100/70;
     background: radial-gradient(circle at 35% 30%, hsl(46 100% 82% / .32), hsl(17 95% 55% / .15) 55%, transparent 72%);
     box-shadow: 0 0 80px hsl(40 95% 58% / .12), inset 0 0 30px hsl(46 100% 80% / .12);
     animation: lunarSun 7s ease-in-out infinite;
   }
+  .lacquer-sun small { @apply mt-1 font-sans text-[9px] uppercase tracking-[.45em] text-amber-100/45; }
   .lacquer-sun::before, .lacquer-sun::after { content: ""; @apply absolute rounded-full border border-amber-200/15; }
   .lacquer-sun::before { @apply -inset-5; }
   .lacquer-sun::after { @apply -inset-10; }
@@ -517,19 +703,44 @@
   .lacquer-mountain-back { @apply h-[38%]; background: hsl(5 50% 18% / .18); clip-path: polygon(0 72%, 11% 42%, 19% 67%, 31% 29%, 43% 70%, 56% 38%, 67% 68%, 78% 25%, 91% 62%, 100% 40%, 100% 100%, 0 100%); animation: mountainDrift 12s ease-in-out infinite alternate; }
   .lacquer-mountain-front { @apply h-[27%]; background: linear-gradient(to top, hsl(4 55% 12% / .2), hsl(8 70% 28% / .1)); clip-path: polygon(0 68%, 14% 34%, 27% 72%, 40% 43%, 52% 70%, 68% 30%, 82% 67%, 100% 39%, 100% 100%, 0 100%); animation: mountainDrift 9s ease-in-out infinite alternate-reverse; }
 
-  .blossom-branch { @apply absolute z-10 h-2 w-[35%] rounded-full; background: linear-gradient(90deg, hsl(25 50% 18% / .75), hsl(30 50% 32% / .35)); transform-origin: left; }
-  .blossom-branch-left { @apply -left-12 top-[23%]; transform: rotate(18deg); }
-  .blossom-branch-right { @apply -right-20 top-[38%]; transform: rotate(198deg); }
+  .tet-courtyard {
+    @apply absolute inset-x-0 bottom-0 h-[34%];
+    background: linear-gradient(to top, hsl(18 42% 12% / .34), hsl(24 38% 24% / .14) 58%, transparent);
+    clip-path: polygon(0 35%, 50% 0, 100% 35%, 100% 100%, 0 100%);
+  }
+  .tet-courtyard::before { content: ""; @apply absolute inset-0; background: repeating-linear-gradient(100deg, transparent 0 74px, hsl(42 65% 65% / .045) 75px 76px); }
+
+  .tet-gate { @apply absolute left-1/2 top-[24%] z-[8] h-72 w-[24rem] -translate-x-1/2; filter: drop-shadow(0 16px 24px hsl(0 65% 8% / .22)); }
+  .tet-gate-roof { @apply absolute left-1/2 top-0 flex h-16 w-[27rem] -translate-x-1/2 items-end justify-center overflow-hidden; background: linear-gradient(155deg, hsl(8 65% 20% / .88), hsl(2 75% 10% / .92)); clip-path: polygon(7% 58%, 17% 22%, 50% 3%, 83% 22%, 93% 58%, 100% 82%, 82% 72%, 50% 64%, 18% 72%, 0 82%); }
+  .tet-gate-roof::after { content: ""; @apply absolute inset-x-8 bottom-2 h-px bg-amber-200/35; box-shadow: 0 -6px 0 hsl(42 75% 60% / .08); }
+  .tet-gate-roof i { @apply mb-3 h-9 w-8 rounded-t-full border-x border-amber-100/10; background: linear-gradient(to bottom, hsl(8 75% 28% / .42), transparent); }
+  .tet-gate-beam { @apply absolute left-1/2 top-14 flex h-16 w-72 -translate-x-1/2 flex-col items-center justify-center border border-amber-200/35 bg-red-950/80 font-serif text-2xl text-amber-100/85; box-shadow: inset 0 0 22px hsl(38 90% 58% / .1); }
+  .tet-gate-beam small { @apply mt-1 font-sans text-[7px] uppercase tracking-[.45em] text-amber-100/40; }
+  .tet-gate-pillar { @apply absolute top-[7rem] flex h-44 w-12 items-center justify-center border border-amber-200/25 bg-gradient-to-b from-red-800/85 to-red-950/90 font-serif text-[9px] tracking-[.18em] text-amber-100/75; writing-mode: vertical-rl; box-shadow: inset 0 0 14px hsl(40 90% 60% / .08); }
+  .tet-gate-pillar-left { @apply left-10; }
+  .tet-gate-pillar-right { @apply right-10; }
+  .tet-gate-door { @apply absolute top-[7rem] h-44 w-[8.5rem] border border-amber-200/15; background: repeating-linear-gradient(90deg, hsl(5 62% 16% / .78) 0 14px, hsl(12 52% 23% / .72) 14px 16px); }
+  .tet-gate-door::after { content: ""; @apply absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border border-amber-100/40 bg-amber-500/30; }
+  .tet-gate-door-left { @apply left-[3.55rem]; }
+  .tet-gate-door-left::after { @apply right-3; }
+  .tet-gate-door-right { @apply right-[3.55rem]; }
+  .tet-gate-door-right::after { @apply left-3; }
+
+  .blossom-branch { @apply absolute z-10 h-3 w-[42%] rounded-full; background: linear-gradient(90deg, hsl(25 50% 15% / .88), hsl(30 50% 32% / .45)); transform-origin: left; box-shadow: inset 0 -2px 2px hsl(20 60% 8% / .24); }
+  .blossom-branch-left { @apply -left-16 top-[19%]; transform: rotate(16deg); }
+  .blossom-branch-right { @apply -right-24 top-[31%]; transform: rotate(196deg); }
   .blossom-branch::after { content: ""; @apply absolute left-[22%] top-0 h-1 w-[70%] rounded-full; background: hsl(28 50% 25% / .5); transform: rotate(-22deg); transform-origin: left; }
+  .blossom-branch::before { content: ""; @apply absolute left-[44%] top-0 h-1.5 w-[44%] rounded-full; background: hsl(26 48% 20% / .72); transform: rotate(31deg); transform-origin: left; }
   .blossom-branch i {
     --x: calc(var(--i) * 11%);
     @apply absolute h-5 w-5 rounded-full;
     left: var(--x); top: calc((var(--i) % 3) * 13px - 18px);
-    background: radial-gradient(circle, #fff5b8 0 15%, #ffc35c 17% 35%, #ef6b64 38% 58%, transparent 61%);
     filter: drop-shadow(0 0 7px hsl(42 100% 65% / .35));
     animation: blossomBreath 3s ease-in-out infinite;
     animation-delay: calc(var(--i) * -.28s);
   }
+  .blossom-mai i { background: radial-gradient(circle, #fff6b6 0 13%, #ffc83d 15% 38%, #f3a81a 40% 58%, transparent 61%); }
+  .blossom-dao i { background: radial-gradient(circle, #fff0ce 0 12%, #ff9bb4 14% 38%, #df537d 40% 58%, transparent 61%); filter: drop-shadow(0 0 7px hsl(340 90% 68% / .35)); }
 
   .lunar-lantern { @apply absolute top-0 z-20 flex w-20 flex-col items-center pt-24; animation: lanternSway 5s ease-in-out infinite; transform-origin: top; }
   .lunar-lantern::before { content: ""; @apply absolute top-0 h-24 w-px bg-gradient-to-b from-amber-200/70 to-red-500/40; }
@@ -539,6 +750,43 @@
   .lunar-lantern-a { @apply left-[12%]; }
   .lunar-lantern-b { @apply left-[25%] scale-75; animation-delay: -2s; }
   .lunar-seal { @apply absolute bottom-[12%] right-[8%] z-20 flex h-16 w-16 items-center justify-center border border-red-300/40 text-center font-mono text-[9px] tracking-[.2em] text-red-200/60; transform: rotate(-6deg); box-shadow: inset 0 0 18px hsl(0 80% 55% / .12); }
+
+  .tet-neu { @apply absolute bottom-[10%] left-[8%] z-10 hidden h-[58%] w-1 rounded-full bg-gradient-to-t from-amber-950/70 via-amber-700/60 to-amber-300/55 lg:block; transform: rotate(2deg); transform-origin: bottom; }
+  .tet-neu::before { content: ""; @apply absolute -left-12 top-6 h-px w-24 bg-amber-300/35; }
+  .tet-neu i, .tet-neu span, .tet-neu b { @apply absolute top-5 h-3 w-3 rounded-full border border-amber-200/35; box-shadow: 0 0 12px hsl(40 95% 58% / .24); }
+  .tet-neu i { @apply -left-10; }
+  .tet-neu span { @apply -left-1; }
+  .tet-neu b { @apply left-8; }
+
+  .tet-kumquat { @apply absolute bottom-[8%] right-[11%] z-10 h-44 w-36 rounded-[55%] border border-lime-200/10; background: radial-gradient(ellipse, hsl(105 52% 30% / .44), hsl(115 48% 15% / .16) 65%, transparent 68%); filter: drop-shadow(0 10px 16px hsl(110 50% 6% / .2)); }
+  .tet-kumquat::after { content: ""; @apply absolute bottom-[-18px] left-1/2 h-7 w-16 -translate-x-1/2 rounded-b-lg border border-red-300/25 bg-red-900/30; }
+  .tet-kumquat i { --x: calc((var(--i) * 37) % 88); --y: calc((var(--i) * 53) % 78); @apply absolute h-3 w-3 rounded-full border border-amber-100/45 bg-orange-400/80; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); box-shadow: 0 0 9px hsl(35 100% 60% / .42); animation: fruitGlow 3s ease-in-out infinite; animation-delay: calc(var(--i) * -.25s); }
+
+  .tet-tea-table { @apply absolute bottom-[7%] left-1/2 z-20 hidden h-20 w-56 -translate-x-1/2 rounded-[50%] border border-amber-200/25 bg-red-950/55 md:block; box-shadow: inset 0 0 24px hsl(40 80% 55% / .08), 0 14px 30px hsl(0 70% 8% / .22); }
+  .tet-tea-table::after { content: ""; @apply absolute left-1/2 top-full h-14 w-2 -translate-x-1/2 bg-red-950/45; }
+  .tet-teapot { @apply absolute left-1/2 top-4 h-9 w-12 -translate-x-1/2 rounded-[45%] border border-cyan-100/25 bg-cyan-950/35; }
+  .tet-teapot::before { content: ""; @apply absolute -left-4 top-2 h-5 w-5 rounded-full border border-cyan-100/25; }
+  .tet-teapot::after { content: ""; @apply absolute -right-4 top-2 h-2 w-5 rotate-[-18deg] border-t border-cyan-100/30; }
+  .tet-teapot i { @apply absolute left-1/2 -top-2 h-3 w-5 -translate-x-1/2 rounded-t-full border border-cyan-100/25; }
+  .tet-cup { @apply absolute top-11 h-4 w-5 rounded-b-md border border-cyan-100/20 bg-cyan-950/25; }
+  .tet-cup-a { @apply left-[36%]; }
+  .tet-cup-b { @apply right-[36%]; }
+  .tet-fruit-tray { @apply absolute right-5 top-7 flex h-7 w-14 items-center justify-around rounded-[50%] border-b border-amber-200/25; }
+  .tet-fruit-tray i { @apply h-3 w-3 rounded-full bg-orange-400/80; box-shadow: 0 0 5px hsl(38 90% 60% / .2); }
+  .tet-fruit-tray i:nth-child(2) { @apply bg-lime-500/75; }
+  .tet-fruit-tray i:nth-child(3) { @apply bg-red-500/75; }
+  .tet-fruit-tray i:nth-child(4) { @apply bg-yellow-300/75; }
+  .tet-fruit-tray i:nth-child(5) { @apply bg-emerald-500/75; }
+  .tet-gifts { @apply absolute bottom-[7%] left-[18%] z-20 hidden items-end gap-3 md:flex; }
+  .banh-chung { @apply relative h-16 w-16 rotate-[-5deg] border border-lime-200/30; background: linear-gradient(135deg, hsl(115 42% 30% / .75), hsl(92 48% 15% / .82)); box-shadow: inset 0 0 14px hsl(80 70% 70% / .1); }
+  .banh-chung::before, .banh-chung::after { content: ""; @apply absolute bg-amber-100/25; }
+  .banh-chung::before { @apply left-1/2 top-0 h-full w-px; }
+  .banh-chung::after { @apply left-0 top-1/2 h-px w-full; }
+  .banh-tet { @apply relative h-20 w-10 rotate-[7deg] rounded-[45%] border border-lime-200/25; background: repeating-linear-gradient(90deg, hsl(108 42% 25% / .78) 0 8px, hsl(88 45% 16% / .82) 8px 10px); }
+  .banh-tet::before, .banh-tet::after { content: ""; @apply absolute left-0 h-px w-full bg-amber-100/30; }
+  .banh-tet::before { @apply top-5; }
+  .banh-tet::after { @apply bottom-5; }
+  .li-xi { @apply mb-1 flex h-14 w-9 rotate-[-8deg] items-center justify-center border border-amber-200/35 bg-red-700/55 font-serif text-xs text-amber-100/80; box-shadow: 0 0 18px hsl(20 90% 55% / .14); }
 
   /* Christmas / Nordic Night */
   .effect-scene-christmas {
@@ -629,6 +877,19 @@
   @keyframes lightTwinkle { 50% { opacity: .3; transform: scale(.65); } }
   @keyframes cyberBreath { 50% { transform: translate(-50%, -50%) scale(1.12) rotate(12deg); opacity: .65; } }
   @keyframes cyberAtmosphere { 50% { opacity: .65; filter: blur(52px); } }
+  @keyframes cyberAurora {
+    from { transform: translateX(-3%) skewY(-2deg) scaleY(.82); opacity: .45; }
+    to { transform: translateX(4%) skewY(2deg) scaleY(1.18); opacity: .9; }
+  }
+  @keyframes depthLinesShift {
+    from { transform: translateX(-1.5%); opacity: .55; }
+    to { transform: translateX(1.5%); opacity: .9; }
+  }
+  @keyframes signalSweep {
+    0% { transform: translate3d(-90px, 18px, 0); opacity: 0; }
+    18%, 48% { opacity: .7; }
+    72%, 100% { transform: translate3d(170px, -24px, 0); opacity: 0; }
+  }
   @keyframes gridTravel { to { background-position: 0 56px, 56px 0; } }
   @keyframes coreFloat {
     0%, 100% { margin-top: 0; }
@@ -640,18 +901,30 @@
   @keyframes portalSpin {
     to { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); }
   }
-  @keyframes portalSpinReverse {
-    to { transform: translate(-50%, -50%) rotateY(70deg) rotateZ(-360deg); }
+  @keyframes satelliteOrbitA {
+    from { transform: rotateX(66deg) rotateY(-8deg) rotateZ(0deg); }
+    to { transform: rotateX(66deg) rotateY(-8deg) rotateZ(360deg); }
   }
-  @keyframes orbitDriftA {
-    to { transform: translate(-50%, -50%) rotateX(64deg) rotateY(-10deg) rotateZ(360deg); }
+  @keyframes satelliteOrbitB {
+    from { transform: rotateY(68deg) rotateX(18deg) rotateZ(0deg); }
+    to { transform: rotateY(68deg) rotateX(18deg) rotateZ(360deg); }
   }
-  @keyframes orbitDriftB {
-    to { transform: translate(-50%, -50%) rotateY(68deg) rotateX(12deg) rotateZ(-360deg); }
+  @keyframes satelliteOrbitC {
+    from { transform: rotateX(48deg) rotateY(48deg) rotateZ(0deg); }
+    to { transform: rotateX(48deg) rotateY(48deg) rotateZ(360deg); }
+  }
+  @keyframes satelliteOrbitD {
+    from { transform: rotateX(78deg) rotateY(-38deg) rotateZ(0deg); }
+    to { transform: rotateX(78deg) rotateY(-38deg) rotateZ(360deg); }
+  }
+  @keyframes satellitePulse {
+    0%, 100% { transform: translate3d(var(--satellite-distance), 0, 0) rotateX(28deg) rotateY(42deg) rotateZ(8deg) scale(.82); opacity: .62; }
+    50% { transform: translate3d(var(--satellite-distance), 0, 0) rotateX(208deg) rotateY(222deg) rotateZ(98deg) scale(1.22); opacity: 1; }
   }
   @keyframes hudScan { to { background-position: 24px 0; } }
   @keyframes lacquerPulse { 50% { opacity: .6; transform: scale(1.04); } }
   @keyframes lunarSun { 50% { transform: translateY(-8px) scale(1.04); filter: brightness(1.15); } }
+  @keyframes fruitGlow { 50% { transform: scale(.72); opacity: .58; } }
   @keyframes mountainDrift { to { transform: scaleX(1.035) translateX(8px); } }
   @keyframes blossomBreath { 50% { transform: scale(1.25) rotate(18deg); filter: drop-shadow(0 0 12px hsl(42 100% 68% / .6)); } }
   @keyframes lanternSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
@@ -667,6 +940,10 @@
     }
     .cyber-cursor-halo { @apply hidden; }
     .cyber-grid { opacity: .65; }
+    .tet-gate { top: 31%; transform: translateX(-50%) scale(.72); }
+    .lacquer-sun { @apply right-[4%] top-[15%] h-32 w-32 text-3xl; }
+    .blossom-branch { @apply w-[55%]; }
+    .tet-kumquat { @apply right-[4%] h-32 w-24; opacity: .75; }
   }
 
   @media (prefers-reduced-motion: reduce) {
