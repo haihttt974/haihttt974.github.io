@@ -26,7 +26,7 @@ export const Header = () => {
         <nav className="flex h-[72px] items-center justify-between">
           <Link to="/" className="group flex items-center gap-3">
             <span className="brand-logo flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-primary/35 bg-primary/[.07] p-1 shadow-sm transition-all duration-300 group-hover:border-primary/70 group-hover:bg-primary/10">
-              <img src="/logo.png" alt="" className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110" />
+              <img src="/logo-rm-khongvien.png" alt="" className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110" />
             </span>
             <span>
               <span className="block font-mono text-sm font-semibold leading-none">HAI IT</span>
