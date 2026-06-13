@@ -1,4 +1,65 @@
-import { Fragment, ReactNode } from "react";
+import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
+import { Check, Copy } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const copyToClipboard = async (text: string) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+};
+
+const CodeBlock = ({ code, language }: { code: string; language: string }) => {
+  const { language: currentLanguage } = useLanguage();
+  const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<number>();
+  const copyLabel = currentLanguage === "vi" ? "Sao chép mã" : "Copy code";
+  const copiedLabel = currentLanguage === "vi" ? "Đã sao chép" : "Copied";
+
+  useEffect(() => () => window.clearTimeout(resetTimer.current), []);
+
+  const handleCopy = async () => {
+    try {
+      await copyToClipboard(code);
+      setCopied(true);
+      window.clearTimeout(resetTimer.current);
+      resetTimer.current = window.setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Unable to copy code:", error);
+    }
+  };
+
+  return (
+    <div className="my-8 overflow-hidden rounded-xl border border-border/80 bg-background/70">
+      <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-2.5 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground">
+        <span>{language || "code"}</span>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-muted-foreground/70 sm:inline">haiit.dev</span>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border/80 bg-background/80 text-foreground transition-colors hover:border-primary/60 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label={copied ? copiedLabel : copyLabel}
+            title={copied ? copiedLabel : copyLabel}
+          >
+            {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
+            <span className="sr-only" aria-live="polite">{copied ? copiedLabel : copyLabel}</span>
+          </button>
+        </div>
+      </div>
+      <pre className="overflow-x-auto p-5 text-sm leading-7"><code>{code}</code></pre>
+    </div>
+  );
+};
 
 const renderInline = (text: string): ReactNode[] =>
   text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).filter(Boolean).map((part, index) => {
@@ -28,14 +89,7 @@ export const ArticleContent = ({ content }: { content: string }) => {
         code.push(lines[index]);
         index += 1;
       }
-      blocks.push(
-        <div key={`code-${index}`} className="my-8 overflow-hidden rounded-xl border border-border/80 bg-background/70">
-          <div className="flex items-center justify-between border-b border-border/70 px-4 py-2.5 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground">
-            <span>{language || "code"}</span><span>haiit.dev</span>
-          </div>
-          <pre className="overflow-x-auto p-5 text-sm leading-7"><code>{code.join("\n")}</code></pre>
-        </div>,
-      );
+      blocks.push(<CodeBlock key={`code-${index}`} language={language} code={code.join("\n")} />);
       index += 1;
       continue;
     }
