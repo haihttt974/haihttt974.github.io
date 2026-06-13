@@ -18,11 +18,17 @@ const palettes: CubePalette[] = [
 
 const makePanel = (size: number, color: number) => {
   const geometry = new THREE.PlaneGeometry(size * 0.48, size * 0.48);
-  const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+  const material = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: 0.28,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
   const panel = new THREE.Mesh(geometry, material);
   const panelEdges = new THREE.LineSegments(
     new THREE.EdgesGeometry(geometry),
-    new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.9 }),
+    new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.5 }),
   );
   panel.add(panelEdges);
   return panel;
@@ -39,19 +45,22 @@ const makeCube = (size: number, palette: CubePalette, detailed = false) => {
     clearcoat: 1,
     clearcoatRoughness: 0.12,
     emissive: new THREE.Color(index === 2 ? palette.accent : color).multiplyScalar(index === 2 ? 0.14 : 0.07),
+    transparent: true,
+    opacity: 0.38,
+    depthWrite: false,
   }));
   const mesh = new THREE.Mesh(geometry, materials);
   const edges = new THREE.LineSegments(
     new THREE.EdgesGeometry(geometry),
-    new THREE.LineBasicMaterial({ color: palette.edge, transparent: true, opacity: 0.96 }),
+    new THREE.LineBasicMaterial({ color: palette.edge, transparent: true, opacity: 0.58 }),
   );
   const frame = new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.BoxGeometry(size * 1.13, size * 1.13, size * 1.13)),
-    new THREE.LineBasicMaterial({ color: palette.accent, transparent: true, opacity: detailed ? 0.48 : 0.24 }),
+    new THREE.LineBasicMaterial({ color: palette.accent, transparent: true, opacity: detailed ? 0.3 : 0.16 }),
   );
   const energy = new THREE.Mesh(
     new THREE.OctahedronGeometry(size * (detailed ? 0.24 : 0.19), 0),
-    new THREE.MeshBasicMaterial({ color: palette.accent, transparent: true, opacity: 0.88 }),
+    new THREE.MeshBasicMaterial({ color: palette.accent, transparent: true, opacity: 0.48, depthWrite: false }),
   );
   energy.name = "cube-energy";
   frame.name = "cube-frame";
