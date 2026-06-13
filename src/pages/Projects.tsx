@@ -4,9 +4,12 @@ import { projects, aboutData } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { m, useReducedMotion } from "framer-motion";
+import { staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
 
 const Projects = () => {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
@@ -32,12 +35,18 @@ const Projects = () => {
             <Star className="h-5 w-5 text-yellow-500" />
             {t("project.featured")}
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {projects.filter(p => p.featured).map((project, index) => (
-              <article
+          <m.div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+            variants={reduceMotion ? undefined : staggerContainer}
+            initial={reduceMotion ? false : "hidden"}
+            whileInView="visible"
+            viewport={viewportOnce}
+          >
+            {projects.filter(p => p.featured).map((project) => (
+              <m.article
                 key={project.id}
-                className="group card-gradient border border-border/50 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 animate-slide-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                variants={reduceMotion ? undefined : staggerItem}
+                className="group card-gradient border border-border/50 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300"
               >
                 {/* Project Visual */}
                 <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-b border-border/50 relative overflow-hidden">
@@ -108,9 +117,9 @@ const Projects = () => {
                     )}
                   </div>
                 </div>
-              </article>
+              </m.article>
             ))}
-          </div>
+          </m.div>
         </div>
 
         {/* All Projects Grid */}
@@ -119,12 +128,18 @@ const Projects = () => {
             <GitFork className="h-5 w-5 text-primary" />
             {t("project.all")}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.filter(p => !p.featured).map((project, index) => (
-              <article
+          <m.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={reduceMotion ? undefined : staggerContainer}
+            initial={reduceMotion ? false : "hidden"}
+            whileInView="visible"
+            viewport={viewportOnce}
+          >
+            {projects.filter(p => !p.featured).map((project) => (
+              <m.article
                 key={project.id}
-                className="group card-gradient border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all duration-300 animate-slide-up"
-                style={{ animationDelay: `${index * 0.05}s` }}
+                variants={reduceMotion ? undefined : staggerItem}
+                className="group card-gradient border border-border/50 rounded-xl p-6 hover:border-primary/50 transition-all duration-300"
               >
                 <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
                   {project.title}
@@ -167,9 +182,9 @@ const Projects = () => {
                     </Button>
                   )}
                 </div>
-              </article>
+              </m.article>
             ))}
-          </div>
+          </m.div>
         </div>
       </div>
     </Layout>

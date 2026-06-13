@@ -4,6 +4,8 @@ import { blogPosts, categories, localizeBlogPost } from "@/data/blogData";
 import { useEffect, useState } from "react";
 import { fetchAllViews } from "@/lib/umamiViews";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { m, useReducedMotion } from "framer-motion";
+import { revealSection, staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
 
 const featuredPosts = blogPosts
   .filter((post) => post.featured)
@@ -12,6 +14,7 @@ const featuredPosts = blogPosts
 
 export const FeaturedPosts = () => {
   const { t, locale, language } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const [viewsMap, setViewsMap] = useState<Record<string, number>>({});
   const categoryName = (id: string) => categories.some((category) => category.id === id) ? t(`category.${id}`) : id;
 
@@ -33,7 +36,13 @@ export const FeaturedPosts = () => {
   }, []);
 
   return (
-    <section className="border-b border-border/70 py-20 md:py-28">
+    <m.section
+      className="border-b border-border/70 py-20 md:py-28"
+      variants={reduceMotion ? undefined : revealSection}
+      initial={reduceMotion ? false : "hidden"}
+      whileInView="visible"
+      viewport={viewportOnce}
+    >
       <div className="container mx-auto px-4">
         <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
@@ -43,11 +52,11 @@ export const FeaturedPosts = () => {
           <Link to="/blog" className="inline-flex items-center gap-2 font-mono text-xs text-primary">{t("home.notes.all")} <ArrowRight className="h-4 w-4" /></Link>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
+        <m.div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]" variants={reduceMotion ? undefined : staggerContainer}>
           {featuredPosts.map((sourcePost, index) => {
             const post = localizeBlogPost(sourcePost, language);
             return (
-            <article key={post.id} className={`group journal-card p-6 md:p-8 ${index === 0 ? "lg:row-span-2" : ""}`}>
+            <m.article key={post.id} variants={reduceMotion ? undefined : staggerItem} className={`group journal-card p-6 md:p-8 ${index === 0 ? "lg:row-span-2" : ""}`}>
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-5 font-mono text-[9px] uppercase tracking-[.16em] text-muted-foreground">
                 <span className="text-primary">Note / 0{index + 1}</span>
                 <span>{categoryName(post.category)}</span>
@@ -62,10 +71,10 @@ export const FeaturedPosts = () => {
                 <span className="flex items-center gap-1.5"><Eye className="h-3 w-3" />{(viewsMap[post.id] ?? 0).toLocaleString("vi-VN")}</span>
                 <Link to={`/blog/${post.id}`} className="ml-auto flex items-center gap-1.5 text-primary">{t("home.notes.read")} <ArrowRight className="h-3 w-3" /></Link>
               </div>
-            </article>
+            </m.article>
           )})}
-        </div>
+        </m.div>
       </div>
-    </section>
+    </m.section>
   );
 };

@@ -908,6 +908,7 @@ export const aboutData = {
   title: "Information Systems Developer",
   subtitle: "Database • Server-side • DevOps",
   avatar: "https://avatars.githubusercontent.com/u/202379592?v=4",
+  address: "Đông Hưng Thuận, Ho Chi Minh City",
   bio: `Tôi là một chuyên gia về Hệ thống thông tin (Information Systems), tập trung vào việc xây dựng các giải pháp có khả năng mở rộng (Scalable) và tin cậy (Reliable).
 
 Chuyên môn của tôi bao gồm: Cơ sở dữ liệu, Server-side Development và DevOps. Tôi đam mê việc tối ưu hóa hiệu suất hệ thống và xây dựng các kiến trúc phần mềm bền vững.
@@ -944,7 +945,8 @@ Ngoài lập trình, tôi còn là gia sư Toán, chia sẻ kiến thức và gi
     instagram: "https://instagram.com/haiit.974",
     tiktok: "https://tiktok.com/@haiit.974",
     twitter: "https://x.com/haiit974",
-    email: "leduyhai090704@gmail.com",
+    email: "ld.hai.insys@gmail.com",
+    secondaryEmail: "leduyhai090704@gmail.com",
   },
 
   socialLinks: [
@@ -954,7 +956,8 @@ Ngoài lập trình, tôi còn là gia sư Toán, chia sẻ kiến thức và gi
     { name: "Instagram", url: "https://instagram.com/haiit.974", icon: "Instagram" },
     { name: "TikTok", url: "https://tiktok.com/@haiit.974", icon: "Music2" },
     { name: "X (Twitter)", url: "https://x.com/haiit974", icon: "Twitter" },
-    { name: "Email", url: "mailto:leduyhai090704@gmail.com", icon: "Mail" },
+    { name: "Primary Email", url: "mailto:ld.hai.insys@gmail.com", icon: "Mail" },
+    { name: "Secondary Email", url: "mailto:leduyhai090704@gmail.com", icon: "Mail" },
   ],
 
   experience: [

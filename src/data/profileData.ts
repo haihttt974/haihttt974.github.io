@@ -36,7 +36,7 @@ export const cvProfiles = [
 
 export const professionalExperience = [
   {
-    period: "03/2026 - Present",
+    period: "03/2026 - 06/2026",
     role: "Fullstack Developer",
     company: "Song Ân Software Solutions Co., Ltd.",
     summary: {

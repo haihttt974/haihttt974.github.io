@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { fetchAllViews } from "@/lib/umamiViews";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { m, useReducedMotion } from "framer-motion";
+import { staggerContainer, staggerItem } from "@/lib/motion";
 
 const Blog = () => {
   const { t, locale, language } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewsMap, setViewsMap] = useState<Record<string, number>>({});
@@ -112,12 +115,18 @@ const Blog = () => {
 
         {/* Posts Grid */}
         {filteredPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPosts.map((post, index) => (
-              <article
+          <m.div
+            key={`${selectedCategory}-${searchQuery}-${language}`}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={reduceMotion ? undefined : staggerContainer}
+            initial={reduceMotion ? false : "hidden"}
+            animate="visible"
+          >
+            {filteredPosts.map((post) => (
+              <m.article
                 key={post.id}
-                className="group card-gradient border border-border/50 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 animate-slide-up"
-                style={{ animationDelay: `${index * 0.05}s` }}
+                variants={reduceMotion ? undefined : staggerItem}
+                className="group card-gradient border border-border/50 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300"
               >
                 <div className="p-6">
                 <div className="flex items-center gap-4 mb-4">
@@ -170,9 +179,9 @@ const Blog = () => {
                     </Link>
                   </div>
                 </div>
-              </article>
+              </m.article>
             ))}
-          </div>
+          </m.div>
         ) : (
           <div className="text-center py-20">
             <Filter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

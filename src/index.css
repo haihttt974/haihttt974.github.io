@@ -310,41 +310,81 @@
     --hud-shift: 0px;
     --core-rx: -18deg;
     --core-ry: 35deg;
-    perspective: 1000px;
+    --scene-x: 0px;
+    --scene-y: 0px;
+    --scene-rx: 0deg;
+    --scene-ry: 0deg;
+    --far-x: 0px;
+    --far-y: 0px;
+    --near-x: 0px;
+    --near-y: 0px;
+    --panel-x: 0px;
+    --panel-y: 0px;
+    --panel-inverse-x: 0px;
+    --panel-inverse-y: 0px;
+    perspective: 1200px;
     background:
-      radial-gradient(circle at var(--px) var(--py), hsl(78 90% 60% / .08), transparent 22rem),
-      radial-gradient(circle at 50% 45%, hsl(190 90% 50% / .1), transparent 34rem),
-      linear-gradient(180deg, hsl(225 60% 6% / .34), transparent 75%);
+      radial-gradient(circle at var(--px) var(--py), hsl(78 80% 62% / .055), transparent 20rem),
+      radial-gradient(circle at 50% 45%, hsl(190 80% 52% / .085), transparent 34rem),
+      linear-gradient(180deg, hsl(225 60% 6% / .3), transparent 75%);
+  }
+
+  .cyber-network { opacity: .82; }
+
+  .cyber-atmosphere {
+    @apply absolute rounded-full blur-3xl;
+    transition: transform .8s cubic-bezier(.2, .7, .2, 1);
+    animation: cyberAtmosphere 11s ease-in-out infinite alternate;
+  }
+
+  .cyber-atmosphere-a {
+    @apply -left-32 top-[12%] h-80 w-80;
+    background: hsl(190 78% 55% / .055);
+    transform: translate3d(var(--far-x), var(--far-y), 0);
+  }
+
+  .cyber-atmosphere-b {
+    @apply -right-40 bottom-[8%] h-96 w-96;
+    background: hsl(270 60% 60% / .045);
+    transform: translate3d(var(--near-x), var(--near-y), 0);
+    animation-delay: -5s;
   }
 
   .cyber-spotlight {
     @apply absolute left-1/2 top-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl;
-    background: conic-gradient(from 30deg, hsl(190 90% 55% / .09), transparent 25%, hsl(78 85% 55% / .06), transparent 60%, hsl(280 85% 62% / .08));
+    background: conic-gradient(from 30deg, hsl(190 80% 55% / .07), transparent 25%, hsl(78 70% 55% / .045), transparent 60%, hsl(280 65% 62% / .055));
     animation: cyberBreath 7s ease-in-out infinite;
   }
 
   .cyber-grid {
     @apply absolute left-1/2 w-[130%] -translate-x-1/2;
-    background-image: linear-gradient(hsl(190 90% 60% / .14) 1px, transparent 1px), linear-gradient(90deg, hsl(190 90% 60% / .14) 1px, transparent 1px);
+    background-image: linear-gradient(hsl(190 70% 60% / .105) 1px, transparent 1px), linear-gradient(90deg, hsl(190 70% 60% / .105) 1px, transparent 1px);
     background-size: 56px 56px;
     mask-image: radial-gradient(ellipse, black, transparent 70%);
     transition: transform .35s ease-out;
   }
 
   .cyber-grid-back { @apply top-[-28%] h-[65%]; transform: translateX(calc(-50% + var(--back-shift))) perspective(700px) rotateX(-63deg); }
-  .cyber-grid-floor { @apply bottom-[-34%] h-[85%]; transform: translateX(calc(-50% + var(--floor-shift))) perspective(650px) rotateX(65deg); animation: gridTravel 7s linear infinite; }
+  .cyber-grid-floor { @apply bottom-[-34%] h-[85%]; transform: translateX(calc(-50% + var(--floor-shift))) perspective(650px) rotateX(65deg); animation: gridTravel 9s linear infinite; }
+
+  .cyber-observatory {
+    @apply absolute left-1/2 top-[43%] h-[30rem] w-[30rem];
+    transform-style: preserve-3d;
+    transform: translate3d(calc(-50% + var(--scene-x)), calc(-50% + var(--scene-y)), 0) rotateX(var(--scene-rx)) rotateY(var(--scene-ry));
+    transition: transform .3s ease-out;
+  }
 
   .cyber-core {
-    @apply absolute left-1/2 top-[43%] h-28 w-28;
+    @apply absolute left-1/2 top-1/2 h-28 w-28;
     transform-style: preserve-3d;
     transform: translate(-50%, -50%) rotateX(var(--core-rx)) rotateY(var(--core-ry));
     animation: coreFloat 6s ease-in-out infinite;
   }
 
   .cyber-core-face {
-    @apply absolute inset-0 border border-cyan-300/45;
-    background: linear-gradient(135deg, hsl(190 90% 58% / .13), hsl(78 90% 58% / .04));
-    box-shadow: inset 0 0 35px hsl(190 90% 55% / .12), 0 0 18px hsl(190 90% 55% / .08);
+    @apply absolute inset-0 border border-cyan-300/35;
+    background: linear-gradient(135deg, hsl(190 80% 58% / .105), hsl(78 70% 58% / .025));
+    box-shadow: inset 0 0 35px hsl(190 75% 55% / .09), 0 0 18px hsl(190 75% 55% / .055);
     backdrop-filter: blur(3px);
   }
 
@@ -355,9 +395,17 @@
   .cyber-core-top { transform: rotateX(90deg) translateZ(56px); }
   .cyber-core-bottom { transform: rotateX(-90deg) translateZ(56px); }
 
+  .cyber-core-inner {
+    @apply absolute left-1/2 top-1/2 h-12 w-12 rounded-lg border border-lime-200/25;
+    background: radial-gradient(circle at 35% 30%, hsl(78 80% 70% / .22), hsl(190 75% 55% / .08) 55%, transparent 72%);
+    box-shadow: 0 0 32px hsl(190 75% 55% / .11);
+    transform: translate3d(-50%, -50%, 0);
+    animation: coreInner 4s ease-in-out infinite;
+  }
+
   .cyber-portal {
-    @apply absolute left-1/2 top-[43%] rounded-full border border-cyan-300/25;
-    box-shadow: 0 0 35px hsl(190 90% 55% / .1), inset 0 0 35px hsl(190 90% 55% / .08);
+    @apply absolute left-1/2 top-1/2 rounded-full border border-cyan-300/20;
+    box-shadow: 0 0 35px hsl(190 75% 55% / .07), inset 0 0 35px hsl(190 75% 55% / .055);
   }
 
   .cyber-portal::before, .cyber-portal::after { content: ""; @apply absolute rounded-full border border-primary/20; }
@@ -365,6 +413,53 @@
   .cyber-portal::after { @apply inset-10; }
   .cyber-portal-a { @apply h-72 w-72; transform: translate(-50%, -50%) rotateX(70deg); animation: portalSpin 12s linear infinite; }
   .cyber-portal-b { @apply h-[28rem] w-[28rem]; transform: translate(-50%, -50%) rotateY(70deg); animation: portalSpinReverse 17s linear infinite; }
+
+  .cyber-orbit {
+    @apply absolute left-1/2 top-1/2 rounded-full border border-cyan-200/20;
+    transform-style: preserve-3d;
+  }
+
+  .cyber-orbit-a {
+    @apply h-80 w-80;
+    transform: translate(-50%, -50%) rotateX(64deg) rotateY(-10deg);
+    animation: orbitDriftA 15s linear infinite;
+  }
+
+  .cyber-orbit-b {
+    @apply h-[24rem] w-[24rem];
+    transform: translate(-50%, -50%) rotateY(68deg) rotateX(12deg);
+    animation: orbitDriftB 21s linear infinite;
+  }
+
+  .cyber-orbit i {
+    @apply absolute left-1/2 top-1/2 h-2 w-2 rounded-full border border-cyan-100/40 bg-cyan-200/20;
+    box-shadow: 0 0 14px hsl(190 80% 65% / .2);
+  }
+
+  .cyber-orbit-a i:nth-child(1) { transform: rotate(15deg) translateX(160px); }
+  .cyber-orbit-a i:nth-child(2) { transform: rotate(142deg) translateX(160px) scale(.7); }
+  .cyber-orbit-a i:nth-child(3) { transform: rotate(266deg) translateX(160px) scale(.5); }
+  .cyber-orbit-b i:nth-child(1) { transform: rotate(72deg) translateX(192px) scale(.8); }
+  .cyber-orbit-b i:nth-child(2) { transform: rotate(232deg) translateX(192px) scale(.55); }
+
+  .cyber-glass {
+    @apply absolute hidden w-40 border border-cyan-200/15 bg-background/20 p-4 font-mono text-[7px] uppercase tracking-[.18em] text-cyan-100/50 backdrop-blur-sm lg:block;
+    box-shadow: inset 0 0 24px hsl(190 70% 55% / .025);
+    transition: transform .45s cubic-bezier(.2, .7, .2, 1);
+  }
+
+  .cyber-glass-a {
+    @apply left-[16%] top-[22%];
+    transform: perspective(650px) rotateY(14deg) translate3d(var(--panel-x), var(--panel-y), 0);
+  }
+
+  .cyber-glass-b {
+    @apply bottom-[18%] right-[15%] text-right;
+    transform: perspective(650px) rotateY(-14deg) translate3d(var(--panel-inverse-x), var(--panel-inverse-y), 0);
+  }
+
+  .cyber-glass b { @apply mt-2 block text-sm font-normal text-primary/55; }
+  .cyber-glass i { @apply mt-3 block h-7 border-l border-t border-cyan-200/15; background: repeating-linear-gradient(90deg, transparent 0 9px, hsl(190 70% 60% / .12) 9px 10px); }
 
   .cyber-hud {
     @apply absolute top-[36%] hidden w-36 border-y border-cyan-300/20 py-3 font-mono text-[8px] uppercase tracking-[.18em] text-cyan-200/60 lg:block;
@@ -374,6 +469,31 @@
   .cyber-hud-right { @apply right-[8%] text-right; }
   .cyber-hud b { @apply mt-2 block text-lg font-normal text-primary/70; }
   .cyber-hud i { @apply mt-3 block h-px w-full; background: repeating-linear-gradient(90deg, hsl(190 90% 60% / .4) 0 8px, transparent 8px 12px); animation: hudScan 2s linear infinite; }
+
+  .cyber-cursor-halo {
+    @apply absolute h-40 w-40 rounded-full border border-cyan-200/10;
+    left: var(--px);
+    top: var(--py);
+    background: radial-gradient(circle, transparent 35%, hsl(190 75% 60% / .025) 70%, transparent 72%);
+    box-shadow: inset 0 0 28px hsl(190 70% 60% / .035);
+    transform: translate(-50%, -50%);
+    transition: width .35s ease, height .35s ease, border-color .35s ease;
+  }
+
+  .cyber-cursor-halo::before, .cyber-cursor-halo::after {
+    content: "";
+    @apply absolute left-1/2 top-1/2 bg-cyan-100/15;
+    transform: translate(-50%, -50%);
+  }
+  .cyber-cursor-halo::before { @apply h-px w-6; }
+  .cyber-cursor-halo::after { @apply h-6 w-px; }
+
+  .cyber-scanlines {
+    @apply absolute inset-0;
+    background: repeating-linear-gradient(180deg, transparent 0 5px, hsl(190 50% 70% / .012) 5px 6px);
+    mix-blend-mode: screen;
+    opacity: .55;
+  }
 
   /* Tet / Lacquer Garden */
   .effect-scene-tet {
@@ -508,16 +628,26 @@
   @keyframes aurora { from { transform: translateX(-4%) skewY(-4deg); opacity: .5; } to { transform: translateX(5%) skewY(3deg); opacity: 1; } }
   @keyframes lightTwinkle { 50% { opacity: .3; transform: scale(.65); } }
   @keyframes cyberBreath { 50% { transform: translate(-50%, -50%) scale(1.12) rotate(12deg); opacity: .65; } }
+  @keyframes cyberAtmosphere { 50% { opacity: .65; filter: blur(52px); } }
   @keyframes gridTravel { to { background-position: 0 56px, 56px 0; } }
   @keyframes coreFloat {
     0%, 100% { margin-top: 0; }
     50% { margin-top: -18px; }
+  }
+  @keyframes coreInner {
+    50% { transform: translate3d(-50%, -50%, 18px) rotate(45deg) scale(.82); opacity: .65; }
   }
   @keyframes portalSpin {
     to { transform: translate(-50%, -50%) rotateX(70deg) rotateZ(360deg); }
   }
   @keyframes portalSpinReverse {
     to { transform: translate(-50%, -50%) rotateY(70deg) rotateZ(-360deg); }
+  }
+  @keyframes orbitDriftA {
+    to { transform: translate(-50%, -50%) rotateX(64deg) rotateY(-10deg) rotateZ(360deg); }
+  }
+  @keyframes orbitDriftB {
+    to { transform: translate(-50%, -50%) rotateY(68deg) rotateX(12deg) rotateZ(-360deg); }
   }
   @keyframes hudScan { to { background-position: 24px 0; } }
   @keyframes lacquerPulse { 50% { opacity: .6; transform: scale(1.04); } }
@@ -529,6 +659,15 @@
   @keyframes nordicAurora { from { transform: translateX(-5%) skewY(-5deg) scaleY(.8); opacity: .45; } to { transform: translateX(6%) skewY(4deg) scaleY(1.2); opacity: 1; } }
   @keyframes baubleFloat { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(12px) rotate(3deg); } }
   @keyframes festiveBulb { 50% { opacity: .28; transform: translateY(2px) scale(.7); } }
+
+  @media (max-width: 767px) {
+    .cyber-observatory {
+      top: 46%;
+      transform: translate3d(calc(-50% + var(--scene-x)), calc(-50% + var(--scene-y)), 0) rotateX(var(--scene-rx)) rotateY(var(--scene-ry)) scale(.72);
+    }
+    .cyber-cursor-halo { @apply hidden; }
+    .cyber-grid { opacity: .65; }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

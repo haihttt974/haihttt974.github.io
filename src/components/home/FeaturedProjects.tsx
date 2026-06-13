@@ -3,13 +3,22 @@ import { ArrowRight, ArrowUpRight, Github } from "lucide-react";
 import { projects } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { m, useReducedMotion } from "framer-motion";
+import { revealSection, staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
 
 export const FeaturedProjects = () => {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const featuredProjects = projects.filter((project) => project.featured).slice(0, 3);
 
   return (
-    <section className="border-b border-border/70 py-20 md:py-28">
+    <m.section
+      className="border-b border-border/70 py-20 md:py-28"
+      variants={reduceMotion ? undefined : revealSection}
+      initial={reduceMotion ? false : "hidden"}
+      whileInView="visible"
+      viewport={viewportOnce}
+    >
       <div className="container mx-auto px-4">
         <div className="mb-12 grid gap-6 md:grid-cols-[1fr_.7fr] md:items-end">
           <div>
@@ -22,9 +31,9 @@ export const FeaturedProjects = () => {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <m.div className="space-y-4" variants={reduceMotion ? undefined : staggerContainer}>
           {featuredProjects.map((project, index) => (
-            <article key={project.id} className="group journal-card grid gap-0 transition-transform duration-300 hover:-translate-y-1 md:grid-cols-[110px_1fr_1fr_auto]">
+            <m.article key={project.id} variants={reduceMotion ? undefined : staggerItem} className="group journal-card grid gap-0 transition-transform duration-300 hover:-translate-y-1 md:grid-cols-[110px_1fr_1fr_auto]">
               <div className="flex items-center border-b border-border/70 p-5 font-mono text-4xl text-primary/70 md:border-b-0 md:border-r">0{index + 1}</div>
               <div className="border-b border-border/70 p-5 md:border-b-0 md:border-r md:p-7">
                 <p className="mb-2 font-mono text-[9px] uppercase tracking-[.18em] text-muted-foreground">{t("home.work.case")} / {project.id}</p>
@@ -39,10 +48,10 @@ export const FeaturedProjects = () => {
                 {project.github && <a href={project.github} target="_blank" rel="noreferrer" aria-label="Source code" className="rounded-lg border border-border p-3 text-muted-foreground transition-colors hover:border-primary hover:text-primary"><Github className="h-4 w-4" /></a>}
                 {project.demo && <a href={project.demo} target="_blank" rel="noreferrer" aria-label="Live demo" className="rounded-lg border border-border p-3 text-muted-foreground transition-colors hover:border-primary hover:text-primary"><ArrowUpRight className="h-4 w-4" /></a>}
               </div>
-            </article>
+            </m.article>
           ))}
-        </div>
+        </m.div>
       </div>
-    </section>
+    </m.section>
   );
 };

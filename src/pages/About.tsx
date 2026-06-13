@@ -25,9 +25,11 @@ const About = () => {
     skills: "Năng lực chuyên môn",
     education: "Học vấn",
     educationTitle: "Công nghệ Thông tin",
-    school: "Trường Đại học Công nghệ TP. Hồ Chí Minh (HUTECH)",
+    school: "Trường Đại học Công nghệ TP. Hồ Chí Minh",
     awards: "Danh hiệu & giải thưởng",
     certificates: "Chứng chỉ",
+    primaryEmail: "Email chính",
+    secondaryEmail: "Email phụ",
   } : {
     eyebrow: "Professional profile / 2026",
     intro: "I build fullstack products, understand data, and never ignore the business story behind each feature.",
@@ -48,6 +50,8 @@ const About = () => {
     school: "Ho Chi Minh City University of Technology (HUTECH)",
     awards: "Honors & awards",
     certificates: "Certifications",
+    primaryEmail: "Primary email",
+    secondaryEmail: "Secondary email",
   };
 
   return (
@@ -73,7 +77,7 @@ const About = () => {
                 <Button asChild variant="outline"><a href={aboutData.social.linkedin} target="_blank" rel="noreferrer">LinkedIn <ArrowUpRight className="ml-2 h-4 w-4" /></a></Button>
               </div>
               <div className="mt-10 grid border-y border-border/70 sm:grid-cols-3">
-                {[["3.39/4.00", "GPA"], ["03/2026", text.experience], ["03", text.cvLabel]].map(([value, label], index) => (
+                {[["3.44/4.00", "GPA"], ["03/2026", text.experience], ["03", text.cvLabel]].map(([value, label], index) => (
                   <div key={label} className={`py-4 ${index ? "border-t border-border/70 sm:border-l sm:border-t-0 sm:pl-5" : ""}`}>
                     <span className="font-mono text-xl font-semibold text-primary">{value}</span>
                     <span className="ml-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{label}</span>
@@ -133,9 +137,22 @@ const About = () => {
               <GraduationCap className="h-6 w-6 text-primary" />
               <h3 className="mt-5 text-xl">{text.educationTitle}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{text.school}</p>
-              <div className="mt-5 flex justify-between border-t border-border/70 pt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"><span>2022 - {text.present}</span><span className="text-primary">GPA 3.39 / 4.00</span></div>
+              <div className="mt-5 flex justify-between border-t border-border/70 pt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"><span>2022 - {text.present}</span><span className="text-primary">GPA 3.44 / 4.00</span></div>
             </div>
-            <div className="journal-card p-6"><MapPin className="h-5 w-5 text-primary" /><p className="mt-4 text-sm text-muted-foreground">Tăng Nhơn Phú, Ho Chi Minh City</p><p className="mt-2 font-mono text-xs">{aboutData.social.email}</p></div>
+            <div className="journal-card p-6">
+              <MapPin className="h-5 w-5 text-primary" />
+              <p className="mt-4 text-sm text-muted-foreground">{aboutData.address}</p>
+              <div className="mt-4 space-y-3 border-t border-border/70 pt-4 font-mono text-xs">
+                <a className="block hover:text-primary" href={`mailto:${aboutData.social.email}`}>
+                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">{text.primaryEmail}</span>
+                  {aboutData.social.email}
+                </a>
+                <a className="block hover:text-primary" href={`mailto:${aboutData.social.secondaryEmail}`}>
+                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">{text.secondaryEmail}</span>
+                  {aboutData.social.secondaryEmail}
+                </a>
+              </div>
+            </div>
           </aside>
         </div>
       </section>
