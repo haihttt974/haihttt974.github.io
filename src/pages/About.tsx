@@ -64,7 +64,7 @@ const About = () => {
               <img src={aboutData.avatar} alt={aboutData.name} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6">
-                <p className="font-mono text-[10px] uppercase tracking-[.18em] text-primary">Fullstack / Information Systems</p>
+                <p className="font-mono text-xs uppercase tracking-[.16em] text-primary">Fullstack / Information Systems</p>
                 <h1 className="mt-2 text-3xl">{aboutData.name}</h1>
               </div>
             </div>
@@ -80,7 +80,7 @@ const About = () => {
                 {[["3.44/4.00", "GPA"], ["03/2026", text.experience], ["03", text.cvLabel]].map(([value, label], index) => (
                   <div key={label} className={`py-4 ${index ? "border-t border-border/70 sm:border-l sm:border-t-0 sm:pl-5" : ""}`}>
                     <span className="font-mono text-xl font-semibold text-primary">{value}</span>
-                    <span className="ml-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">{label}</span>
+                    <span className="ml-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
                   </div>
                 ))}
               </div>
@@ -105,7 +105,7 @@ const About = () => {
                 </div>
                 <h3 className="mt-8 text-2xl">{cv.title[language]}</h3>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">{cv.description[language]}</p>
-                <div className="mt-5 flex flex-wrap gap-2">{cv.stack.map((item) => <Badge key={item} variant="secondary" className="font-mono text-[9px]">{item}</Badge>)}</div>
+                <div className="mt-5 flex flex-wrap gap-2.5">{cv.stack.map((item) => <Badge key={item} variant="secondary" className="min-h-7 px-3 py-1 font-mono text-[11px]">{item}</Badge>)}</div>
                 <div className="mt-auto flex gap-2 border-t border-border/70 pt-5">
                   <Button asChild size="sm" className="flex-1"><a href={cv.file} target="_blank" rel="noreferrer">{text.view}<ExternalLink className="ml-2 h-3.5 w-3.5" /></a></Button>
                   <Button asChild size="sm" variant="outline"><a href={cv.file} download><Download className="h-3.5 w-3.5" /><span className="sr-only">{text.download}</span></a></Button>
@@ -124,7 +124,7 @@ const About = () => {
               <article key={experience.company} className="journal-card p-7 md:p-9">
                 <div className="flex flex-col justify-between gap-3 border-b border-border/70 pb-6 sm:flex-row">
                   <div><h2 className="text-2xl">{experience.role}</h2><p className="mt-1 text-primary">{experience.company}</p></div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{experience.period}</span>
+                  <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">{experience.period}</span>
                 </div>
                 <p className="mt-6 leading-7 text-muted-foreground">{experience.summary[language]}</p>
                 <div className="mt-6 space-y-3">{experience.highlights[language].map((item) => <p key={item} className="flex gap-3 text-sm text-muted-foreground"><ArrowDownRight className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{item}</p>)}</div>
@@ -137,18 +137,18 @@ const About = () => {
               <GraduationCap className="h-6 w-6 text-primary" />
               <h3 className="mt-5 text-xl">{text.educationTitle}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{text.school}</p>
-              <div className="mt-5 flex justify-between border-t border-border/70 pt-4 font-mono text-[10px] uppercase tracking-wider text-muted-foreground"><span>2022 - {text.present}</span><span className="text-primary">GPA 3.44 / 4.00</span></div>
+              <div className="mt-5 flex justify-between border-t border-border/70 pt-4 font-mono text-xs uppercase tracking-wider text-muted-foreground"><span>2022 - {text.present}</span><span className="text-primary">GPA 3.44 / 4.00</span></div>
             </div>
             <div className="journal-card p-6">
               <MapPin className="h-5 w-5 text-primary" />
               <p className="mt-4 text-sm text-muted-foreground">{aboutData.address}</p>
               <div className="mt-4 space-y-3 border-t border-border/70 pt-4 font-mono text-xs">
                 <a className="block hover:text-primary" href={`mailto:${aboutData.social.email}`}>
-                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">{text.primaryEmail}</span>
+                  <span className="block text-[11px] uppercase tracking-wider text-muted-foreground">{text.primaryEmail}</span>
                   {aboutData.social.email}
                 </a>
                 <a className="block hover:text-primary" href={`mailto:${aboutData.social.secondaryEmail}`}>
-                  <span className="block text-[9px] uppercase tracking-wider text-muted-foreground">{text.secondaryEmail}</span>
+                  <span className="block text-[11px] uppercase tracking-wider text-muted-foreground">{text.secondaryEmail}</span>
                   {aboutData.social.secondaryEmail}
                 </a>
               </div>
@@ -163,7 +163,7 @@ const About = () => {
           <div className="grid gap-5 md:grid-cols-2">
             {featuredProfileProjects.map((project) => (
               <article key={project.period} className="journal-card p-7">
-                <div className="flex justify-between gap-3"><h3 className="text-2xl">{project.title[language]}</h3><span className="font-mono text-[9px] text-primary">{project.period}</span></div>
+                <div className="flex justify-between gap-3"><h3 className="text-2xl">{project.title[language]}</h3><span className="font-mono text-xs text-primary">{project.period}</span></div>
                 <p className="mt-4 text-sm leading-7 text-muted-foreground">{project.description[language]}</p>
                 <div className="mt-5 flex flex-wrap gap-2">{project.stack.map((item) => <Badge key={item} variant="secondary">{item}</Badge>)}</div>
                 <a href={project.github} target="_blank" rel="noreferrer" className="mt-6 inline-flex items-center gap-2 font-mono text-xs text-primary">GitHub repository <ArrowUpRight className="h-3.5 w-3.5" /></a>
@@ -177,8 +177,8 @@ const About = () => {
         <div className="container mx-auto grid gap-12 px-4 lg:grid-cols-[1fr_1fr]">
           <div><p className="eyebrow mb-8">{text.skills}</p><div className="grid gap-4 sm:grid-cols-2">{profileSkills.map((group) => <div key={group.title} className="journal-card p-5"><h3>{group.title}</h3><div className="mt-4 flex flex-wrap gap-2">{group.items.map((item) => <Badge key={item} variant="secondary">{item}</Badge>)}</div></div>)}</div></div>
           <div className="grid gap-8 sm:grid-cols-2">
-            <div><p className="eyebrow mb-8">{text.awards}</p><div className="space-y-3">{achievements.map((item) => <div key={`${item.year}-${item.en}`} className="journal-card p-4"><Award className="h-4 w-4 text-primary" /><p className="mt-3 text-sm">{item[language]}</p><p className="mt-2 font-mono text-[9px] text-muted-foreground">{item.year}</p></div>)}</div></div>
-            <div><p className="eyebrow mb-8">{text.certificates}</p><div className="space-y-3">{certifications.map((item) => <div key={item.en} className="journal-card p-4"><BriefcaseBusiness className="h-4 w-4 text-primary" /><p className="mt-3 text-sm">{item[language]}</p><p className="mt-2 font-mono text-[9px] text-muted-foreground">{item.year}</p></div>)}</div></div>
+            <div><p className="eyebrow mb-8">{text.awards}</p><div className="space-y-3">{achievements.map((item) => <div key={`${item.year}-${item.en}`} className="journal-card p-4"><Award className="h-4 w-4 text-primary" /><p className="mt-3 text-sm">{item[language]}</p><p className="mt-2 font-mono text-xs text-muted-foreground">{item.year}</p></div>)}</div></div>
+            <div><p className="eyebrow mb-8">{text.certificates}</p><div className="space-y-3">{certifications.map((item) => <div key={item.en} className="journal-card p-4"><BriefcaseBusiness className="h-4 w-4 text-primary" /><p className="mt-3 text-sm">{item[language]}</p><p className="mt-2 font-mono text-xs text-muted-foreground">{item.year}</p></div>)}</div></div>
           </div>
         </div>
       </section>

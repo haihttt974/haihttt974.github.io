@@ -32,7 +32,7 @@ export const Footer = () => {
           </div>
         </div>
       </div>
-      <div className="mt-12 flex flex-col gap-2 border-t border-border/70 pt-6 font-mono text-[10px] uppercase tracking-[.16em] text-muted-foreground sm:flex-row sm:justify-between">
+      <div className="mt-12 flex flex-col gap-2 border-t border-border/70 pt-6 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground sm:flex-row sm:justify-between">
         <span>© {new Date().getFullYear()} Lê Duy Hải / Hai IT</span>
         <span>{t("footer.designed")}</span>
       </div>

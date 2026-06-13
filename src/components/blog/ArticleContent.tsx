@@ -30,7 +30,7 @@ export const ArticleContent = ({ content }: { content: string }) => {
       }
       blocks.push(
         <div key={`code-${index}`} className="my-8 overflow-hidden rounded-xl border border-border/80 bg-background/70">
-          <div className="flex items-center justify-between border-b border-border/70 px-4 py-2 font-mono text-[9px] uppercase tracking-[.16em] text-muted-foreground">
+          <div className="flex items-center justify-between border-b border-border/70 px-4 py-2.5 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground">
             <span>{language || "code"}</span><span>haiit.dev</span>
           </div>
           <pre className="overflow-x-auto p-5 text-sm leading-7"><code>{code.join("\n")}</code></pre>

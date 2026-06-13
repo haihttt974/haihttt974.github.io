@@ -57,7 +57,7 @@ export const FeaturedPosts = () => {
             const post = localizeBlogPost(sourcePost, language);
             return (
             <m.article key={post.id} variants={reduceMotion ? undefined : staggerItem} className={`group journal-card p-6 md:p-8 ${index === 0 ? "lg:row-span-2" : ""}`}>
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-5 font-mono text-[9px] uppercase tracking-[.16em] text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-5 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground">
                 <span className="text-primary">Note / 0{index + 1}</span>
                 <span>{categoryName(post.category)}</span>
               </div>
@@ -65,7 +65,7 @@ export const FeaturedPosts = () => {
                 <h3 className={`mt-8 transition-colors group-hover:text-primary ${index === 0 ? "max-w-2xl text-3xl md:text-5xl" : "text-2xl"}`}>{post.title}</h3>
               </Link>
               <p className={`mt-4 leading-relaxed text-muted-foreground ${index === 0 ? "max-w-2xl text-base" : "text-sm"}`}>{post.excerpt}</p>
-              <div className="mt-8 flex flex-wrap items-center gap-5 border-t border-border/70 pt-5 font-mono text-[10px] text-muted-foreground">
+              <div className="mt-8 flex flex-wrap items-center gap-5 border-t border-border/70 pt-5 font-mono text-xs text-muted-foreground">
                 <span>{new Date(post.date).toLocaleDateString(locale)}</span>
                 <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" />{post.readTime}</span>
                 <span className="flex items-center gap-1.5"><Eye className="h-3 w-3" />{(viewsMap[post.id] ?? 0).toLocaleString("vi-VN")}</span>

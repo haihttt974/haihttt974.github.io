@@ -159,7 +159,7 @@ const Blog = () => {
                     {post.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center text-xs text-muted-foreground bg-muted px-2 py-1 rounded"
+                        className="inline-flex min-h-7 items-center rounded bg-muted px-2.5 py-1 text-xs text-muted-foreground"
                       >
                         <Tag className="h-3 w-3 mr-1" />
                         {tag}

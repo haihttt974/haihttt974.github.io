@@ -27,7 +27,7 @@ export const CategoryGrid = () => {
           <m.div key={category.id} variants={reduceMotion ? undefined : staggerItem}>
           <Link to={`/blog?category=${category.id}`} className="group block min-h-56 border-b border-r border-border/70 bg-background/30 p-6 transition-colors hover:bg-primary/[.04]">
             <div className="flex items-start justify-between">
-              <span className="font-mono text-[10px] text-primary">MAP / 0{index + 1}</span>
+              <span className="font-mono text-xs font-medium text-primary">MAP / 0{index + 1}</span>
               <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-primary" />
             </div>
             <h3 className="mt-12 text-xl group-hover:text-primary">{t(`category.${category.id}`)}</h3>

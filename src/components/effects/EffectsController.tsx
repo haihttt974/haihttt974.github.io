@@ -33,7 +33,7 @@ export const EffectsController = () => {
           <Icon className="h-4 w-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="left" className="font-mono text-[10px] uppercase tracking-[.14em]">
+      <TooltipContent side="left" className="font-mono text-xs uppercase tracking-[.12em]">
         {hint}
       </TooltipContent>
     </Tooltip>
