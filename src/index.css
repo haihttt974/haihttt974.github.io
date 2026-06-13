@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Oooh+Baby&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -690,12 +690,11 @@
 
   .lacquer-glow { @apply absolute inset-0; background: radial-gradient(ellipse at 50% 110%, hsl(8 90% 45% / .18), transparent 62%); animation: lacquerPulse 6s ease-in-out infinite; }
   .lacquer-sun {
-    @apply absolute right-[11%] top-[15%] flex h-48 w-48 flex-col items-center justify-center rounded-full border border-amber-200/25 font-serif text-5xl text-amber-100/70;
+    @apply absolute right-[11%] top-[15%] flex h-48 w-48 items-center justify-center rounded-full border border-amber-200/25 font-serif text-6xl text-amber-100/35;
     background: radial-gradient(circle at 35% 30%, hsl(46 100% 82% / .32), hsl(17 95% 55% / .15) 55%, transparent 72%);
     box-shadow: 0 0 80px hsl(40 95% 58% / .12), inset 0 0 30px hsl(46 100% 80% / .12);
     animation: lunarSun 7s ease-in-out infinite;
   }
-  .lacquer-sun small { @apply mt-1 font-sans text-[9px] uppercase tracking-[.45em] text-amber-100/45; }
   .lacquer-sun::before, .lacquer-sun::after { content: ""; @apply absolute rounded-full border border-amber-200/15; }
   .lacquer-sun::before { @apply -inset-5; }
   .lacquer-sun::after { @apply -inset-10; }
@@ -703,44 +702,19 @@
   .lacquer-mountain-back { @apply h-[38%]; background: hsl(5 50% 18% / .18); clip-path: polygon(0 72%, 11% 42%, 19% 67%, 31% 29%, 43% 70%, 56% 38%, 67% 68%, 78% 25%, 91% 62%, 100% 40%, 100% 100%, 0 100%); animation: mountainDrift 12s ease-in-out infinite alternate; }
   .lacquer-mountain-front { @apply h-[27%]; background: linear-gradient(to top, hsl(4 55% 12% / .2), hsl(8 70% 28% / .1)); clip-path: polygon(0 68%, 14% 34%, 27% 72%, 40% 43%, 52% 70%, 68% 30%, 82% 67%, 100% 39%, 100% 100%, 0 100%); animation: mountainDrift 9s ease-in-out infinite alternate-reverse; }
 
-  .tet-courtyard {
-    @apply absolute inset-x-0 bottom-0 h-[34%];
-    background: linear-gradient(to top, hsl(18 42% 12% / .34), hsl(24 38% 24% / .14) 58%, transparent);
-    clip-path: polygon(0 35%, 50% 0, 100% 35%, 100% 100%, 0 100%);
-  }
-  .tet-courtyard::before { content: ""; @apply absolute inset-0; background: repeating-linear-gradient(100deg, transparent 0 74px, hsl(42 65% 65% / .045) 75px 76px); }
-
-  .tet-gate { @apply absolute left-1/2 top-[24%] z-[8] h-72 w-[24rem] -translate-x-1/2; filter: drop-shadow(0 16px 24px hsl(0 65% 8% / .22)); }
-  .tet-gate-roof { @apply absolute left-1/2 top-0 flex h-16 w-[27rem] -translate-x-1/2 items-end justify-center overflow-hidden; background: linear-gradient(155deg, hsl(8 65% 20% / .88), hsl(2 75% 10% / .92)); clip-path: polygon(7% 58%, 17% 22%, 50% 3%, 83% 22%, 93% 58%, 100% 82%, 82% 72%, 50% 64%, 18% 72%, 0 82%); }
-  .tet-gate-roof::after { content: ""; @apply absolute inset-x-8 bottom-2 h-px bg-amber-200/35; box-shadow: 0 -6px 0 hsl(42 75% 60% / .08); }
-  .tet-gate-roof i { @apply mb-3 h-9 w-8 rounded-t-full border-x border-amber-100/10; background: linear-gradient(to bottom, hsl(8 75% 28% / .42), transparent); }
-  .tet-gate-beam { @apply absolute left-1/2 top-14 flex h-16 w-72 -translate-x-1/2 flex-col items-center justify-center border border-amber-200/35 bg-red-950/80 font-serif text-2xl text-amber-100/85; box-shadow: inset 0 0 22px hsl(38 90% 58% / .1); }
-  .tet-gate-beam small { @apply mt-1 font-sans text-[7px] uppercase tracking-[.45em] text-amber-100/40; }
-  .tet-gate-pillar { @apply absolute top-[7rem] flex h-44 w-12 items-center justify-center border border-amber-200/25 bg-gradient-to-b from-red-800/85 to-red-950/90 font-serif text-[9px] tracking-[.18em] text-amber-100/75; writing-mode: vertical-rl; box-shadow: inset 0 0 14px hsl(40 90% 60% / .08); }
-  .tet-gate-pillar-left { @apply left-10; }
-  .tet-gate-pillar-right { @apply right-10; }
-  .tet-gate-door { @apply absolute top-[7rem] h-44 w-[8.5rem] border border-amber-200/15; background: repeating-linear-gradient(90deg, hsl(5 62% 16% / .78) 0 14px, hsl(12 52% 23% / .72) 14px 16px); }
-  .tet-gate-door::after { content: ""; @apply absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border border-amber-100/40 bg-amber-500/30; }
-  .tet-gate-door-left { @apply left-[3.55rem]; }
-  .tet-gate-door-left::after { @apply right-3; }
-  .tet-gate-door-right { @apply right-[3.55rem]; }
-  .tet-gate-door-right::after { @apply left-3; }
-
-  .blossom-branch { @apply absolute z-10 h-3 w-[42%] rounded-full; background: linear-gradient(90deg, hsl(25 50% 15% / .88), hsl(30 50% 32% / .45)); transform-origin: left; box-shadow: inset 0 -2px 2px hsl(20 60% 8% / .24); }
-  .blossom-branch-left { @apply -left-16 top-[19%]; transform: rotate(16deg); }
-  .blossom-branch-right { @apply -right-24 top-[31%]; transform: rotate(196deg); }
+  .blossom-branch { @apply absolute z-10 h-2 w-[35%] rounded-full; background: linear-gradient(90deg, hsl(25 50% 18% / .75), hsl(30 50% 32% / .35)); transform-origin: left; }
+  .blossom-branch-left { @apply -left-12 top-[23%]; transform: rotate(18deg); }
+  .blossom-branch-right { @apply -right-20 top-[38%]; transform: rotate(198deg); }
   .blossom-branch::after { content: ""; @apply absolute left-[22%] top-0 h-1 w-[70%] rounded-full; background: hsl(28 50% 25% / .5); transform: rotate(-22deg); transform-origin: left; }
-  .blossom-branch::before { content: ""; @apply absolute left-[44%] top-0 h-1.5 w-[44%] rounded-full; background: hsl(26 48% 20% / .72); transform: rotate(31deg); transform-origin: left; }
   .blossom-branch i {
     --x: calc(var(--i) * 11%);
     @apply absolute h-5 w-5 rounded-full;
     left: var(--x); top: calc((var(--i) % 3) * 13px - 18px);
+    background: radial-gradient(circle, #fff5b8 0 15%, #ffc35c 17% 35%, #ef6b64 38% 58%, transparent 61%);
     filter: drop-shadow(0 0 7px hsl(42 100% 65% / .35));
     animation: blossomBreath 3s ease-in-out infinite;
     animation-delay: calc(var(--i) * -.28s);
   }
-  .blossom-mai i { background: radial-gradient(circle, #fff6b6 0 13%, #ffc83d 15% 38%, #f3a81a 40% 58%, transparent 61%); }
-  .blossom-dao i { background: radial-gradient(circle, #fff0ce 0 12%, #ff9bb4 14% 38%, #df537d 40% 58%, transparent 61%); filter: drop-shadow(0 0 7px hsl(340 90% 68% / .35)); }
 
   .lunar-lantern { @apply absolute top-0 z-20 flex w-20 flex-col items-center pt-24; animation: lanternSway 5s ease-in-out infinite; transform-origin: top; }
   .lunar-lantern::before { content: ""; @apply absolute top-0 h-24 w-px bg-gradient-to-b from-amber-200/70 to-red-500/40; }
@@ -751,42 +725,115 @@
   .lunar-lantern-b { @apply left-[25%] scale-75; animation-delay: -2s; }
   .lunar-seal { @apply absolute bottom-[12%] right-[8%] z-20 flex h-16 w-16 items-center justify-center border border-red-300/40 text-center font-mono text-[9px] tracking-[.2em] text-red-200/60; transform: rotate(-6deg); box-shadow: inset 0 0 18px hsl(0 80% 55% / .12); }
 
-  .tet-neu { @apply absolute bottom-[10%] left-[8%] z-10 hidden h-[58%] w-1 rounded-full bg-gradient-to-t from-amber-950/70 via-amber-700/60 to-amber-300/55 lg:block; transform: rotate(2deg); transform-origin: bottom; }
-  .tet-neu::before { content: ""; @apply absolute -left-12 top-6 h-px w-24 bg-amber-300/35; }
-  .tet-neu i, .tet-neu span, .tet-neu b { @apply absolute top-5 h-3 w-3 rounded-full border border-amber-200/35; box-shadow: 0 0 12px hsl(40 95% 58% / .24); }
-  .tet-neu i { @apply -left-10; }
-  .tet-neu span { @apply -left-1; }
-  .tet-neu b { @apply left-8; }
+  .tet-vietnam-frame {
+    @apply absolute inset-5 rounded-[2rem] border border-amber-200/10;
+    background:
+      linear-gradient(90deg, hsl(42 75% 62% / .08), transparent 12%, transparent 88%, hsl(42 75% 62% / .08)),
+      linear-gradient(0deg, hsl(4 72% 40% / .08), transparent 15%, transparent 85%, hsl(4 72% 40% / .08));
+    mask-image: linear-gradient(to bottom, black, transparent 46%, transparent 54%, black);
+    box-shadow: inset 0 0 48px hsl(6 70% 30% / .045);
+  }
+  .tet-vietnam-frame::before, .tet-vietnam-frame::after { content: ""; @apply absolute h-16 w-16 border-amber-200/20; }
+  .tet-vietnam-frame::before { @apply left-3 top-3 border-l border-t; }
+  .tet-vietnam-frame::after { @apply bottom-3 right-3 border-b border-r; }
 
-  .tet-kumquat { @apply absolute bottom-[8%] right-[11%] z-10 h-44 w-36 rounded-[55%] border border-lime-200/10; background: radial-gradient(ellipse, hsl(105 52% 30% / .44), hsl(115 48% 15% / .16) 65%, transparent 68%); filter: drop-shadow(0 10px 16px hsl(110 50% 6% / .2)); }
-  .tet-kumquat::after { content: ""; @apply absolute bottom-[-18px] left-1/2 h-7 w-16 -translate-x-1/2 rounded-b-lg border border-red-300/25 bg-red-900/30; }
-  .tet-kumquat i { --x: calc((var(--i) * 37) % 88); --y: calc((var(--i) * 53) % 78); @apply absolute h-3 w-3 rounded-full border border-amber-100/45 bg-orange-400/80; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); box-shadow: 0 0 9px hsl(35 100% 60% / .42); animation: fruitGlow 3s ease-in-out infinite; animation-delay: calc(var(--i) * -.25s); }
+  .tet-corner { @apply absolute top-0 z-10 h-52 w-[38%]; pointer-events: none; }
+  .tet-corner-dao { @apply left-0; }
+  .tet-corner-mai { @apply right-0; transform: scaleX(-1); }
+  .tet-border-branch { @apply absolute -left-8 top-14 h-3 w-full rounded-full; background: linear-gradient(90deg, hsl(24 55% 15% / .78), hsl(30 48% 30% / .18)); transform: rotate(13deg); transform-origin: left; }
+  .tet-border-branch::before, .tet-border-branch::after { content: ""; @apply absolute left-[30%] top-0 h-1.5 w-[48%] rounded-full bg-amber-950/45; transform-origin: left; }
+  .tet-border-branch::before { transform: rotate(-27deg); }
+  .tet-border-branch::after { @apply left-[48%]; transform: rotate(31deg); }
+  .tet-border-branch i {
+    --x: calc(var(--i) * 7.4%);
+    @apply absolute h-4 w-4 rounded-full;
+    left: var(--x);
+    top: calc((var(--i) % 4) * 13px - 19px);
+    animation: blossomBreath 3.8s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -.2s);
+  }
+  .tet-corner-dao .tet-border-branch i { background: radial-gradient(circle, #fff4cf 0 12%, #f9a3b9 14% 37%, #db557b 39% 58%, transparent 61%); filter: drop-shadow(0 0 5px hsl(340 82% 66% / .28)); }
+  .tet-corner-mai .tet-border-branch i { background: radial-gradient(circle, #fff7c4 0 12%, #ffd553 14% 38%, #eaaa22 40% 58%, transparent 61%); filter: drop-shadow(0 0 5px hsl(44 90% 60% / .28)); }
 
-  .tet-tea-table { @apply absolute bottom-[7%] left-1/2 z-20 hidden h-20 w-56 -translate-x-1/2 rounded-[50%] border border-amber-200/25 bg-red-950/55 md:block; box-shadow: inset 0 0 24px hsl(40 80% 55% / .08), 0 14px 30px hsl(0 70% 8% / .22); }
-  .tet-tea-table::after { content: ""; @apply absolute left-1/2 top-full h-14 w-2 -translate-x-1/2 bg-red-950/45; }
-  .tet-teapot { @apply absolute left-1/2 top-4 h-9 w-12 -translate-x-1/2 rounded-[45%] border border-cyan-100/25 bg-cyan-950/35; }
-  .tet-teapot::before { content: ""; @apply absolute -left-4 top-2 h-5 w-5 rounded-full border border-cyan-100/25; }
-  .tet-teapot::after { content: ""; @apply absolute -right-4 top-2 h-2 w-5 rotate-[-18deg] border-t border-cyan-100/30; }
-  .tet-teapot i { @apply absolute left-1/2 -top-2 h-3 w-5 -translate-x-1/2 rounded-t-full border border-cyan-100/25; }
-  .tet-cup { @apply absolute top-11 h-4 w-5 rounded-b-md border border-cyan-100/20 bg-cyan-950/25; }
-  .tet-cup-a { @apply left-[36%]; }
-  .tet-cup-b { @apply right-[36%]; }
-  .tet-fruit-tray { @apply absolute right-5 top-7 flex h-7 w-14 items-center justify-around rounded-[50%] border-b border-amber-200/25; }
-  .tet-fruit-tray i { @apply h-3 w-3 rounded-full bg-orange-400/80; box-shadow: 0 0 5px hsl(38 90% 60% / .2); }
-  .tet-fruit-tray i:nth-child(2) { @apply bg-lime-500/75; }
-  .tet-fruit-tray i:nth-child(3) { @apply bg-red-500/75; }
-  .tet-fruit-tray i:nth-child(4) { @apply bg-yellow-300/75; }
-  .tet-fruit-tray i:nth-child(5) { @apply bg-emerald-500/75; }
-  .tet-gifts { @apply absolute bottom-[7%] left-[18%] z-20 hidden items-end gap-3 md:flex; }
-  .banh-chung { @apply relative h-16 w-16 rotate-[-5deg] border border-lime-200/30; background: linear-gradient(135deg, hsl(115 42% 30% / .75), hsl(92 48% 15% / .82)); box-shadow: inset 0 0 14px hsl(80 70% 70% / .1); }
-  .banh-chung::before, .banh-chung::after { content: ""; @apply absolute bg-amber-100/25; }
-  .banh-chung::before { @apply left-1/2 top-0 h-full w-px; }
-  .banh-chung::after { @apply left-0 top-1/2 h-px w-full; }
-  .banh-tet { @apply relative h-20 w-10 rotate-[7deg] rounded-[45%] border border-lime-200/25; background: repeating-linear-gradient(90deg, hsl(108 42% 25% / .78) 0 8px, hsl(88 45% 16% / .82) 8px 10px); }
-  .banh-tet::before, .banh-tet::after { content: ""; @apply absolute left-0 h-px w-full bg-amber-100/30; }
-  .banh-tet::before { @apply top-5; }
-  .banh-tet::after { @apply bottom-5; }
-  .li-xi { @apply mb-1 flex h-14 w-9 rotate-[-8deg] items-center justify-center border border-amber-200/35 bg-red-700/55 font-serif text-xs text-amber-100/80; box-shadow: 0 0 18px hsl(20 90% 55% / .14); }
+  .tet-viet-lantern { @apply absolute left-[28%] top-0 flex h-36 w-16 flex-col items-center pt-16; animation: lanternSway 6s ease-in-out infinite; transform-origin: top; }
+  .tet-viet-lantern::before { content: ""; @apply absolute left-1/2 top-0 h-14 w-px bg-gradient-to-b from-amber-100/55 to-red-500/25; }
+  .tet-viet-lantern::after { content: ""; @apply absolute top-12 h-16 w-14 rounded-[45%] border border-amber-100/35; background: repeating-linear-gradient(90deg, hsl(5 80% 42% / .38) 0 6px, hsl(38 85% 55% / .12) 6px 7px); box-shadow: 0 0 18px hsl(25 90% 55% / .14), inset 0 0 15px hsl(42 90% 62% / .16); }
+  .tet-viet-lantern span { @apply relative z-10 mt-1 font-serif text-base text-amber-100/70; }
+  .tet-viet-lantern i { @apply absolute top-[6.6rem] h-8 w-px bg-gradient-to-b from-amber-200/50 to-transparent; }
+  .tet-corner-mai .tet-viet-lantern { transform: scaleX(-1); }
+  .tet-corner-mai .tet-viet-lantern span { transform: scaleX(-1); }
+
+  .tet-side-couplet { @apply absolute top-[30%] z-10 hidden h-56 w-14 border-x border-amber-200/25 font-serif text-amber-100/70 lg:flex; background: linear-gradient(90deg, hsl(2 72% 27% / .38), hsl(8 85% 46% / .32) 50%, hsl(2 72% 25% / .4)); box-shadow: inset 0 0 16px hsl(42 90% 65% / .06), 0 9px 18px hsl(0 60% 8% / .08); }
+  .tet-side-couplet::before, .tet-side-couplet::after { content: ""; @apply absolute left-1/2 h-2 w-16 -translate-x-1/2 rounded-full border border-amber-200/25; background: linear-gradient(90deg, hsl(25 50% 17% / .62), hsl(42 65% 48% / .36), hsl(25 50% 17% / .62)); }
+  .tet-side-couplet::before { @apply -top-2; }
+  .tet-side-couplet::after { @apply -bottom-2; }
+  .tet-side-couplet i, .tet-side-couplet b { @apply absolute left-1/2 h-5 w-px -translate-x-1/2 bg-gradient-to-b from-amber-200/35 to-transparent; }
+  .tet-side-couplet i { @apply -top-7; }
+  .tet-side-couplet b { @apply -bottom-7 rotate-180; }
+  .tet-side-couplet span {
+    @apply grid h-full w-full grid-rows-7 items-center justify-items-center px-1 py-1 text-center text-[14px] leading-none;
+    font-family: "Oooh Baby", "Times New Roman", cursive;
+    text-shadow: .7px .5px hsl(38 85% 84% / .38), 1.4px 1px hsl(26 95% 32% / .18), 0 0 7px hsl(42 90% 65% / .17);
+  }
+  .tet-side-couplet em { @apply flex h-full w-full items-center justify-center not-italic; font-family: "Oooh Baby", "Times New Roman", cursive; transform: scaleX(.96) rotate(-3deg); }
+  .tet-side-couplet em:nth-child(2) { transform: scaleX(1.05) rotate(2deg); opacity: .84; }
+  .tet-side-couplet em:nth-child(3) { transform: scaleX(.98) rotate(-1deg); opacity: .92; }
+  .tet-side-couplet em:nth-child(4) { transform: scaleX(1.02) rotate(3deg); opacity: .82; }
+  .tet-side-couplet em:nth-child(5) { transform: scaleX(.96) rotate(-2deg); opacity: .9; }
+  .tet-side-couplet em:nth-child(6) { transform: scaleX(1.04) rotate(2deg); opacity: .84; }
+  .tet-side-couplet em:nth-child(7) { transform: scaleX(.98) rotate(-3deg); opacity: .9; }
+  .tet-side-couplet-right em:nth-child(odd) { transform: scaleX(1.02) rotate(2deg); }
+  .tet-side-couplet-right em:nth-child(even) { transform: scaleX(.96) rotate(-2deg); }
+  .tet-side-couplet strong { @apply absolute bottom-2 right-1 flex h-3.5 min-w-3.5 items-center justify-center border border-red-200/30 bg-red-950/25 px-0.5 font-serif text-[5px] font-normal leading-none text-red-100/45; transform: rotate(-5deg); }
+  .tet-side-couplet-left { @apply left-7; transform: rotate(-1deg); }
+  .tet-side-couplet-right { @apply right-7; transform: rotate(1deg); }
+
+  .tet-bottom { @apply absolute bottom-3 z-10 hidden h-32 w-64 items-end md:flex; pointer-events: none; }
+  .tet-bottom-left { @apply left-7 gap-4; }
+  .tet-bottom-right { @apply right-7 justify-end gap-4; }
+  .tet-banh-chung { @apply relative mb-2 h-16 w-16 rotate-[-7deg] rounded-sm border border-lime-100/30; background: repeating-linear-gradient(132deg, hsl(112 40% 34% / .72) 0 8px, hsl(100 48% 18% / .72) 8px 11px); box-shadow: inset -8px -8px 12px hsl(105 60% 7% / .22), inset 5px 5px 8px hsl(82 55% 72% / .07), 5px 8px 12px hsl(0 55% 5% / .12); transform-style: preserve-3d; }
+  .tet-banh-chung::before { content: ""; @apply absolute left-1 top-full h-2 w-full origin-top -skew-x-[35deg] border-b border-lime-100/15; background: hsl(105 42% 13% / .72); }
+  .tet-banh-chung::after { content: ""; @apply absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 bg-amber-100/20; box-shadow: -16px 0 0 hsl(42 65% 76% / .12), 16px 0 0 hsl(42 65% 76% / .12); }
+  .tet-banh-chung i { @apply absolute left-0 top-1/2 h-1 w-full -translate-y-1/2 bg-amber-100/20; box-shadow: 0 -16px 0 hsl(42 65% 76% / .12), 0 16px 0 hsl(42 65% 76% / .12); }
+  .tet-banh-chung span { @apply absolute left-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-lime-100/10; }
+  .tet-banh-chung b { @apply absolute inset-1 rounded-sm border border-lime-200/10; }
+
+  .tet-banh-tet { @apply relative mb-1 h-24 w-11 rotate-[8deg] rounded-[48%] border border-lime-100/30; background: repeating-linear-gradient(90deg, hsl(108 40% 30% / .72) 0 7px, hsl(94 48% 16% / .75) 7px 10px); box-shadow: inset -7px -5px 10px hsl(105 60% 7% / .2), 5px 8px 12px hsl(0 55% 5% / .1); }
+  .tet-banh-tet::before, .tet-banh-tet::after { content: ""; @apply absolute left-1/2 h-3 w-9 -translate-x-1/2 rounded-[50%] border border-amber-100/20; background: radial-gradient(ellipse, hsl(108 38% 32% / .72), hsl(95 50% 13% / .8)); }
+  .tet-banh-tet::before { @apply -top-1; }
+  .tet-banh-tet::after { @apply -bottom-1; }
+  .tet-banh-tet i, .tet-banh-tet span { @apply absolute left-0 h-px w-full bg-amber-100/25; }
+  .tet-banh-tet i { @apply top-7; }
+  .tet-banh-tet span { @apply bottom-7; }
+  .tet-banh-tet b { @apply absolute left-1/2 top-1/2 h-full w-px -translate-x-1/2 -translate-y-1/2 bg-amber-100/15; }
+
+  .tet-watermelon { @apply relative mb-1 h-16 w-20 rotate-[-4deg] rounded-[50%] border border-lime-100/20; background: repeating-linear-gradient(105deg, hsl(120 48% 14% / .72) 0 9px, hsl(112 52% 31% / .62) 9px 14px); box-shadow: inset -9px -7px 12px hsl(125 60% 6% / .18), 5px 8px 12px hsl(0 55% 5% / .1); }
+  .tet-watermelon::before { content: ""; @apply absolute -right-5 bottom-0 h-10 w-12 rounded-t-full border-[3px] border-green-700/45; background: radial-gradient(circle at 50% 85%, hsl(4 78% 50% / .65) 0 60%, hsl(105 48% 25% / .72) 62% 75%, transparent 77%); transform: rotate(12deg); }
+  .tet-watermelon::after { content: "•••"; @apply absolute -right-3 bottom-2 font-mono text-[6px] tracking-[3px] text-slate-950/55; transform: rotate(12deg); }
+  .tet-watermelon i { @apply absolute -top-2 left-1/2 h-3 w-px -translate-x-1/2 rotate-[28deg] bg-lime-200/25; }
+
+  .tet-envelope { @apply relative mb-1 flex h-[4.5rem] w-12 rotate-[-9deg] items-center justify-center overflow-hidden rounded-sm border border-amber-200/35 font-serif text-xs text-amber-100/70; background: linear-gradient(145deg, hsl(3 82% 48% / .62), hsl(352 78% 26% / .7)); box-shadow: inset 0 0 12px hsl(42 90% 62% / .08), 4px 7px 10px hsl(0 55% 5% / .1); }
+  .tet-envelope::before { content: ""; @apply absolute -top-5 left-1/2 h-10 w-10 -translate-x-1/2 rotate-45 border-b border-r border-amber-200/25; background: hsl(4 80% 42% / .45); }
+  .tet-envelope i { @apply absolute inset-1 rounded-sm border border-amber-200/15; }
+  .tet-envelope span { @apply relative z-10 flex h-7 w-7 items-center justify-center rounded-full border border-amber-200/35 bg-red-950/20; }
+  .tet-envelope b { @apply absolute bottom-1 left-1/2 h-px w-7 -translate-x-1/2 bg-amber-200/20; box-shadow: 0 -3px 0 hsl(42 80% 65% / .12); }
+
+  .tet-quat { @apply relative mb-2 h-28 w-24 rounded-[52%]; background: radial-gradient(ellipse, hsl(110 48% 30% / .34), hsl(118 42% 13% / .08) 67%, transparent 70%); }
+  .tet-quat::after { content: ""; @apply absolute -bottom-4 left-1/2 h-6 w-12 -translate-x-1/2 rounded-b-md border border-red-300/20 bg-red-900/20; }
+  .tet-quat i { --x: calc((var(--i) * 37) % 88); --y: calc((var(--i) * 53) % 78); @apply absolute h-2.5 w-2.5 rounded-full border border-amber-100/30 bg-orange-400/55; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); box-shadow: 0 0 6px hsl(35 100% 60% / .22); }
+  .tet-dongson { @apply relative mb-1 h-20 w-20 rounded-full border border-amber-200/20; background: repeating-radial-gradient(circle, transparent 0 8px, hsl(42 75% 58% / .08) 9px 10px); animation: dongsonTurn 28s linear infinite; }
+  .tet-dongson::before, .tet-dongson::after { content: ""; @apply absolute left-1/2 top-1/2 bg-amber-200/20; transform: translate(-50%, -50%); }
+  .tet-dongson::before { @apply h-px w-12; }
+  .tet-dongson::after { @apply h-12 w-px; }
+  .tet-dongson i, .tet-dongson span, .tet-dongson b { @apply absolute left-1/2 top-1/2 h-2 w-2 border border-amber-200/20; transform: translate(-50%, -50%) rotate(45deg); }
+  .tet-dongson span { @apply h-5 w-5; }
+  .tet-dongson b { @apply h-9 w-9; }
+
+  .tet-top-knot { @apply absolute top-0 z-10 h-28 w-8; }
+  .tet-top-knot::before { content: ""; @apply absolute left-1/2 top-0 h-20 w-px bg-gradient-to-b from-amber-200/40 to-red-500/20; }
+  .tet-top-knot i { @apply absolute bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border border-amber-200/30 bg-red-700/10; }
+  .tet-top-knot-a { @apply left-[42%]; }
+  .tet-top-knot-b { @apply right-[36%]; }
 
   /* Christmas / Nordic Night */
   .effect-scene-christmas {
@@ -924,10 +971,10 @@
   @keyframes hudScan { to { background-position: 24px 0; } }
   @keyframes lacquerPulse { 50% { opacity: .6; transform: scale(1.04); } }
   @keyframes lunarSun { 50% { transform: translateY(-8px) scale(1.04); filter: brightness(1.15); } }
-  @keyframes fruitGlow { 50% { transform: scale(.72); opacity: .58; } }
   @keyframes mountainDrift { to { transform: scaleX(1.035) translateX(8px); } }
   @keyframes blossomBreath { 50% { transform: scale(1.25) rotate(18deg); filter: drop-shadow(0 0 12px hsl(42 100% 68% / .6)); } }
   @keyframes lanternSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
+  @keyframes dongsonTurn { to { transform: rotate(360deg); } }
   @keyframes starPulse { 50% { opacity: .3; transform: scale(.65); } }
   @keyframes nordicAurora { from { transform: translateX(-5%) skewY(-5deg) scaleY(.8); opacity: .45; } to { transform: translateX(6%) skewY(4deg) scaleY(1.2); opacity: 1; } }
   @keyframes baubleFloat { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(12px) rotate(3deg); } }
@@ -940,10 +987,10 @@
     }
     .cyber-cursor-halo { @apply hidden; }
     .cyber-grid { opacity: .65; }
-    .tet-gate { top: 31%; transform: translateX(-50%) scale(.72); }
-    .lacquer-sun { @apply right-[4%] top-[15%] h-32 w-32 text-3xl; }
-    .blossom-branch { @apply w-[55%]; }
-    .tet-kumquat { @apply right-[4%] h-32 w-24; opacity: .75; }
+    .tet-corner { @apply w-[62%]; opacity: .72; }
+    .tet-viet-lantern { transform: scale(.75); }
+    .tet-corner-mai .tet-viet-lantern { transform: scaleX(-1) scale(.75); }
+    .tet-top-knot { @apply hidden; }
   }
 
   @media (prefers-reduced-motion: reduce) {
