@@ -54,7 +54,7 @@ export const HeroSection = () => {
         <div className="flex flex-col justify-between py-2 lg:py-5">
           <div>
             <p className="eyebrow mb-6 animate-fade-in">{t("hero.hello")} {aboutData.nickname}</p>
-            <h1 className="max-w-4xl text-[clamp(3.15rem,6.8vw,6.8rem)] font-semibold leading-[.88] tracking-[-.075em] animate-slide-up">
+            <h1 className="max-w-4xl text-[clamp(3.15rem,6.8vw,6.8rem)] font-semibold leading-[.98] tracking-[-.075em] animate-slide-up">
               {t("hero.line1")}
               <span className="block text-muted-foreground">{t("hero.line2")}</span>
               <span className="text-gradient">{t("hero.line3")}</span>
