@@ -963,9 +963,17 @@
   .nordic-pines-back { @apply bottom-[7%] text-cyan-950/15; filter: blur(1.5px); }
   .nordic-pines-front { @apply z-10 text-slate-950/25; filter: blur(.5px); }
   .winter-ground { @apply absolute inset-x-0 bottom-0 h-[20%]; background: linear-gradient(to top, hsl(195 70% 88% / .11), transparent); clip-path: ellipse(75% 65% at 50% 100%); mask-image: linear-gradient(to right, black, transparent 30%, transparent 70%, black); }
-  .christmas-light-strand { @apply absolute left-[-2%] top-8 z-30 flex w-[104%] justify-around opacity-70; }
-  .christmas-light-strand::before { content: ""; @apply absolute left-0 top-0 h-px w-full bg-white/20; transform: rotate(-1deg); }
-  .christmas-light-strand i { --bulb: hsl(calc(var(--i) * 47) 88% 65%); @apply relative h-2.5 w-2.5 rounded-full; margin-top: calc((var(--i) % 5) * 3px); background: var(--bulb); box-shadow: 0 0 12px var(--bulb), 0 0 28px var(--bulb); animation: festiveBulb 2.2s ease-in-out infinite; animation-delay: calc(var(--i) * -.14s); }
+  .christmas-light-drift { @apply absolute inset-x-0 top-[clamp(4.5rem,7vw,5.75rem)] z-20 h-16 pointer-events-none; }
+  .christmas-light-drift i {
+    @apply absolute h-3.5 w-3.5 rounded-full;
+    background: var(--bulb);
+    box-shadow:
+      0 0 10px var(--bulb),
+      0 0 24px color-mix(in srgb, var(--bulb) 65%, white 35%);
+    animation: festiveBulb 2.2s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -.16s);
+    transform: translateX(-50%);
+  }
 }
 
 @layer utilities {

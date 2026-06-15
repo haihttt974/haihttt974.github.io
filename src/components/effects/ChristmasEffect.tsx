@@ -1,6 +1,15 @@
 import { SnowEffect } from "./SnowEffect";
 
-const bulbs = Array.from({ length: 24 });
+const bulbs = Array.from({ length: 18 }, (_, index) => {
+  const progress = index / 17;
+  const sag = Math.sin(progress * Math.PI) * 2.5;
+  return {
+    x: `${4 + progress * 92}%`,
+    y: `${8 + sag}px`,
+    delay: `${index * -0.16}s`,
+    hue: 35 + index * 18,
+  };
+});
 const stars = Array.from({ length: 42 });
 const pineNeedles = Array.from({ length: 9 });
 const berries = Array.from({ length: 5 });
@@ -44,7 +53,19 @@ export const ChristmasEffect = () => (
 
     <div className="nordic-pines nordic-pines-back">{Array.from({ length: 9 }, (_, index) => <i key={index} style={{ "--i": index } as React.CSSProperties} />)}</div>
     <div className="nordic-pines nordic-pines-front">{Array.from({ length: 7 }, (_, index) => <i key={index} style={{ "--i": index } as React.CSSProperties} />)}</div>
-    <div className="christmas-light-strand">{bulbs.map((_, index) => <i key={index} style={{ "--i": index } as React.CSSProperties} />)}</div>
+    <div className="christmas-light-drift">
+      {bulbs.map((bulb) => (
+        <i
+          key={bulb.x}
+          style={{
+            left: bulb.x,
+            top: bulb.y,
+            "--bulb": `hsl(${bulb.hue} 88% 64%)`,
+            animationDelay: bulb.delay,
+          } as React.CSSProperties}
+        />
+      ))}
+    </div>
     <div className="winter-ground" />
     <SnowEffect />
     <div className="effect-label left-5 top-24">CHRISTMAS EVE / WINTER GLOW</div>
