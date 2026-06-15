@@ -50,12 +50,12 @@ export const HeroSection = () => {
         <span className="flex items-center gap-2 text-primary"><span className="h-1.5 w-1.5 rounded-full bg-primary" />{t("hero.open")}</span>
       </div>
 
-      <div className="grid items-stretch gap-7 lg:grid-cols-[1.16fr_.84fr]">
+      <div className="grid items-stretch gap-7 lg:grid-cols-[1.25fr_.75fr]">
         <div className="flex flex-col justify-between py-2 lg:py-5">
           <div>
             <p className="eyebrow mb-6 animate-fade-in">{t("hero.hello")} {aboutData.nickname}</p>
             <h1 className="max-w-4xl text-[clamp(3.15rem,6.8vw,6.8rem)] font-semibold leading-[.98] tracking-[-.075em] animate-slide-up">
-              {t("hero.line1")}
+              <span className="block whitespace-nowrap">{t("hero.line1")}</span>
               <span className="block text-muted-foreground">{t("hero.line2")}</span>
               <span className="text-gradient">{t("hero.line3")}</span>
             </h1>
