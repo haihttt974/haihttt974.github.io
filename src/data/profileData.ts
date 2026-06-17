@@ -59,7 +59,7 @@ export const featuredProfileProjects = [
       en: "ASP.NET Core 9.0 MVC system for driver training, theory exams, traffic simulation, driving center operations, and online payments.",
     },
     stack: ["ASP.NET Core 9", "SignalR", "OpenAI SDK", "VNPAY", "MoMo", "PayPal"],
-    github: "https://github.com/haihtt974/dacn-dtgplx",
+    github: "https://github.com/haihttt974/dacn-dtgplx",
   },
   {
     title: { vi: "Ứng dụng Web Quản lý Phòng Gym", en: "Gym Management Web Application" },
