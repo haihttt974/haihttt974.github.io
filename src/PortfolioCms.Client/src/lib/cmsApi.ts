@@ -1,11 +1,12 @@
 import { BlogPost, Category, blogPosts as fallbackPosts, categories as fallbackCategories } from "@/data/blogData";
 
+const DEFAULT_PRODUCTION_API_BASE_URL = "https://portfolio-cms-api-go5c.onrender.com";
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
 const hasValidApiBaseUrl = /^https?:\/\/[^/\s]+/i.test(configuredApiBaseUrl);
 const isInvalidProductionApiBaseUrl =
   !import.meta.env.DEV &&
   (!hasValidApiBaseUrl || configuredApiBaseUrl.includes("github.io"));
-const API_BASE_URL = isInvalidProductionApiBaseUrl ? null : configuredApiBaseUrl || "";
+const API_BASE_URL = isInvalidProductionApiBaseUrl ? DEFAULT_PRODUCTION_API_BASE_URL : configuredApiBaseUrl || "";
 
 export type PostStatus = "Draft" | "Published" | "Archived" | 0 | 1 | 2;
 
@@ -135,10 +136,6 @@ const fallbackTagDtos = (): CmsTag[] => {
 };
 
 async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  if (API_BASE_URL === null) {
-    throw new Error("API base URL is not configured. Deploy the backend API and set VITE_API_BASE_URL to that API origin.");
-  }
-
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -164,7 +161,7 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
 }
 
 export const cmsApi = {
-  hasBackend: API_BASE_URL !== null,
+  hasBackend: true,
 
   async getPosts(language: "vi" | "en", options: { featured?: boolean; pageSize?: number } = {}) {
     try {
@@ -237,9 +234,6 @@ export const cmsApi = {
       updateTag: (id: string, body: { name: string; slug?: string | null }) => apiRequest<CmsTag>(`/api/admin/tags/${id}`, { method: "PUT", headers: auth, body: JSON.stringify(body) }),
       deleteTag: (id: string) => apiRequest<void>(`/api/admin/tags/${id}`, { method: "DELETE", headers: auth }),
       upload: async (file: File) => {
-        if (API_BASE_URL === null) {
-          throw new Error("API base URL is not configured. Deploy the backend API and set VITE_API_BASE_URL to that API origin.");
-        }
         const form = new FormData();
         form.append("file", file);
         const response = await fetch(`${API_BASE_URL}/api/admin/media/upload`, { method: "POST", headers: auth, body: form });
