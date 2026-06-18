@@ -101,6 +101,32 @@ app.MapGet("/", (IHostEnvironment environment) => Results.Ok(new
     environment = environment.EnvironmentName
 }));
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "portfolio-cms" }));
+app.MapGet("/health/database", async (AppDbContext db, IConfiguration configuration) =>
+{
+    var provider = configuration["Database:Provider"] ?? "Postgres";
+    var canConnect = await db.Database.CanConnectAsync();
+
+    if (provider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        return Results.Ok(new
+        {
+            status = canConnect ? "ok" : "unavailable",
+            provider = db.Database.ProviderName,
+            dataSource = configuration.GetConnectionString("SqliteConnection") ?? "Data Source=portfolio_cms_dev.db"
+        });
+    }
+
+    var connectionBuilder = new NpgsqlConnectionStringBuilder(ResolvePostgresConnectionString(configuration));
+
+    return Results.Ok(new
+    {
+        status = canConnect ? "ok" : "unavailable",
+        provider = db.Database.ProviderName,
+        host = connectionBuilder.Host,
+        database = connectionBuilder.Database,
+        username = connectionBuilder.Username
+    });
+});
 app.MapGet("/routes", (IEnumerable<EndpointDataSource> endpointSources) =>
 {
     var routes = endpointSources
