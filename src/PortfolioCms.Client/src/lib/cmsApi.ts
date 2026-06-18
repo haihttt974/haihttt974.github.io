@@ -1,9 +1,10 @@
 import { BlogPost, Category, blogPosts as fallbackPosts, categories as fallbackCategories } from "@/data/blogData";
 
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+const hasValidApiBaseUrl = /^https?:\/\/[^/\s]+/i.test(configuredApiBaseUrl);
 const isInvalidProductionApiBaseUrl =
   !import.meta.env.DEV &&
-  (!configuredApiBaseUrl || configuredApiBaseUrl.includes("github.io"));
+  (!hasValidApiBaseUrl || configuredApiBaseUrl.includes("github.io"));
 const API_BASE_URL = isInvalidProductionApiBaseUrl ? null : configuredApiBaseUrl || "";
 
 export type PostStatus = "Draft" | "Published" | "Archived" | 0 | 1 | 2;
