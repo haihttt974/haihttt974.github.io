@@ -58,12 +58,13 @@ public sealed class PostsController(AppDbContext db) : ControllerBase
             query = query.Where(x => x.Featured == featured.Value);
         }
 
-        var total = await query.CountAsync(cancellationToken);
-        var posts = await query
+        var allPosts = await query.ToListAsync(cancellationToken);
+        var total = allPosts.Count;
+        var posts = allPosts
             .OrderByDescending(x => x.PublishedAt ?? x.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            .ToList();
         var items = posts.Select(ToListItem).ToList();
 
         return new PagedResult<PostListItemDto>(items, page, pageSize, total, (int)Math.Ceiling(total / (double)pageSize));

@@ -32,8 +32,9 @@ public sealed class AdminController(AppDbContext db, SlugService slugService, Cl
         pageSize = Math.Clamp(pageSize, 1, 100);
 
         var query = db.Posts.AsNoTracking().Include(x => x.Category).Include(x => x.PostTags).ThenInclude(x => x.Tag);
-        var total = await query.CountAsync(cancellationToken);
-        var posts = await query.OrderByDescending(x => x.UpdatedAt).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var allPosts = await query.ToListAsync(cancellationToken);
+        var total = allPosts.Count;
+        var posts = allPosts.OrderByDescending(x => x.UpdatedAt).Skip((page - 1) * pageSize).Take(pageSize).ToList();
         var items = posts.Select(PostsController.ToListItem).ToList();
 
         return new PagedResult<PostListItemDto>(items, page, pageSize, total, (int)Math.Ceiling(total / (double)pageSize));
@@ -198,9 +199,11 @@ public sealed class AdminController(AppDbContext db, SlugService slugService, Cl
     [HttpGet("media")]
     public async Task<IReadOnlyList<MediaAssetDto>> Media(CancellationToken cancellationToken)
     {
-        return await db.MediaAssets.AsNoTracking().OrderByDescending(x => x.CreatedAt)
+        var assets = await db.MediaAssets.AsNoTracking().ToListAsync(cancellationToken);
+        return assets
+            .OrderByDescending(x => x.CreatedAt)
             .Select(x => new MediaAssetDto(x.Id, x.Url, x.PublicId, x.FileName, x.MimeType, x.SizeBytes, x.CreatedAt))
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 
     [HttpPost("media/upload")]

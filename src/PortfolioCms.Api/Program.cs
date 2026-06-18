@@ -15,13 +15,22 @@ builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("
 var databaseProvider = builder.Configuration["Database:Provider"] ?? "Postgres";
 var useInMemoryDatabase = builder.Environment.IsDevelopment() &&
     databaseProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase);
+var useSqliteDatabase = builder.Environment.IsDevelopment() &&
+    databaseProvider.Equals("Sqlite", StringComparison.OrdinalIgnoreCase);
 var connectionString = ResolvePostgresConnectionString(builder.Configuration);
+var sqliteConnectionString = builder.Configuration.GetConnectionString("SqliteConnection") ?? "Data Source=portfolio_cms_dev.db";
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (useInMemoryDatabase)
     {
         options.UseInMemoryDatabase("portfolio_cms_dev");
+        return;
+    }
+
+    if (useSqliteDatabase)
+    {
+        options.UseSqlite(sqliteConnectionString);
         return;
     }
 
@@ -117,7 +126,7 @@ app.MapGet("/routes", (IEnumerable<EndpointDataSource> endpointSources) =>
     return Results.Ok(routes);
 });
 
-await InitializeDatabaseAsync(app, useInMemoryDatabase);
+await InitializeDatabaseAsync(app, useInMemoryDatabase || useSqliteDatabase);
 
 app.Run();
 
