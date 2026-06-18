@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using PortfolioCms.Data;
 using PortfolioCms.Service;
 
@@ -14,6 +15,7 @@ builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? builder.Configuration["DATABASE_URL"]
     ?? "Host=localhost;Port=5432;Database=portfolio_cms;Username=postgres;Password=postgres";
+connectionString = NormalizePostgresConnectionString(connectionString);
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
@@ -81,3 +83,25 @@ if (app.Configuration.GetValue("Database:AutoMigrate", true))
 }
 
 app.Run();
+
+static string NormalizePostgresConnectionString(string value)
+{
+    if (!value.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) &&
+        !value.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        return value;
+    }
+
+    var uri = new Uri(value);
+    var userInfo = uri.UserInfo.Split(':', 2);
+
+    return new NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port > 0 ? uri.Port : 5432,
+        Database = uri.AbsolutePath.TrimStart('/'),
+        Username = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(0) ?? ""),
+        Password = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(1) ?? ""),
+        SslMode = SslMode.Require
+    }.ConnectionString;
+}
