@@ -20,6 +20,12 @@ Create `src/PortfolioCms.Client/.env` from `src/PortfolioCms.Client/.env.example
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
+For GitHub Pages production, create `src/PortfolioCms.Client/.env.production` with your deployed backend URL, for example:
+
+```bash
+VITE_API_BASE_URL=https://your-backend.onrender.com
+```
+
 Backend:
 
 ```bash
@@ -66,7 +72,8 @@ Cloudinary__CloudName=your-cloud-name
 Cloudinary__ApiKey=your-api-key
 Cloudinary__ApiSecret=your-api-secret
 Cloudinary__Folder=portfolio-blog
-AllowedOrigins__0=https://your-frontend-domain
+AllowedOrigins__0=https://haihttt974.github.io
+AllowedOrigins__1=https://your-frontend.pages.dev
 Database__AutoMigrate=true
 ```
 
@@ -79,6 +86,9 @@ VITE_API_BASE_URL=https://your-backend-domain
 ```
 
 If `VITE_API_BASE_URL` is missing or the backend is unavailable, the public blog falls back to `src/PortfolioCms.Client/src/data/blogData.ts`.
+
+For the admin login to work on GitHub Pages, the frontend build must use a production backend URL, not `localhost`.
+The backend production deployment must also allow the GitHub Pages origin in CORS.
 
 ## CMS URLs
 
