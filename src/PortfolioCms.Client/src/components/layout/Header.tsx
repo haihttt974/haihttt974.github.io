@@ -1,16 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
-import { ArrowUpRight, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpRight, Menu, ShieldCheck, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { aboutData } from "@/data/blogData";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { adminAuthChangedEvent, getAdminToken } from "@/lib/adminAuth";
 
 export const Header = () => {
   const { t } = useLanguage();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => Boolean(getAdminToken()));
   const navItems = [
     { path: "/", label: t("nav.home"), index: "00" },
     { path: "/projects", label: t("nav.projects"), index: "01" },
@@ -19,6 +21,19 @@ export const Header = () => {
   ];
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+
+  useEffect(() => {
+    const syncAdminState = () => setIsAdminLoggedIn(Boolean(getAdminToken()));
+
+    window.addEventListener(adminAuthChangedEvent, syncAdminState);
+    window.addEventListener("storage", syncAdminState);
+    syncAdminState();
+
+    return () => {
+      window.removeEventListener(adminAuthChangedEvent, syncAdminState);
+      window.removeEventListener("storage", syncAdminState);
+    };
+  }, []);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
@@ -37,6 +52,21 @@ export const Header = () => {
           </Link>
 
           <ul className="hidden items-center gap-1 md:flex">
+            {isAdminLoggedIn && (
+              <li>
+                <Link
+                  to="/admin"
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
+                    isActive("/admin")
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  <ShieldCheck className="h-3.5 w-3.5 opacity-80" />
+                  Admin
+                </Link>
+              </li>
+            )}
             {navItems.map((item) => (
               <li key={item.path}>
                 <Link
@@ -77,6 +107,18 @@ export const Header = () => {
 
         {mobileMenuOpen && (
           <div className="border-t border-border/60 py-4 md:hidden">
+            {isAdminLoggedIn && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`mb-2 flex items-center justify-between rounded-lg px-4 py-3 font-mono text-sm ${
+                  isActive("/admin") ? "bg-primary/10 text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" />Admin</span>
+                <span className="text-xs opacity-65">/admin</span>
+              </Link>
+            )}
             {navItems.map((item) => (
               <Link
                 key={item.path}

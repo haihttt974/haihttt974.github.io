@@ -2,23 +2,25 @@ import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Clock, Tag, Filter, X, ChevronDown, Check } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { blogPosts, categories, localizeBlogPost } from "@/data/blogData";
+import { localizeBlogPost, BlogPost } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Eye } from "lucide-react";
-import { fetchAllViews } from "@/lib/umamiViews";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
 import { staggerContainer, staggerItem } from "@/lib/motion";
+import { CmsCategory, CmsTag, cmsApi } from "@/lib/cmsApi";
 
 const Blog = () => {
   const { t, locale, language } = useLanguage();
   const reduceMotion = useReducedMotion();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewsMap, setViewsMap] = useState<Record<string, number>>({});
+  const [blogPosts, setBlogPosts] = useState<(BlogPost & { viewCount?: number })[]>([]);
+  const [categories, setCategories] = useState<CmsCategory[]>([]);
+  const [tags, setTags] = useState<CmsTag[]>([]);
   
   const selectedCategory = searchParams.get("category") || "all";
   const tagParam = searchParams.get("tag") || "";
@@ -27,32 +29,18 @@ const Blog = () => {
     [tagParam],
   );
 
-  const allTags = useMemo(() => {
-    const tagCounts = new Map<string, number>();
-
-    blogPosts.forEach((post) => {
-      post.tags.forEach((tag) => {
-        tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-      });
-    });
-
-    return Array.from(tagCounts.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
-  }, []);
+  const allTags = useMemo(() => tags.map((tag) => ({ name: tag.name, count: tag.postCount })), [tags]);
 
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
 
-    blogPosts.forEach((post) => {
-      counts.set(post.category, (counts.get(post.category) ?? 0) + 1);
-    });
+    categories.forEach((category) => counts.set(category.slug, category.postCount));
 
     return counts;
-  }, []);
+  }, [categories]);
 
   const filteredPosts = useMemo(() => {
-    return blogPosts.map((post) => localizeBlogPost(post, language)).filter((post) => {
+    return blogPosts.map((sourcePost) => ({ ...localizeBlogPost(sourcePost, language), viewCount: sourcePost.viewCount })).filter((post) => {
       const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
       const matchesTags =
         selectedTags.length === 0 ||
@@ -65,11 +53,10 @@ const Blog = () => {
         post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesCategory && matchesTags && matchesSearch;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [selectedCategory, selectedTags, searchQuery, language]);
+  }, [blogPosts, selectedCategory, selectedTags, searchQuery, language]);
 
-  const getCategoryName = (categoryId: string) => {
-    return categories.some((c) => c.id === categoryId) ? t(`category.${categoryId}`) : categoryId;
-  };
+  const getCategoryName = (categoryId: string) =>
+    categories.find((c) => c.slug === categoryId)?.name || t(`category.${categoryId}`) || categoryId;
 
   const setCategoryFilter = (categoryId: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -112,32 +99,26 @@ const Blog = () => {
   useEffect(() => {
     let cancelled = false;
 
-    const updateAllViews = async () => {
-      try {
-        const allViews = await fetchAllViews();
-        
-        if (!cancelled) {
-          const mappedViews: Record<string, number> = {};
-          
-          blogPosts.forEach(post => {
-            const path = `/blog/${post.id}`;
-            mappedViews[post.id] = allViews[path] || 0;
-          });
-          setViewsMap(mappedViews);
-        }
-      } catch (err) {
-        console.error("Error updating all views:", err);
+    const loadBlog = async () => {
+      const [posts, categoryItems, tagItems] = await Promise.all([
+        cmsApi.getPosts(language, { pageSize: 100 }),
+        cmsApi.getCategories(),
+        cmsApi.getTags(),
+      ]);
+
+      if (!cancelled) {
+        setBlogPosts(posts);
+        setCategories(categoryItems);
+        setTags(tagItems);
       }
     };
 
-    updateAllViews();
-    const interval = setInterval(updateAllViews, 60000);
+    loadBlog();
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
     };
-  }, []);
+  }, [language]);
 
   return (
     <Layout>
@@ -205,28 +186,28 @@ const Blog = () => {
                       <span className="h-2.5 w-2.5 rounded-full bg-current opacity-70" />
                       <span className="min-w-0 flex-1 truncate">{t("blog.all")}</span>
                       <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                        {blogPosts.length}
+                    {blogPosts.length}
                       </span>
                       {selectedCategory === "all" && <Check className="h-4 w-4" />}
                     </button>
                     {categories.map((category) => {
-                      const isActive = selectedCategory === category.id;
+                      const isActive = selectedCategory === category.slug;
 
                       return (
                         <button
                           key={category.id}
                           type="button"
-                          onClick={() => setCategoryFilter(category.id)}
+                          onClick={() => setCategoryFilter(category.slug)}
                           className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
                             isActive
                               ? "bg-primary/10 text-primary ring-1 ring-primary/20"
                               : "text-foreground hover:bg-muted"
                           }`}
                         >
-                          <span className={`h-2.5 w-2.5 rounded-full ${category.color}`} />
-                          <span className="min-w-0 flex-1 truncate">{t(`category.${category.id}`)}</span>
+                          <span className={`h-2.5 w-2.5 rounded-full ${category.color || "category-practices"}`} />
+                          <span className="min-w-0 flex-1 truncate">{category.name}</span>
                           <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                            {categoryCounts.get(category.id) ?? 0}
+                            {categoryCounts.get(category.slug) ?? 0}
                           </span>
                           {isActive && <Check className="h-4 w-4" />}
                         </button>
@@ -344,7 +325,7 @@ const Blog = () => {
 
                   <div className="flex items-center text-muted-foreground text-sm">
                     <Eye className="h-4 w-4 mr-1" />
-                    {(viewsMap[post.id] ?? 0).toLocaleString(locale)}
+                    {(post.viewCount ?? 0).toLocaleString(locale)}
                   </div>
                 </div>
 

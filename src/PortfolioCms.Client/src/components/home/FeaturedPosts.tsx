@@ -1,39 +1,29 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, Eye } from "lucide-react";
-import { blogPosts, categories, localizeBlogPost } from "@/data/blogData";
+import { BlogPost, categories, localizeBlogPost } from "@/data/blogData";
 import { useEffect, useState } from "react";
-import { fetchAllViews } from "@/lib/umamiViews";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
 import { revealSection, staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
-
-const featuredPosts = blogPosts
-  .filter((post) => post.featured)
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  .slice(0, 3);
+import { cmsApi } from "@/lib/cmsApi";
 
 export const FeaturedPosts = () => {
   const { t, locale, language } = useLanguage();
   const reduceMotion = useReducedMotion();
-  const [viewsMap, setViewsMap] = useState<Record<string, number>>({});
+  const [featuredPosts, setFeaturedPosts] = useState<(BlogPost & { viewCount?: number })[]>([]);
   const categoryName = (id: string) => categories.some((category) => category.id === id) ? t(`category.${id}`) : id;
 
   useEffect(() => {
     let cancelled = false;
-    const updateViews = async () => {
-      try {
-        const views = await fetchAllViews();
-        if (!cancelled) {
-          setViewsMap(Object.fromEntries(featuredPosts.map((post) => [post.id, views[`/blog/${post.id}`] || 0])));
-        }
-      } catch (error) {
-        console.error("Error updating featured views:", error);
+    const loadFeaturedPosts = async () => {
+      const posts = await cmsApi.getPosts(language, { featured: true, pageSize: 3 });
+      if (!cancelled) {
+        setFeaturedPosts(posts.slice(0, 3));
       }
     };
-    updateViews();
-    const interval = setInterval(updateViews, 60000);
-    return () => { cancelled = true; clearInterval(interval); };
-  }, []);
+    loadFeaturedPosts();
+    return () => { cancelled = true; };
+  }, [language]);
 
   return (
     <m.section
@@ -68,7 +58,7 @@ export const FeaturedPosts = () => {
               <div className="mt-8 flex flex-wrap items-center gap-5 border-t border-border/70 pt-5 font-mono text-xs text-muted-foreground">
                 <span>{new Date(post.date).toLocaleDateString(locale)}</span>
                 <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" />{post.readTime}</span>
-                <span className="flex items-center gap-1.5"><Eye className="h-3 w-3" />{(viewsMap[post.id] ?? 0).toLocaleString("vi-VN")}</span>
+                <span className="flex items-center gap-1.5"><Eye className="h-3 w-3" />{(sourcePost.viewCount ?? 0).toLocaleString(locale)}</span>
                 <Link to={`/blog/${post.id}`} className="ml-auto flex items-center gap-1.5 text-primary">{t("home.notes.read")} <ArrowRight className="h-3 w-3" /></Link>
               </div>
             </m.article>

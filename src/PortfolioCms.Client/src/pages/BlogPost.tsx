@@ -2,42 +2,54 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
-import { blogPosts, categories, localizeBlogPost } from "@/data/blogData";
+import { BlogPost as BlogPostData, localizeBlogPost } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { fetchViews } from "@/lib/umamiViews";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArticleContent } from "@/components/blog/ArticleContent";
+import { cmsApi } from "@/lib/cmsApi";
 
 const BlogPost = () => {
   const { t, locale, language } = useLanguage();
   const { id } = useParams();
-  const [views, setViews] = useState<number | null>(null);
+  const [sourcePost, setSourcePost] = useState<(BlogPostData & { viewCount?: number }) | undefined>();
+  const [loading, setLoading] = useState(true);
 
-  const sourcePost = blogPosts.find((p) => p.id === id);
   const post = sourcePost ? localizeBlogPost(sourcePost, language) : undefined;
 
   useEffect(() => {
-    if (!sourcePost) return;
+    if (!id) return;
+    let cancelled = false;
 
-    const path = `/blog/${sourcePost.id}`;
+    const loadPost = async () => {
+      setLoading(true);
+      const loadedPost = await cmsApi.getPost(id, language);
+      if (!cancelled) {
+        setSourcePost(loadedPost);
+        setLoading(false);
+      }
 
-    const updateViews = async () => {
-      try {
-        const v = await fetchViews(path);
-        setViews(v);
-      } catch (err) {
-        console.error("Error fetching views:", err);
-        setViews((currentViews) => currentViews ?? 0);
+      const view = await cmsApi.incrementView(id);
+      if (!cancelled && view && loadedPost) {
+        setSourcePost({ ...loadedPost, viewCount: view.viewCount });
       }
     };
 
-    updateViews();
-    // Poll for real-time updates every 30 seconds
-    const interval = setInterval(updateViews, 30000);
+    loadPost();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, language]);
 
-    return () => clearInterval(interval);
-  }, [sourcePost]);
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">
+          Loading...
+        </div>
+      </Layout>
+    );
+  }
 
   if (!post) {
     return (
@@ -58,12 +70,11 @@ const BlogPost = () => {
     );
   }
 
-  const categoryName = categories.some((c) => c.id === post.category) ? t(`category.${post.category}`) : post.category;
+  const categoryName = t(`category.${post.category}`) || post.category;
 
   return (
     <Layout>
       <article className="container mx-auto px-4 py-12">
-        {/* Back Link */}
         <Link
           to="/blog"
           className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors mb-8"
@@ -72,7 +83,6 @@ const BlogPost = () => {
           {t("post.back")}
         </Link>
 
-        {/* Header */}
         <header className="max-w-3xl mb-12">
           <Badge variant="secondary" className="mb-4">
             {categoryName}
@@ -100,12 +110,11 @@ const BlogPost = () => {
 
             <div className="flex items-center">
               <Eye className="h-4 w-4 mr-2" />
-              {views === null ? "—" : `${views.toLocaleString(locale)} ${t("post.views")}`}
+              {`${(sourcePost?.viewCount ?? 0).toLocaleString(locale)} ${t("post.views")}`}
             </div>
           </div>
         </header>
 
-        {/* Content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
           <div className="lg:col-span-3">
             <div className="card-gradient rounded-xl border border-border/50 p-6 md:p-12">
@@ -113,10 +122,8 @@ const BlogPost = () => {
             </div>
           </div>
 
-          {/* Sidebar */}
           <aside className="lg:col-span-1">
             <div className="sticky top-24 space-y-8">
-              {/* Tags */}
               <div className="card-gradient border border-border/50 rounded-xl p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
                   <Tag className="h-4 w-4 mr-2" />
@@ -133,7 +140,6 @@ const BlogPost = () => {
                 </div>
               </div>
 
-              {/* Share */}
               <div className="card-gradient border border-border/50 rounded-xl p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
                   <Share2 className="h-4 w-4 mr-2" />
