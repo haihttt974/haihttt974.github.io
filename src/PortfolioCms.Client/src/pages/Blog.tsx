@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Clock, Tag, Filter, X, ChevronDown, Check } from "lucide-react";
+import { BadgeCheck, Blocks, BookOpenCheck, Check, ChevronDown, Clock, Code2, Filter, Folder, Map as MapIcon, Network, Search, Shapes, Tag, X } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { localizeBlogPost, BlogPost } from "@/data/blogData";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,8 @@ const Blog = () => {
   const [blogPosts, setBlogPosts] = useState<(BlogPost & { viewCount?: number })[]>([]);
   const [categories, setCategories] = useState<CmsCategory[]>([]);
   const [tags, setTags] = useState<CmsTag[]>([]);
+  const [categorySearch, setCategorySearch] = useState("");
+  const [tagSearch, setTagSearch] = useState("");
   
   const selectedCategory = searchParams.get("category") || "all";
   const tagParam = searchParams.get("tag") || "";
@@ -30,6 +32,22 @@ const Blog = () => {
   );
 
   const allTags = useMemo(() => tags.map((tag) => ({ name: tag.name, count: tag.postCount })), [tags]);
+
+  const filteredCategories = useMemo(() => {
+    const query = categorySearch.trim().toLowerCase();
+    if (!query) return categories;
+
+    return categories.filter((category) =>
+      [category.name, category.slug, category.description ?? ""].some((value) => value.toLowerCase().includes(query)),
+    );
+  }, [categories, categorySearch]);
+
+  const filteredTags = useMemo(() => {
+    const query = tagSearch.trim().toLowerCase();
+    if (!query) return allTags;
+
+    return allTags.filter((tag) => tag.name.toLowerCase().includes(query));
+  }, [allTags, tagSearch]);
 
   const categoryCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -57,6 +75,20 @@ const Blog = () => {
 
   const getCategoryName = (categoryId: string) =>
     categories.find((c) => c.slug === categoryId)?.name || t(`category.${categoryId}`) || categoryId;
+
+  const getCategoryIcon = (category: Pick<CmsCategory, "name" | "slug"> | { name: string; slug: string }) => {
+    const value = `${category.slug} ${category.name}`.toLowerCase();
+
+    if (value.includes("language")) return Code2;
+    if (value.includes("framework") || value.includes("librar")) return Blocks;
+    if (value.includes("architecture")) return Network;
+    if (value.includes("pattern")) return Shapes;
+    if (value.includes("practice")) return BadgeCheck;
+    if (value.includes("roadmap")) return MapIcon;
+    if (value.includes("learning")) return BookOpenCheck;
+
+    return Folder;
+  };
 
   const setCategoryFilter = (categoryId: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -173,6 +205,17 @@ const Blog = () => {
                   <div className="px-2 pb-2 pt-1 text-xs font-medium uppercase text-muted-foreground">
                     {t("blog.filterCategory")}
                   </div>
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      value={categorySearch}
+                      onChange={(event) => setCategorySearch(event.target.value)}
+                      onKeyDown={(event) => event.stopPropagation()}
+                      placeholder={language === "vi" ? "Tìm danh mục" : "Search categories"}
+                      className="h-9 rounded-lg border-border/70 bg-background/85 pl-9 text-sm"
+                    />
+                  </div>
                   <div className="space-y-1">
                     <button
                       type="button"
@@ -183,15 +226,16 @@ const Blog = () => {
                           : "text-foreground hover:bg-muted"
                       }`}
                     >
-                      <span className="h-2.5 w-2.5 rounded-full bg-current opacity-70" />
+                      <Folder className="h-4 w-4 shrink-0 opacity-75" />
                       <span className="min-w-0 flex-1 truncate">{t("blog.all")}</span>
                       <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                     {blogPosts.length}
                       </span>
                       {selectedCategory === "all" && <Check className="h-4 w-4" />}
                     </button>
-                    {categories.map((category) => {
+                    {filteredCategories.map((category) => {
                       const isActive = selectedCategory === category.slug;
+                      const CategoryIcon = getCategoryIcon(category);
 
                       return (
                         <button
@@ -204,7 +248,7 @@ const Blog = () => {
                               : "text-foreground hover:bg-muted"
                           }`}
                         >
-                          <span className={`h-2.5 w-2.5 rounded-full ${category.color || "category-practices"}`} />
+                          <CategoryIcon className="h-4 w-4 shrink-0 opacity-75" />
                           <span className="min-w-0 flex-1 truncate">{category.name}</span>
                           <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                             {categoryCounts.get(category.slug) ?? 0}
@@ -213,6 +257,11 @@ const Blog = () => {
                         </button>
                       );
                     })}
+                    {filteredCategories.length === 0 && (
+                      <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                        {language === "vi" ? "Không tìm thấy danh mục" : "No categories found"}
+                      </div>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>
@@ -247,8 +296,19 @@ const Blog = () => {
                       </Button>
                     )}
                   </div>
+                  <div className="relative mb-3">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      value={tagSearch}
+                      onChange={(event) => setTagSearch(event.target.value)}
+                      onKeyDown={(event) => event.stopPropagation()}
+                      placeholder={language === "vi" ? "Tìm thẻ" : "Search tags"}
+                      className="h-9 rounded-lg border-border/70 bg-background/85 pl-9 text-sm"
+                    />
+                  </div>
                   <div className="flex max-h-72 flex-wrap gap-2 overflow-y-auto pr-1">
-                    {allTags.map((tag) => {
+                    {filteredTags.map((tag) => {
                       const isSelected = selectedTags.some((selectedTag) => selectedTag.toLowerCase() === tag.name.toLowerCase());
 
                       return (
@@ -267,6 +327,11 @@ const Blog = () => {
                         </Button>
                       );
                     })}
+                    {filteredTags.length === 0 && (
+                      <div className="w-full px-3 py-6 text-center text-sm text-muted-foreground">
+                        {language === "vi" ? "Không tìm thấy thẻ" : "No tags found"}
+                      </div>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>
