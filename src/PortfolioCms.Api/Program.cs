@@ -77,17 +77,45 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.MapOpenApi();
+app.MapGet("/swagger", () => Results.Redirect("/openapi/v1.json", permanent: false));
 
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/", (IHostEnvironment environment) => Results.Ok(new
+{
+    status = "ok",
+    service = "portfolio-cms",
+    environment = environment.EnvironmentName
+}));
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "portfolio-cms" }));
+app.MapGet("/routes", (IEnumerable<EndpointDataSource> endpointSources) =>
+{
+    var routes = endpointSources
+        .SelectMany(source => source.Endpoints)
+        .OfType<RouteEndpoint>()
+        .Select(endpoint =>
+        {
+            var httpMethods = endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods;
+            var authorize = endpoint.Metadata.GetOrderedMetadata<Microsoft.AspNetCore.Authorization.IAuthorizeData>();
+
+            return new
+            {
+                pattern = endpoint.RoutePattern.RawText,
+                methods = httpMethods?.OrderBy(method => method).ToArray() ?? [],
+                displayName = endpoint.DisplayName,
+                requiresAuthorization = authorize.Count > 0
+            };
+        })
+        .OrderBy(route => route.pattern)
+        .ThenBy(route => string.Join(",", route.methods))
+        .ToArray();
+
+    return Results.Ok(routes);
+});
 
 await InitializeDatabaseAsync(app, useInMemoryDatabase);
 
