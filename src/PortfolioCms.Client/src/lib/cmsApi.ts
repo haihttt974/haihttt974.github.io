@@ -1,6 +1,7 @@
 import { BlogPost, Category, blogPosts as fallbackPosts, categories as fallbackCategories } from "@/data/blogData";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") || "";
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+const API_BASE_URL = configuredApiBaseUrl || (import.meta.env.DEV ? "" : null);
 
 export type PostStatus = "Draft" | "Published" | "Archived" | 0 | 1 | 2;
 
@@ -130,7 +131,9 @@ const fallbackTagDtos = (): CmsTag[] => {
 };
 
 async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
-  if (!API_BASE_URL) throw new Error("API base URL is not configured.");
+  if (API_BASE_URL === null) {
+    throw new Error("API base URL is not configured. Deploy the backend API and set VITE_API_BASE_URL to that API origin.");
+  }
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
@@ -157,7 +160,7 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
 }
 
 export const cmsApi = {
-  hasBackend: Boolean(API_BASE_URL),
+  hasBackend: API_BASE_URL !== null,
 
   async getPosts(language: "vi" | "en", options: { featured?: boolean; pageSize?: number } = {}) {
     try {
@@ -230,7 +233,9 @@ export const cmsApi = {
       updateTag: (id: string, body: { name: string; slug?: string | null }) => apiRequest<CmsTag>(`/api/admin/tags/${id}`, { method: "PUT", headers: auth, body: JSON.stringify(body) }),
       deleteTag: (id: string) => apiRequest<void>(`/api/admin/tags/${id}`, { method: "DELETE", headers: auth }),
       upload: async (file: File) => {
-        if (!API_BASE_URL) throw new Error("API base URL is not configured.");
+        if (API_BASE_URL === null) {
+          throw new Error("API base URL is not configured. Deploy the backend API and set VITE_API_BASE_URL to that API origin.");
+        }
         const form = new FormData();
         form.append("file", file);
         const response = await fetch(`${API_BASE_URL}/api/admin/media/upload`, { method: "POST", headers: auth, body: form });

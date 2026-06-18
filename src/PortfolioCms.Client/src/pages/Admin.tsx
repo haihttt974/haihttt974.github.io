@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Edit, ImageUp, LayoutDashboard, LogOut, Plus, Save, Tags, Trash2 } from "lucide-react";
+import { Edit, ImageUp, LayoutDashboard, Loader2, LogOut, Plus, Save, Tags, Trash2 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,7 @@ const Admin = () => {
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [posts, setPosts] = useState<CmsPostListItem[]>([]);
   const [categories, setCategories] = useState<CmsCategory[]>([]);
@@ -78,7 +79,10 @@ const Admin = () => {
 
   const login = async (event: FormEvent) => {
     event.preventDefault();
+    if (isLoggingIn) return;
+
     setMessage("");
+    setIsLoggingIn(true);
     try {
       const result = await cmsApi.login(username, password);
       setAdminToken(result.accessToken);
@@ -86,6 +90,8 @@ const Admin = () => {
       setPassword("");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Login failed.");
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -281,10 +287,13 @@ const Admin = () => {
           <form onSubmit={login} className="card-gradient w-full rounded-xl border border-border/50 p-6">
             <h1 className="mb-6 text-3xl font-bold">Admin Login</h1>
             <div className="space-y-4">
-              <Input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Username" />
-              <Input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password" type="password" />
+              <Input value={username} onChange={(event) => setUsername(event.target.value)} placeholder="Username" disabled={isLoggingIn} />
+              <Input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password" type="password" disabled={isLoggingIn} />
               {message && <p className="text-sm text-destructive">{message}</p>}
-              <Button type="submit" className="w-full">Login</Button>
+              <Button type="submit" className="w-full gap-2" disabled={isLoggingIn}>
+                {isLoggingIn && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoggingIn ? "Logging in..." : "Login"}
+              </Button>
             </div>
           </form>
         </div>

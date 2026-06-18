@@ -8,9 +8,11 @@
     "client:preview": "npm --prefix src/PortfolioCms.Client run preview",
     "client:lint": "npm --prefix src/PortfolioCms.Client run lint",
     "client:deploy": "npm --prefix src/PortfolioCms.Client run deploy",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
     "api:restore": "dotnet restore PortfolioCms.slnx",
     "api:build": "dotnet build PortfolioCms.slnx --no-restore",
-    "api:run": "dotnet run --project src/PortfolioCms.Api/PortfolioCms.Api.csproj --urls http://localhost:5000",
+    "api:run": "dotnet run --project src/PortfolioCms.Api/PortfolioCms.Api.csproj --urls http://0.0.0.0:5000",
     "cms:import-blog": "node scripts/import-local-blog-data.mjs",
     "build": "npm run client:build && npm run api:build",
     "deploy": "npm run client:deploy"
