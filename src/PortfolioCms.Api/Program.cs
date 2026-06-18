@@ -17,7 +17,20 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? "Host=localhost;Port=5432;Database=portfolio_cms;Username=postgres;Password=postgres";
 connectionString = NormalizePostgresConnectionString(connectionString);
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+var databaseProvider = builder.Configuration["Database:Provider"] ?? "Postgres";
+var useInMemoryDatabase = builder.Environment.IsDevelopment() &&
+    databaseProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase);
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    if (useInMemoryDatabase)
+    {
+        options.UseInMemoryDatabase("portfolio_cms_dev");
+        return;
+    }
+
+    options.UseNpgsql(connectionString);
+});
 
 var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>() ?? new JwtOptions();
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret));
@@ -78,7 +91,16 @@ if (app.Configuration.GetValue("Database:AutoMigrate", true))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+
+    if (useInMemoryDatabase)
+    {
+        await db.Database.EnsureCreatedAsync();
+    }
+    else
+    {
+        await db.Database.MigrateAsync();
+    }
+
     await scope.ServiceProvider.GetRequiredService<DataSeeder>().SeedAsync();
 }
 
