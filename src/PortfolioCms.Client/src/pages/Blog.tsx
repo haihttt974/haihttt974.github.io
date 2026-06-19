@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
 import { staggerContainer, staggerItem } from "@/lib/motion";
 import { CmsCategory, CmsTag, cmsApi } from "@/lib/cmsApi";
+import { DbLoadingState } from "@/components/loading/DbLoadingState";
 
 const Blog = () => {
   const { t, locale, language } = useLanguage();
@@ -23,6 +24,7 @@ const Blog = () => {
   const [tags, setTags] = useState<CmsTag[]>([]);
   const [categorySearch, setCategorySearch] = useState("");
   const [tagSearch, setTagSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   
   const selectedCategory = searchParams.get("category") || "all";
   const tagParam = searchParams.get("tag") || "";
@@ -132,6 +134,7 @@ const Blog = () => {
     let cancelled = false;
 
     const loadBlog = async () => {
+      setIsLoading(true);
       const [posts, categoryItems, tagItems] = await Promise.all([
         cmsApi.getPosts(language, { pageSize: 100 }),
         cmsApi.getCategories(),
@@ -142,10 +145,13 @@ const Blog = () => {
         setBlogPosts(posts);
         setCategories(categoryItems);
         setTags(tagItems);
+        setIsLoading(false);
       }
     };
 
-    loadBlog();
+    loadBlog().catch(() => {
+      if (!cancelled) setIsLoading(false);
+    });
 
     return () => {
       cancelled = true;
@@ -362,8 +368,9 @@ const Blog = () => {
           )}
         </div>
 
-        {/* Posts Grid */}
-        {filteredPosts.length > 0 ? (
+        {isLoading ? (
+          <DbLoadingState variant="feed" className="min-h-[36rem]" />
+        ) : filteredPosts.length > 0 ? (
           <m.div
             key={`${selectedCategory}-${tagParam}-${searchQuery}-${language}`}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"

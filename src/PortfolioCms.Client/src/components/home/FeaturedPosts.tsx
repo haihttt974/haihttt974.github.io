@@ -6,22 +6,28 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
 import { revealSection, staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
 import { cmsApi } from "@/lib/cmsApi";
+import { DbLoadingState } from "@/components/loading/DbLoadingState";
 
 export const FeaturedPosts = () => {
   const { t, locale, language } = useLanguage();
   const reduceMotion = useReducedMotion();
   const [featuredPosts, setFeaturedPosts] = useState<(BlogPost & { viewCount?: number })[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const categoryName = (id: string) => categories.some((category) => category.id === id) ? t(`category.${id}`) : id;
 
   useEffect(() => {
     let cancelled = false;
     const loadFeaturedPosts = async () => {
+      setIsLoading(true);
       const posts = await cmsApi.getPosts(language, { featured: true, pageSize: 3 });
       if (!cancelled) {
         setFeaturedPosts(posts.slice(0, 3));
+        setIsLoading(false);
       }
     };
-    loadFeaturedPosts();
+    loadFeaturedPosts().catch(() => {
+      if (!cancelled) setIsLoading(false);
+    });
     return () => { cancelled = true; };
   }, [language]);
 
@@ -42,7 +48,10 @@ export const FeaturedPosts = () => {
           <Link to="/blog" className="inline-flex items-center gap-2 font-mono text-xs text-primary">{t("home.notes.all")} <ArrowRight className="h-4 w-4" /></Link>
         </div>
 
-        <m.div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]" variants={reduceMotion ? undefined : staggerContainer}>
+        {isLoading ? (
+          <DbLoadingState variant="feed" className="min-h-[28rem]" />
+        ) : (
+          <m.div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]" variants={reduceMotion ? undefined : staggerContainer}>
           {featuredPosts.map((sourcePost, index) => {
             const post = localizeBlogPost(sourcePost, language);
             return (
@@ -63,7 +72,8 @@ export const FeaturedPosts = () => {
               </div>
             </m.article>
           )})}
-        </m.div>
+          </m.div>
+        )}
       </div>
     </m.section>
   );

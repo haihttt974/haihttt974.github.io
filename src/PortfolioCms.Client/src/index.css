@@ -13,6 +13,41 @@
   }
 }
 
+@keyframes db-loader-sweep {
+  0% {
+    transform: translateX(-30%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(130%);
+    opacity: 0;
+  }
+}
+
+@keyframes db-loader-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes db-loader-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @layer base {
   :root {
     --background: 45 35% 96%;
@@ -138,6 +173,41 @@
   .category-patterns { background: hsl(var(--category-patterns)); }
   .category-practices { background: hsl(var(--category-practices)); }
   .category-roadmap { background: hsl(var(--category-roadmap)); }
+
+  .db-loader-shell {
+    @apply relative overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/90 shadow-[0_28px_80px_hsl(var(--foreground)/0.08)];
+    background-image:
+      radial-gradient(circle at 14% 16%, hsl(var(--primary) / 0.09), transparent 28%),
+      radial-gradient(circle at 84% 20%, hsl(var(--accent) / 0.08), transparent 22%),
+      linear-gradient(180deg, hsl(var(--background) / 0.72), hsl(var(--background) / 0.45));
+  }
+
+  .db-loader-shell::before {
+    content: "";
+    @apply pointer-events-none absolute inset-0;
+    background: linear-gradient(90deg, transparent 0%, hsl(var(--primary) / 0.14) 50%, transparent 100%);
+    width: 36%;
+    filter: blur(18px);
+    animation: db-loader-sweep 2.8s ease-in-out infinite;
+  }
+
+  .db-loader-shell::after {
+    content: "";
+    @apply pointer-events-none absolute inset-0 opacity-[0.22];
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.45) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.45) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 88%);
+  }
+
+  .db-loader-orbit {
+    animation: db-loader-orbit 18s linear infinite;
+  }
+
+  .db-loader-breathe {
+    animation: db-loader-breathe 1.8s ease-in-out infinite;
+  }
 
   .page-grid {
     background-image:

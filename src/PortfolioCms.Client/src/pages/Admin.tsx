@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
+  AlertTriangle,
   BookOpen,
   Camera,
   CheckCircle2,
@@ -30,6 +31,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { DbLoadingState } from "@/components/loading/DbLoadingState";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   AdminProfile,
@@ -45,6 +57,13 @@ import { blogPosts as localBlogPosts, categories as localCategories } from "@/da
 import { clearAdminToken, getAdminToken, setAdminToken } from "@/lib/adminAuth";
 
 type AdminSection = "dashboard" | "posts" | "categories" | "tags" | "media" | "account";
+type PendingConfirmation = {
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  tone?: "danger" | "warning";
+  action: () => Promise<void>;
+};
 
 const slugify = (value: string) =>
   value
@@ -122,8 +141,14 @@ const Admin = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [postForm, setPostForm] = useState<UpsertPostRequest>(emptyPost());
   const [postSearch, setPostSearch] = useState("");
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [categoryName, setCategoryName] = useState("");
   const [tagName, setTagName] = useState("");
+  const [categoryAdminSearch, setCategoryAdminSearch] = useState("");
+  const [tagAdminSearch, setTagAdminSearch] = useState("");
+  const [pendingConfirmation, setPendingConfirmation] = useState<PendingConfirmation | null>(null);
+  const [confirmingAction, setConfirmingAction] = useState(false);
 
   const { toast } = useToast();
   const adminApi = useMemo(() => (token ? cmsApi.admin(token) : null), [token]);
@@ -135,6 +160,18 @@ const Admin = () => {
       title,
       description: error instanceof Error ? error.message : typeof error === "string" ? error : undefined,
     });
+  const requestConfirmation = (confirmation: PendingConfirmation) => setPendingConfirmation(confirmation);
+  const runConfirmedAction = async () => {
+    if (!pendingConfirmation || confirmingAction) return;
+
+    setConfirmingAction(true);
+    try {
+      await pendingConfirmation.action();
+      setPendingConfirmation(null);
+    } finally {
+      setConfirmingAction(false);
+    }
+  };
 
   const loadAdmin = useCallback(async () => {
     if (!adminApi) return;
@@ -174,6 +211,20 @@ const Admin = () => {
       [post.title, post.titleVi ?? "", post.slug, post.categoryName, String(post.status)].some((value) => value.toLowerCase().includes(query)),
     );
   }, [posts, postSearch]);
+
+  const filteredAdminCategories = useMemo(() => {
+    const query = categoryAdminSearch.trim().toLowerCase();
+    if (!query) return categories;
+    return categories.filter((category) =>
+      [category.name, category.slug, category.description ?? ""].some((value) => value.toLowerCase().includes(query)),
+    );
+  }, [categories, categoryAdminSearch]);
+
+  const filteredAdminTags = useMemo(() => {
+    const query = tagAdminSearch.trim().toLowerCase();
+    if (!query) return tags;
+    return tags.filter((tag) => [tag.name, tag.slug].some((value) => value.toLowerCase().includes(query)));
+  }, [tags, tagAdminSearch]);
 
   const login = async (event: FormEvent) => {
     event.preventDefault();
@@ -247,7 +298,7 @@ const Admin = () => {
   };
 
   const deletePost = async (id: string) => {
-    if (!adminApi || !confirm("Xóa bài viết này?")) return;
+    if (!adminApi) return;
     try {
       await adminApi.deletePost(id);
       await loadAdmin();
@@ -257,20 +308,48 @@ const Admin = () => {
     }
   };
 
-  const createCategory = async (event: FormEvent) => {
+  const requestDeletePost = (post: CmsPostListItem) => {
+    requestConfirmation({
+      title: "Xóa bài viết?",
+      description: `Bài viết "${post.title}" sẽ bị xóa khỏi CMS. Hành động này không thể hoàn tác.`,
+      confirmLabel: "Xóa bài viết",
+      tone: "danger",
+      action: () => deletePost(post.id),
+    });
+  };
+
+  const editCategory = (category: CmsCategory) => {
+    setEditingCategoryId(category.id);
+    setCategoryName(category.name);
+  };
+
+  const resetCategoryForm = () => {
+    setEditingCategoryId(null);
+    setCategoryName("");
+  };
+
+  const saveCategory = async (event: FormEvent) => {
     event.preventDefault();
     if (!adminApi || !categoryName.trim()) return;
 
     try {
-      await adminApi.createCategory({
+      const currentCategory = categories.find((category) => category.id === editingCategoryId);
+      const payload = {
         name: categoryName,
-        slug: "",
-        description: "",
-        color: "category-practices",
-        sortOrder: categories.length + 1,
-        isActive: true,
-      });
-      setCategoryName("");
+        slug: currentCategory?.slug ?? "",
+        description: currentCategory?.description ?? "",
+        color: currentCategory?.color ?? "category-practices",
+        sortOrder: currentCategory?.sortOrder ?? categories.length + 1,
+        isActive: currentCategory?.isActive ?? true,
+      };
+
+      if (editingCategoryId) {
+        await adminApi.updateCategory(editingCategoryId, payload);
+      } else {
+        await adminApi.createCategory(payload);
+      }
+
+      resetCategoryForm();
       await loadAdmin();
       notifySuccess("Đã thêm danh mục");
     } catch (error) {
@@ -279,9 +358,10 @@ const Admin = () => {
   };
 
   const deleteCategory = async (id: string) => {
-    if (!adminApi || !confirm("Xóa danh mục này?")) return;
+    if (!adminApi) return;
     try {
       await adminApi.deleteCategory(id);
+      if (editingCategoryId === id) resetCategoryForm();
       await loadAdmin();
       notifySuccess("Đã xóa danh mục");
     } catch (error) {
@@ -289,13 +369,43 @@ const Admin = () => {
     }
   };
 
-  const createTag = async (event: FormEvent) => {
+  const requestDeleteCategory = (category: CmsCategory) => {
+    const used = category.postCount > 0;
+    requestConfirmation({
+      title: used ? "Danh mục đang được dùng" : "Xóa danh mục?",
+      description: used
+        ? `Danh mục "${category.name}" hiện đang liên kết với ${category.postCount} bài viết. Nếu backend không cho xóa, bạn cần chuyển các bài viết sang danh mục khác trước. Bạn vẫn muốn thử xóa?`
+        : `Danh mục "${category.name}" sẽ bị xóa khỏi CMS. Hành động này không thể hoàn tác.`,
+      confirmLabel: used ? "Vẫn thử xóa" : "Xóa danh mục",
+      tone: used ? "warning" : "danger",
+      action: () => deleteCategory(category.id),
+    });
+  };
+
+  const editTag = (tag: CmsTag) => {
+    setEditingTagId(tag.id);
+    setTagName(tag.name);
+  };
+
+  const resetTagForm = () => {
+    setEditingTagId(null);
+    setTagName("");
+  };
+
+  const saveTag = async (event: FormEvent) => {
     event.preventDefault();
     if (!adminApi || !tagName.trim()) return;
 
     try {
-      await adminApi.createTag({ name: tagName });
-      setTagName("");
+      const currentTag = tags.find((tag) => tag.id === editingTagId);
+
+      if (editingTagId) {
+        await adminApi.updateTag(editingTagId, { name: tagName, slug: currentTag?.slug });
+      } else {
+        await adminApi.createTag({ name: tagName });
+      }
+
+      resetTagForm();
       await loadAdmin();
       notifySuccess("Đã thêm thẻ");
     } catch (error) {
@@ -304,14 +414,28 @@ const Admin = () => {
   };
 
   const deleteTag = async (id: string) => {
-    if (!adminApi || !confirm("Xóa thẻ này?")) return;
+    if (!adminApi) return;
     try {
       await adminApi.deleteTag(id);
+      if (editingTagId === id) resetTagForm();
       await loadAdmin();
       notifySuccess("Đã xóa thẻ");
     } catch (error) {
       notifyError("Không thể xóa thẻ", error);
     }
+  };
+
+  const requestDeleteTag = (tag: CmsTag) => {
+    const used = tag.postCount > 0;
+    requestConfirmation({
+      title: used ? "Thẻ đang được dùng" : "Xóa thẻ?",
+      description: used
+        ? `Thẻ "${tag.name}" hiện đang liên kết với ${tag.postCount} bài viết. Xóa thẻ có thể làm mất phân loại nội dung liên quan. Bạn chắc chắn muốn xóa?`
+        : `Thẻ "${tag.name}" sẽ bị xóa khỏi CMS. Hành động này không thể hoàn tác.`,
+      confirmLabel: used ? "Xóa thẻ đang dùng" : "Xóa thẻ",
+      tone: "danger",
+      action: () => deleteTag(tag.id),
+    });
   };
 
   const uploadImage = async (file?: File, applyToPost = true) => {
@@ -330,7 +454,7 @@ const Admin = () => {
   };
 
   const deleteMedia = async (id: string) => {
-    if (!adminApi || !confirm("Xóa media này khỏi CMS?")) return;
+    if (!adminApi) return;
     try {
       await adminApi.deleteMedia(id);
       await loadAdmin();
@@ -338,6 +462,16 @@ const Admin = () => {
     } catch (error) {
       notifyError("Không thể xóa media", error);
     }
+  };
+
+  const requestDeleteMedia = (asset: MediaAsset) => {
+    requestConfirmation({
+      title: "Xóa media?",
+      description: `Ảnh "${asset.fileName ?? "media đã chọn"}" sẽ bị xóa khỏi thư viện CMS. Nếu ảnh đang được dùng trong bài viết, URL hiện tại có thể không còn quản lý được trong CMS.`,
+      confirmLabel: "Xóa media",
+      tone: "danger",
+      action: () => deleteMedia(asset.id),
+    });
   };
 
   const copyMediaUrl = async (url: string) => {
@@ -384,7 +518,7 @@ const Admin = () => {
   };
 
   const importLocalBlogData = async () => {
-    if (!adminApi || !confirm("Import dữ liệu blog cục bộ vào database? Các slug đã tồn tại sẽ được bỏ qua.")) return;
+    if (!adminApi) return;
 
     notifyInfo("Đang import dữ liệu blog", "Quá trình này có thể mất vài giây.");
     try {
@@ -459,6 +593,16 @@ const Admin = () => {
     } catch (error) {
       notifyError("Import thất bại", error);
     }
+  };
+
+  const requestImportLocalBlogData = () => {
+    requestConfirmation({
+      title: "Import dữ liệu blog?",
+      description: "Dữ liệu blog cục bộ sẽ được import vào database. Các slug đã tồn tại sẽ được bỏ qua để tránh trùng bài viết.",
+      confirmLabel: "Bắt đầu import",
+      tone: "warning",
+      action: importLocalBlogData,
+    });
   };
 
   if (!token) {
@@ -718,14 +862,19 @@ const Admin = () => {
             <p className="text-xs text-slate-500">Quản trị nội dung và cấu hình website</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin text-slate-500" />}
+            {isLoading && (
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
+                <span className="db-loader-breathe h-2 w-2 rounded-full bg-indigo-500" />
+                Đang đồng bộ dữ liệu
+              </span>
+            )}
             <Button asChild variant="outline" className={`hidden sm:inline-flex ${adminSecondaryButton}`}>
               <a href="/">
                 <BookOpen className="h-4 w-4" />
                 Trang chủ
               </a>
             </Button>
-            <Button variant="outline" onClick={importLocalBlogData} className={`hidden sm:inline-flex ${adminSecondaryButton}`}>
+            <Button variant="outline" onClick={requestImportLocalBlogData} className={`hidden sm:inline-flex ${adminSecondaryButton}`}>
               <UploadCloud className="h-4 w-4" />
               Import
             </Button>
@@ -733,7 +882,9 @@ const Admin = () => {
         </header>
 
         <div className="p-4 lg:p-6">
-          {section === "dashboard" && (
+          {isLoading ? (
+            <DbLoadingState variant="dashboard" className="min-h-[calc(100vh-7rem)]" />
+          ) : section === "dashboard" && (
             <div className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                 {[
@@ -913,7 +1064,7 @@ const Admin = () => {
                         </div>
                         <div className="flex shrink-0 gap-2">
                           <Button size="icon" variant="outline" className={adminSecondaryButton} onClick={() => editPost(post.id)}><Edit className="h-4 w-4" /></Button>
-                          <Button size="icon" variant="outline" className={adminSecondaryButton} onClick={() => deletePost(post.id)}><Trash2 className="h-4 w-4" /></Button>
+                          <Button size="icon" variant="outline" className={adminSecondaryButton} onClick={() => requestDeletePost(post)}><Trash2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     </article>
@@ -929,19 +1080,51 @@ const Admin = () => {
                 <h2 className="text-lg font-semibold">Quản lý danh mục</h2>
                 <p className="text-sm text-slate-500">Phân loại chính cho bài viết.</p>
               </div>
-              <form onSubmit={createCategory} className="mb-5 flex flex-col gap-3 sm:flex-row">
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <div className="text-sm font-semibold">{editingCategoryId ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}</div>
+                  <div className="text-xs text-slate-500">Click vào danh mục bên dưới để đưa dữ liệu lên form.</div>
+                </div>
+                {editingCategoryId && (
+                  <Button type="button" variant="outline" size="sm" className={adminSecondaryButton} onClick={resetCategoryForm}>
+                    Hủy
+                  </Button>
+                )}
+              </div>
+              <form onSubmit={saveCategory} className={`mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 ${
+                editingCategoryId ? "flex flex-col gap-3 lg:flex-row" : "flex flex-col gap-3 sm:flex-row"
+              } ${editingCategoryId ? "[&>button:first-of-type]:hidden" : ""}`}>
                 <Input className={adminInput} value={categoryName} onChange={(event) => setCategoryName(event.target.value)} placeholder="Tên danh mục mới" />
                 <Button type="submit" className={adminPrimaryButton}><Plus className="h-4 w-4" />Thêm</Button>
+                {editingCategoryId && (
+                  <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-nowrap">
+                    <Button type="submit" className={adminPrimaryButton}>
+                      <Save className="h-4 w-4" />
+                      Lưu sửa
+                    </Button>
+                    <Button type="button" variant="outline" className={`${adminSecondaryButton} text-red-600 hover:text-red-700`} onClick={() => {
+                      const category = categories.find((item) => item.id === editingCategoryId);
+                      if (category) requestDeleteCategory(category);
+                    }}>
+                      <Trash2 className="h-4 w-4" />
+                      Xóa
+                    </Button>
+                  </div>
+                )}
               </form>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input className={`pl-9 ${adminInput}`} value={categoryAdminSearch} onChange={(event) => setCategoryAdminSearch(event.target.value)} placeholder="Tìm danh mục..." />
+              </div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {categories.map((category) => (
-                  <div key={category.id} className="rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-indigo-200 hover:bg-indigo-50/20">
+                {filteredAdminCategories.map((category) => (
+                  <div key={category.id} role="button" tabIndex={0} onClick={() => editCategory(category)} className={`rounded-xl border bg-white p-4 text-left transition-all hover:border-indigo-200 hover:bg-indigo-50/20 hover:shadow-sm ${editingCategoryId === category.id ? "border-indigo-300 bg-indigo-50/70 ring-2 ring-indigo-100" : "border-slate-200"}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <h3 className="font-medium">{category.name}</h3>
                         <p className="mt-1 text-sm text-slate-500">{category.slug}</p>
                       </div>
-                      <Button size="icon" variant="outline" className={adminSecondaryButton} onClick={() => deleteCategory(category.id)}><Trash2 className="h-4 w-4" /></Button>
+                      <Button size="icon" variant="outline" className={adminSecondaryButton} onClick={(event) => { event.stopPropagation(); requestDeleteCategory(category); }}><Trash2 className="h-4 w-4" /></Button>
                     </div>
                     <div className="mt-4 text-sm text-slate-500">{category.postCount} bài viết</div>
                   </div>
@@ -956,17 +1139,49 @@ const Admin = () => {
                 <h2 className="text-lg font-semibold">Quản lý thẻ nội dung</h2>
                 <p className="text-sm text-slate-500">Gắn chủ đề chi tiết cho từng bài viết.</p>
               </div>
-              <form onSubmit={createTag} className="mb-5 flex flex-col gap-3 sm:flex-row">
+              <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <div className="text-sm font-semibold">{editingTagId ? "Chỉnh sửa thẻ" : "Thêm thẻ mới"}</div>
+                  <div className="text-xs text-slate-500">Click vào thẻ bên dưới để đưa dữ liệu lên form.</div>
+                </div>
+                {editingTagId && (
+                  <Button type="button" variant="outline" size="sm" className={adminSecondaryButton} onClick={resetTagForm}>
+                    Hủy
+                  </Button>
+                )}
+              </div>
+              <form onSubmit={saveTag} className={`mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 ${
+                editingTagId ? "flex flex-col gap-3 lg:flex-row" : "flex flex-col gap-3 sm:flex-row"
+              } ${editingTagId ? "[&>button:first-of-type]:hidden" : ""}`}>
                 <Input className={adminInput} value={tagName} onChange={(event) => setTagName(event.target.value)} placeholder="Tên thẻ mới" />
                 <Button type="submit" className={adminPrimaryButton}><Plus className="h-4 w-4" />Thêm</Button>
+                {editingTagId && (
+                  <div className="flex shrink-0 flex-wrap items-center gap-2 lg:flex-nowrap">
+                    <Button type="submit" className={adminPrimaryButton}>
+                      <Save className="h-4 w-4" />
+                      Lưu sửa
+                    </Button>
+                    <Button type="button" variant="outline" className={`${adminSecondaryButton} text-red-600 hover:text-red-700`} onClick={() => {
+                      const tag = tags.find((item) => item.id === editingTagId);
+                      if (tag) requestDeleteTag(tag);
+                    }}>
+                      <Trash2 className="h-4 w-4" />
+                      Xóa
+                    </Button>
+                  </div>
+                )}
               </form>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input className={`pl-9 ${adminInput}`} value={tagAdminSearch} onChange={(event) => setTagAdminSearch(event.target.value)} placeholder="Tìm thẻ..." />
+              </div>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <Badge key={tag.id} variant="outline" className="gap-2 rounded-full border-slate-200 bg-white px-3 py-1.5 text-slate-700">
+                {filteredAdminTags.map((tag) => (
+                  <button key={tag.id} type="button" onClick={() => editTag(tag)} className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition-all hover:border-indigo-200 hover:bg-indigo-50/60 ${editingTagId === tag.id ? "border-indigo-300 bg-indigo-50 text-indigo-700 ring-2 ring-indigo-100" : "border-slate-200 bg-white text-slate-700"}`}>
                     {tag.name}
                     <span className="text-slate-400">{tag.postCount}</span>
-                    <button onClick={() => deleteTag(tag.id)} type="button"><Trash2 className="h-3 w-3" /></button>
-                  </Badge>
+                    <span onClick={(event) => { event.stopPropagation(); requestDeleteTag(tag); }} role="button" tabIndex={0} className="rounded-full p-0.5 text-slate-400 hover:bg-white hover:text-red-600"><Trash2 className="h-3 w-3" /></span>
+                  </button>
                 ))}
               </div>
             </section>
@@ -998,7 +1213,7 @@ const Admin = () => {
                         <Button type="button" variant="outline" size="sm" className={`flex-1 ${adminSecondaryButton}`} onClick={() => copyMediaUrl(asset.url)}>
                           Copy URL
                         </Button>
-                        <Button type="button" variant="outline" size="icon" className={adminSecondaryButton} onClick={() => deleteMedia(asset.id)}>
+                        <Button type="button" variant="outline" size="icon" className={adminSecondaryButton} onClick={() => requestDeleteMedia(asset)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1040,6 +1255,88 @@ const Admin = () => {
           )}
         </div>
       </section>
+
+      <AlertDialog open={Boolean(pendingConfirmation)} onOpenChange={(open) => !open && !confirmingAction && setPendingConfirmation(null)}>
+        <AlertDialogContent className="max-w-md rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 p-0 shadow-2xl overflow-hidden">
+          <div className="relative p-6 pb-4">
+            {/* Elegant Top Accent Line/Glow */}
+            <div className={`absolute top-0 left-0 right-0 h-1.5 ${
+              pendingConfirmation?.tone === "warning" 
+                ? "bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600" 
+                : "bg-gradient-to-r from-red-500 via-rose-600 to-red-700"
+            }`} />
+
+            <AlertDialogHeader className="space-y-4 text-left">
+              <div className="flex items-center gap-4">
+                {/* Glowing Icon Container */}
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-300 ${
+                  pendingConfirmation?.tone === "warning"
+                    ? "bg-amber-50/80 border-amber-200/60 text-amber-600 dark:bg-amber-950/30 dark:border-amber-900/40 dark:text-amber-400 ring-8 ring-amber-500/5 dark:ring-amber-500/2"
+                    : "bg-red-50/80 border-red-200/60 text-red-600 dark:bg-red-950/30 dark:border-red-900/40 dark:text-red-400 ring-8 ring-red-500/5 dark:ring-red-500/2"
+                }`}>
+                  {pendingConfirmation?.tone === "warning" ? (
+                    <AlertTriangle className="h-5 w-5 animate-pulse" />
+                  ) : (
+                    <Trash2 className="h-5 w-5 animate-pulse" />
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  {/* Small Eyebrow Badge */}
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+                    pendingConfirmation?.tone === "warning"
+                      ? "bg-amber-50 text-amber-700 border border-amber-200/50 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/30"
+                      : "bg-red-50 text-red-700 border border-red-200/50 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/30"
+                  }`}>
+                    {pendingConfirmation?.tone === "warning" ? "Cảnh báo" : "Xác nhận xóa"}
+                  </span>
+                  
+                  <AlertDialogTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-none">
+                    {pendingConfirmation?.title}
+                  </AlertDialogTitle>
+                </div>
+              </div>
+
+              {/* Description box */}
+              <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100/50 dark:border-slate-800/30 p-3.5 mt-3">
+                <AlertDialogDescription className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  {pendingConfirmation?.description}
+                </AlertDialogDescription>
+              </div>
+            </AlertDialogHeader>
+          </div>
+
+          <AlertDialogFooter className="border-t border-slate-100 dark:border-slate-900/80 bg-slate-50/50 dark:bg-slate-950/40 px-6 py-4 flex gap-3 sm:gap-0">
+            <AlertDialogCancel 
+              disabled={confirmingAction} 
+              className="border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-slate-100 rounded-xl px-4 py-2 text-sm font-medium transition-all shadow-sm"
+            >
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={confirmingAction}
+              onClick={(event) => {
+                event.preventDefault();
+                runConfirmedAction();
+              }}
+              className={`rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-1.5 ${
+                pendingConfirmation?.tone === "warning" 
+                  ? "bg-amber-600 hover:bg-amber-500 active:bg-amber-700 shadow-amber-600/10 dark:bg-amber-700 dark:hover:bg-amber-600 focus-visible:ring-amber-500" 
+                  : "bg-red-600 hover:bg-red-500 active:bg-red-700 shadow-red-600/10 dark:bg-red-700 dark:hover:bg-red-600 focus-visible:ring-red-500"
+              }`}
+            >
+              {confirmingAction ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : pendingConfirmation?.tone === "warning" ? (
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+              ) : (
+                <Trash2 className="h-4 w-4 shrink-0" />
+              )}
+              <span>{pendingConfirmation?.confirmLabel ?? "Xác nhận"}</span>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 };

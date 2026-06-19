@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArticleContent } from "@/components/blog/ArticleContent";
+import { DbLoadingState } from "@/components/loading/DbLoadingState";
 import { cmsApi } from "@/lib/cmsApi";
 import { useToast } from "@/hooks/use-toast";
 
@@ -52,8 +53,8 @@ const BlogPost = () => {
   if (loading && !activeSourcePost) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">
-          {language === "vi" ? "Đang tải bài viết..." : "Loading article..."}
+        <div className="container mx-auto px-4 py-12">
+          <DbLoadingState variant="article" className="min-h-[calc(100vh-9rem)]" />
         </div>
       </Layout>
     );
@@ -180,3 +181,4 @@ const BlogPost = () => {
 };
 
 export default BlogPost;
+
