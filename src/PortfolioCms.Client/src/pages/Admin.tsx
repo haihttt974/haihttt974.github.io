@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import {
   AdminProfile,
   CmsCategory,
@@ -102,7 +103,6 @@ const Admin = () => {
   const [token, setToken] = useState(() => getAdminToken());
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [section, setSection] = useState<AdminSection>("dashboard");
@@ -122,7 +122,16 @@ const Admin = () => {
   const [categoryName, setCategoryName] = useState("");
   const [tagName, setTagName] = useState("");
 
+  const { toast } = useToast();
   const adminApi = useMemo(() => (token ? cmsApi.admin(token) : null), [token]);
+  const notifySuccess = (title: string, description?: string) => toast({ variant: "success", title, description });
+  const notifyInfo = (title: string, description?: string) => toast({ variant: "info", title, description });
+  const notifyError = (title: string, error?: unknown) =>
+    toast({
+      variant: "destructive",
+      title,
+      description: error instanceof Error ? error.message : typeof error === "string" ? error : undefined,
+    });
 
   const loadAdmin = useCallback(async () => {
     if (!adminApi) return;
@@ -152,7 +161,7 @@ const Admin = () => {
   }, [adminApi]);
 
   useEffect(() => {
-    loadAdmin().catch((error) => setMessage(error instanceof Error ? error.message : "Không tải được dữ liệu admin."));
+    loadAdmin().catch((error) => notifyError("Không tải được dữ liệu admin", error));
   }, [loadAdmin]);
 
   const filteredPosts = useMemo(() => {
@@ -167,15 +176,15 @@ const Admin = () => {
     event.preventDefault();
     if (isLoggingIn) return;
 
-    setMessage("");
     setIsLoggingIn(true);
     try {
       const result = await cmsApi.login(username, password);
       setAdminToken(result.accessToken);
       setToken(result.accessToken);
       setPassword("");
+      notifySuccess("Đăng nhập thành công", `Xin chào ${result.displayName || result.username}.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Login failed.");
+      notifyError("Đăng nhập thất bại", error);
     } finally {
       setIsLoggingIn(false);
     }
@@ -220,7 +229,6 @@ const Admin = () => {
     event.preventDefault();
     if (!adminApi) return;
 
-    setMessage("");
     try {
       if (editingId) {
         await adminApi.updatePost(editingId, postForm);
@@ -229,16 +237,21 @@ const Admin = () => {
       }
       resetPostForm();
       await loadAdmin();
-      setMessage("Đã lưu bài viết.");
+      notifySuccess("Đã lưu bài viết", editingId ? "Bài viết đã được cập nhật." : "Bài viết mới đã được tạo.");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể lưu bài viết.");
+      notifyError("Không thể lưu bài viết", error);
     }
   };
 
   const deletePost = async (id: string) => {
     if (!adminApi || !confirm("Xóa bài viết này?")) return;
-    await adminApi.deletePost(id);
-    await loadAdmin();
+    try {
+      await adminApi.deletePost(id);
+      await loadAdmin();
+      notifySuccess("Đã xóa bài viết");
+    } catch (error) {
+      notifyError("Không thể xóa bài viết", error);
+    }
   };
 
   const createCategory = async (event: FormEvent) => {
@@ -256,9 +269,9 @@ const Admin = () => {
       });
       setCategoryName("");
       await loadAdmin();
-      setMessage("Đã thêm danh mục.");
+      notifySuccess("Đã thêm danh mục");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể thêm danh mục.");
+      notifyError("Không thể thêm danh mục", error);
     }
   };
 
@@ -267,9 +280,9 @@ const Admin = () => {
     try {
       await adminApi.deleteCategory(id);
       await loadAdmin();
-      setMessage("Đã xóa danh mục.");
+      notifySuccess("Đã xóa danh mục");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể xóa danh mục.");
+      notifyError("Không thể xóa danh mục", error);
     }
   };
 
@@ -281,9 +294,9 @@ const Admin = () => {
       await adminApi.createTag({ name: tagName });
       setTagName("");
       await loadAdmin();
-      setMessage("Đã thêm thẻ.");
+      notifySuccess("Đã thêm thẻ");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể thêm thẻ.");
+      notifyError("Không thể thêm thẻ", error);
     }
   };
 
@@ -292,27 +305,45 @@ const Admin = () => {
     try {
       await adminApi.deleteTag(id);
       await loadAdmin();
-      setMessage("Đã xóa thẻ.");
+      notifySuccess("Đã xóa thẻ");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể xóa thẻ.");
+      notifyError("Không thể xóa thẻ", error);
     }
   };
 
   const uploadImage = async (file?: File, applyToPost = true) => {
     if (!adminApi || !file) return;
 
-    const uploaded = await adminApi.upload(file);
-    if (applyToPost) {
-      setPostForm((current) => ({ ...current, coverImageUrl: uploaded.url }));
+    try {
+      const uploaded = await adminApi.upload(file);
+      if (applyToPost) {
+        setPostForm((current) => ({ ...current, coverImageUrl: uploaded.url }));
+      }
+      await loadAdmin();
+      notifySuccess("Đã upload ảnh", applyToPost ? "Ảnh đã được gắn vào bài viết." : "Ảnh đã được thêm vào thư viện media.");
+    } catch (error) {
+      notifyError("Không thể upload ảnh", error);
     }
-    await loadAdmin();
-    setMessage("Đã upload ảnh.");
   };
 
   const deleteMedia = async (id: string) => {
     if (!adminApi || !confirm("Xóa media này khỏi CMS?")) return;
-    await adminApi.deleteMedia(id);
-    await loadAdmin();
+    try {
+      await adminApi.deleteMedia(id);
+      await loadAdmin();
+      notifySuccess("Đã xóa media");
+    } catch (error) {
+      notifyError("Không thể xóa media", error);
+    }
+  };
+
+  const copyMediaUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      notifySuccess("Đã sao chép URL ảnh");
+    } catch (error) {
+      notifyError("Không thể sao chép URL", error);
+    }
   };
 
   const saveProfile = async (event: FormEvent) => {
@@ -323,9 +354,9 @@ const Admin = () => {
       const updated = await adminApi.updateProfile(profileForm);
       setProfile(updated);
       setProfileForm({ username: updated.username, displayName: updated.displayName });
-      setMessage("Đã cập nhật thông tin tài khoản.");
+      notifySuccess("Đã cập nhật tài khoản");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể cập nhật tài khoản.");
+      notifyError("Không thể cập nhật tài khoản", error);
     }
   };
 
@@ -333,7 +364,7 @@ const Admin = () => {
     event.preventDefault();
     if (!adminApi) return;
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setMessage("Mật khẩu mới và xác nhận mật khẩu không khớp.");
+      notifyError("Mật khẩu không khớp", "Mật khẩu mới và xác nhận mật khẩu phải giống nhau.");
       return;
     }
 
@@ -343,16 +374,16 @@ const Admin = () => {
         newPassword: passwordForm.newPassword,
       });
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      setMessage("Đã đổi mật khẩu.");
+      notifySuccess("Đã đổi mật khẩu");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không thể đổi mật khẩu.");
+      notifyError("Không thể đổi mật khẩu", error);
     }
   };
 
   const importLocalBlogData = async () => {
     if (!adminApi || !confirm("Import dữ liệu blog cục bộ vào database? Các slug đã tồn tại sẽ được bỏ qua.")) return;
 
-    setMessage("Đang import dữ liệu blog...");
+    notifyInfo("Đang import dữ liệu blog", "Quá trình này có thể mất vài giây.");
     try {
       const currentCategories = await adminApi.categories();
       const categoryBySlug = new Map(currentCategories.map((category) => [category.slug, category]));
@@ -421,9 +452,9 @@ const Admin = () => {
       }
 
       await loadAdmin();
-      setMessage(`Import hoàn tất. Đã import ${imported}, bỏ qua ${skipped}.`);
+      notifySuccess("Import hoàn tất", `Đã import ${imported}, bỏ qua ${skipped}.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Import thất bại.");
+      notifyError("Import thất bại", error);
     }
   };
 
@@ -555,7 +586,6 @@ const Admin = () => {
                     <label className="mb-2 block text-sm font-medium text-slate-700">Mật khẩu</label>
                     <Input className={`h-10 ${adminInput}`} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Nhập mật khẩu" type="password" disabled={isLoggingIn} />
                   </div>
-                  {message && <p className="rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700">{message}</p>}
                   <Button type="submit" className={`h-10 w-full gap-2 ${adminPrimaryButton}`} disabled={isLoggingIn}>
                     {isLoggingIn && <Loader2 className="h-4 w-4 animate-spin" />}
                     {isLoggingIn ? "Đang đăng nhập..." : "Đăng nhập vào CMS"}
@@ -672,13 +702,6 @@ const Admin = () => {
         </header>
 
         <div className="p-4 lg:p-6">
-          {message && (
-            <div className="mb-5 flex items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900 shadow-sm">
-              <CheckCircle2 className="h-4 w-4" />
-              {message}
-            </div>
-          )}
-
           {section === "dashboard" && (
             <div className="space-y-6">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -941,7 +964,7 @@ const Admin = () => {
                       <div className="truncate text-sm font-medium">{asset.fileName ?? "Uploaded image"}</div>
                       <div className="mt-1 text-xs text-slate-500">{formatDate(asset.createdAt)}</div>
                       <div className="mt-3 flex gap-2">
-                        <Button type="button" variant="outline" size="sm" className={`flex-1 ${adminSecondaryButton}`} onClick={() => navigator.clipboard.writeText(asset.url)}>
+                        <Button type="button" variant="outline" size="sm" className={`flex-1 ${adminSecondaryButton}`} onClick={() => copyMediaUrl(asset.url)}>
                           Copy URL
                         </Button>
                         <Button type="button" variant="outline" size="icon" className={adminSecondaryButton} onClick={() => deleteMedia(asset.id)}>

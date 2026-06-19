@@ -1,6 +1,7 @@
 import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/use-toast";
 
 const copyToClipboard = async (text: string) => {
   if (navigator.clipboard?.writeText) {
@@ -20,6 +21,7 @@ const copyToClipboard = async (text: string) => {
 
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const { language: currentLanguage } = useLanguage();
+  const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<number>();
   const copyLabel = currentLanguage === "vi" ? "Sao chép mã" : "Copy code";
@@ -33,8 +35,16 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
       setCopied(true);
       window.clearTimeout(resetTimer.current);
       resetTimer.current = window.setTimeout(() => setCopied(false), 2000);
+      toast({
+        variant: "success",
+        title: currentLanguage === "vi" ? "Đã sao chép mã" : "Code copied",
+      });
     } catch (error) {
       console.error("Unable to copy code:", error);
+      toast({
+        variant: "destructive",
+        title: currentLanguage === "vi" ? "Không thể sao chép mã" : "Unable to copy code",
+      });
     }
   };
 

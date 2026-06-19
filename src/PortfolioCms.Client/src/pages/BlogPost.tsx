@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArticleContent } from "@/components/blog/ArticleContent";
 import { cmsApi } from "@/lib/cmsApi";
+import { useToast } from "@/hooks/use-toast";
 
 const BlogPost = () => {
   const { t, locale, language } = useLanguage();
+  const { toast } = useToast();
   const { id } = useParams();
   const [sourcePost, setSourcePost] = useState<(BlogPostData & { viewCount?: number }) | undefined>(() =>
     id ? cmsApi.getCachedPost(id) : undefined,
@@ -77,6 +79,20 @@ const BlogPost = () => {
   }
 
   const categoryName = t(`category.${post.category}`) || post.category;
+  const copyPostLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({
+        variant: "success",
+        title: language === "vi" ? "Đã sao chép liên kết" : "Link copied",
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: language === "vi" ? "Không thể sao chép liên kết" : "Unable to copy link",
+      });
+    }
+  };
 
   return (
     <Layout>
@@ -151,9 +167,7 @@ const BlogPost = () => {
                   <Share2 className="h-4 w-4 mr-2" />
                   {t("post.share")}
                 </h3>
-                <Button variant="outline" className="w-full" onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                }}>
+                <Button variant="outline" className="w-full" onClick={copyPostLink}>
                   {t("post.copy")}
                 </Button>
               </div>

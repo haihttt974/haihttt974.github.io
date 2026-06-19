@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
@@ -48,7 +47,6 @@ export default function App() {
         <TooltipProvider>
           <EffectsProvider>
             <Toaster />
-            <Sonner />
             <EffectsRenderer />
             <EffectsController />
 
