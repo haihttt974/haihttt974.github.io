@@ -5,14 +5,68 @@ using PortfolioCms.Common.Contracts;
 using PortfolioCms.Data;
 using PortfolioCms.Common.Domain;
 using PortfolioCms.Service;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace PortfolioCms.Api.Controllers;
 
 [ApiController]
 [Authorize(Roles = "Admin")]
 [Route("api/admin")]
-public sealed class AdminController(AppDbContext db, SlugService slugService, CloudinaryMediaService mediaService) : ControllerBase
+public sealed class AdminController(AppDbContext db, SlugService slugService, CloudinaryMediaService mediaService, PasswordHasher passwordHasher) : ControllerBase
 {
+    [HttpGet("profile")]
+    public async Task<ActionResult<AdminProfileDto>> Profile(CancellationToken cancellationToken)
+    {
+        var user = await CurrentUser(cancellationToken);
+        return user is null ? Unauthorized() : ToProfile(user);
+    }
+
+    [HttpPut("profile")]
+    public async Task<ActionResult<AdminProfileDto>> UpdateProfile(UpdateAdminProfileRequest request, CancellationToken cancellationToken)
+    {
+        var user = await CurrentUser(cancellationToken);
+        if (user is null) return Unauthorized();
+
+        var username = request.Username.Trim();
+        var displayName = request.DisplayName.Trim();
+
+        if (username.Length < 3) return BadRequest(new { message = "Username must be at least 3 characters." });
+        if (displayName.Length < 2) return BadRequest(new { message = "Display name must be at least 2 characters." });
+        if (await db.Users.AnyAsync(x => x.Id != user.Id && x.Username == username, cancellationToken))
+        {
+            return Conflict(new { message = "Username already exists." });
+        }
+
+        user.Username = username;
+        user.DisplayName = displayName;
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+
+        return ToProfile(user);
+    }
+
+    [HttpPut("password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request, CancellationToken cancellationToken)
+    {
+        var user = await CurrentUser(cancellationToken);
+        if (user is null) return Unauthorized();
+        if (!passwordHasher.Verify(request.CurrentPassword, user.PasswordHash))
+        {
+            return BadRequest(new { message = "Current password is incorrect." });
+        }
+        if (request.NewPassword.Length < 8)
+        {
+            return BadRequest(new { message = "New password must be at least 8 characters." });
+        }
+
+        user.PasswordHash = passwordHasher.Hash(request.NewPassword);
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
+    }
+
     [HttpGet("dashboard")]
     public async Task<DashboardDto> Dashboard(CancellationToken cancellationToken)
     {
@@ -266,4 +320,14 @@ public sealed class AdminController(AppDbContext db, SlugService slugService, Cl
         category.IsActive = request.IsActive;
         category.UpdatedAt = DateTimeOffset.UtcNow;
     }
+
+    private async Task<User?> CurrentUser(CancellationToken cancellationToken)
+    {
+        var idValue = User.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(idValue, out var id)
+            ? await db.Users.SingleOrDefaultAsync(x => x.Id == id, cancellationToken)
+            : null;
+    }
+
+    private static AdminProfileDto ToProfile(User user) => new(user.Id, user.Username, user.DisplayName, user.Role, user.CreatedAt, user.UpdatedAt);
 }

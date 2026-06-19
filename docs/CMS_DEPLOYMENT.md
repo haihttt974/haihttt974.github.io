@@ -20,7 +20,7 @@ Create `src/PortfolioCms.Client/.env` from `src/PortfolioCms.Client/.env.example
 VITE_API_BASE_URL=
 ```
 
-Leaving `VITE_API_BASE_URL` empty in development makes Vite proxy `/api` requests to `http://localhost:5000`.
+Leaving `VITE_API_BASE_URL` empty in development makes Vite proxy `/api` requests to `http://localhost:5295`.
 This also works when opening the frontend through a LAN URL such as `http://192.168.176.1:8080/admin`.
 
 For GitHub Pages production, create `src/PortfolioCms.Client/.env.production` with your deployed backend URL, for example:

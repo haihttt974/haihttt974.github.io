@@ -4,6 +4,9 @@ namespace PortfolioCms.Common.Contracts;
 
 public sealed record LoginRequest(string Username, string Password);
 public sealed record LoginResponse(string AccessToken, DateTimeOffset ExpiresAt, string Username, string DisplayName, string Role);
+public sealed record AdminProfileDto(Guid Id, string Username, string DisplayName, string Role, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
+public sealed record UpdateAdminProfileRequest(string Username, string DisplayName);
+public sealed record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
 public sealed record CategoryDto(Guid Id, string Name, string Slug, string? Description, string? Color, int SortOrder, bool IsActive, int PostCount);
 public sealed record UpsertCategoryRequest(string Name, string? Slug, string? Description, string? Color, int SortOrder, bool IsActive);

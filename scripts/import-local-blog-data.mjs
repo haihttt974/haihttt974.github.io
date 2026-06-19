@@ -2,7 +2,7 @@ import fs from "node:fs";
 import vm from "node:vm";
 import { transform } from "esbuild";
 
-const apiBaseUrl = process.env.VITE_API_BASE_URL || "http://localhost:5000";
+const apiBaseUrl = process.env.VITE_API_BASE_URL || "http://localhost:5295";
 const username = process.env.ADMIN_USERNAME || "admin";
 const password = process.env.ADMIN_PASSWORD || "ChangeMe123!";
 

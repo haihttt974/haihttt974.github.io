@@ -91,6 +91,25 @@ export interface Dashboard {
   totalViews: number;
 }
 
+export interface AdminProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MediaAsset {
+  id: string;
+  url: string;
+  publicId?: string | null;
+  fileName?: string | null;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  createdAt: string;
+}
+
 const slugify = (value: string) =>
   value
     .normalize("NFD")
@@ -296,6 +315,11 @@ export const cmsApi = {
   admin(token: string) {
     const auth = { Authorization: `Bearer ${token}` };
     return {
+      profile: () => apiRequest<AdminProfile>("/api/admin/profile", { headers: auth }),
+      updateProfile: (body: { username: string; displayName: string }) =>
+        apiRequest<AdminProfile>("/api/admin/profile", { method: "PUT", headers: auth, body: JSON.stringify(body) }),
+      changePassword: (body: { currentPassword: string; newPassword: string }) =>
+        apiRequest<void>("/api/admin/password", { method: "PUT", headers: auth, body: JSON.stringify(body) }),
       dashboard: () => apiRequest<Dashboard>("/api/admin/dashboard", { headers: auth }),
       posts: () => apiRequest<PagedResult<CmsPostListItem>>("/api/admin/posts?pageSize=100", { headers: auth }),
       post: (id: string) => apiRequest<CmsPostDetail>(`/api/admin/posts/${id}`, { headers: auth }),
@@ -310,12 +334,14 @@ export const cmsApi = {
       createTag: (body: { name: string; slug?: string | null }) => apiRequest<CmsTag>("/api/admin/tags", { method: "POST", headers: auth, body: JSON.stringify(body) }),
       updateTag: (id: string, body: { name: string; slug?: string | null }) => apiRequest<CmsTag>(`/api/admin/tags/${id}`, { method: "PUT", headers: auth, body: JSON.stringify(body) }),
       deleteTag: (id: string) => apiRequest<void>(`/api/admin/tags/${id}`, { method: "DELETE", headers: auth }),
+      media: () => apiRequest<MediaAsset[]>("/api/admin/media", { headers: auth }),
+      deleteMedia: (id: string) => apiRequest<void>(`/api/admin/media/${id}`, { method: "DELETE", headers: auth }),
       upload: async (file: File) => {
         const form = new FormData();
         form.append("file", file);
         const response = await fetch(`${API_BASE_URL}/api/admin/media/upload`, { method: "POST", headers: auth, body: form });
         if (!response.ok) throw new Error(await response.text());
-        return response.json() as Promise<{ url: string }>;
+        return response.json() as Promise<MediaAsset>;
       },
     };
   },

@@ -33,11 +33,11 @@ export default defineConfig({
     hmr: { overlay: false },
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: "http://localhost:5295",
         changeOrigin: true,
       },
       "/health": {
-        target: "http://localhost:5000",
+        target: "http://localhost:5295",
         changeOrigin: true,
       },
     },
