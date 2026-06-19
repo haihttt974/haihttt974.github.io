@@ -68,8 +68,35 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? ["http://localhost:8080", "http://localhost:5173"];
-        policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+        var configuredOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+        var fallbackOrigins = new[]
+        {
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        };
+
+        policy
+            .SetIsOriginAllowed(origin =>
+            {
+                if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                {
+                    return false;
+                }
+
+                if (configuredOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase) ||
+                    fallbackOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                var host = uri.Host.ToLowerInvariant();
+                return host.EndsWith(".github.io", StringComparison.OrdinalIgnoreCase) ||
+                       host is "haiit.dev" or "www.haiit.dev";
+            })
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
