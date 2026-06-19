@@ -166,3 +166,11 @@ src/PortfolioCms.Api/Dockerfile
 ```
 
 Set the container port to `8080`.
+
+For GitHub Pages deploy through `gh-pages`, make sure the production build runs before publishing:
+
+```bash
+npm run client:deploy
+```
+
+That command now rebuilds `dist` first, so the published site picks up the API base URL for the shared database.
