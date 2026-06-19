@@ -55,6 +55,7 @@ import {
 } from "@/lib/cmsApi";
 import { blogPosts as localBlogPosts, categories as localCategories } from "@/data/blogData";
 import { clearAdminToken, getAdminToken, setAdminToken } from "@/lib/adminAuth";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type AdminSection = "dashboard" | "posts" | "categories" | "tags" | "media" | "account";
 type PendingConfirmation = {
@@ -119,14 +120,29 @@ const adminSecondaryButton = "border-slate-200 bg-white text-slate-700 shadow-sm
 const adminPanel = "rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/60";
 const adminInput =
   "border-slate-200 bg-white text-slate-900 shadow-sm placeholder:text-slate-400 focus-visible:ring-indigo-500";
+const adminSectionPaths: Record<AdminSection, string> = {
+  dashboard: "/admin/dashboard",
+  posts: "/admin/posts",
+  categories: "/admin/categories",
+  tags: "/admin/tags",
+  media: "/admin/media",
+  account: "/admin/account",
+};
+
+const resolveAdminSection = (pathname: string): AdminSection => {
+  const segment = pathname.split("/")[2] as AdminSection | undefined;
+  return segment && segment in adminSectionPaths ? segment : "dashboard";
+};
 
 const Admin = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [token, setToken] = useState(() => getAdminToken());
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [section, setSection] = useState<AdminSection>("dashboard");
+  const [section, setSection] = useState<AdminSection>(() => resolveAdminSection(location.pathname));
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -204,6 +220,10 @@ const Admin = () => {
     loadAdmin().catch((error) => notifyError("Không tải được dữ liệu admin", error));
   }, [loadAdmin]);
 
+  useEffect(() => {
+    setSection(resolveAdminSection(location.pathname));
+  }, [location.pathname]);
+
   const filteredPosts = useMemo(() => {
     const query = postSearch.trim().toLowerCase();
     if (!query) return posts;
@@ -272,6 +292,7 @@ const Admin = () => {
       publishedAt: post.publishedAt ?? null,
     });
     setSection("posts");
+    navigate(adminSectionPaths.posts);
   };
 
   const resetPostForm = () => {
@@ -795,6 +816,7 @@ const Admin = () => {
                 type="button"
                 onClick={() => {
                   setSection(item.id);
+                  navigate(adminSectionPaths[item.id]);
                   setSidebarOpen(false);
                 }}
                 title={sidebarCollapsed ? item.label : undefined}
@@ -910,7 +932,7 @@ const Admin = () => {
                 <section className={adminPanel}>
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <h2 className="text-base font-semibold">Bài viết gần đây</h2>
-                    <Button variant="outline" size="sm" className={adminSecondaryButton} onClick={() => setSection("posts")}>Quản lý</Button>
+                    <Button variant="outline" size="sm" className={adminSecondaryButton} onClick={() => navigate(adminSectionPaths.posts)}>Quản lý</Button>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[640px] text-sm">
@@ -954,7 +976,7 @@ const Admin = () => {
                       <span className="font-medium">{profile?.role ?? "-"}</span>
                     </div>
                   </div>
-                  <Button className={`mt-5 w-full ${adminPrimaryButton}`} onClick={() => setSection("account")}>
+                  <Button className={`mt-5 w-full ${adminPrimaryButton}`} onClick={() => navigate(adminSectionPaths.account)}>
                     <Settings className="h-4 w-4" />
                     Cài đặt tài khoản
                   </Button>
