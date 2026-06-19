@@ -33,6 +33,8 @@ export interface CmsPostListItem {
   tags: string[];
   coverImageUrl?: string | null;
   featured: boolean;
+  readTime: string;
+  readTimeVi?: string | null;
   readTimeMinutes: number;
   viewCount: number;
   publishedAt?: string | null;
@@ -136,6 +138,8 @@ const toListItem = (post: BlogPost & { viewCount: number }, language: "vi" | "en
   tags: post.tags,
   coverImageUrl: undefined,
   featured: Boolean(post.featured),
+  readTime: language === "vi" ? post.readTimeVi ?? post.readTime : post.readTime,
+  readTimeVi: post.readTimeVi ?? undefined,
   readTimeMinutes: Number.parseInt(post.readTime, 10) || Number.parseInt(post.readTimeVi ?? post.readTime, 10) || 5,
   viewCount: post.viewCount,
   publishedAt: post.date,
