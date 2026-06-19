@@ -12,14 +12,20 @@ import { cmsApi } from "@/lib/cmsApi";
 const BlogPost = () => {
   const { t, locale, language } = useLanguage();
   const { id } = useParams();
-  const [sourcePost, setSourcePost] = useState<(BlogPostData & { viewCount?: number }) | undefined>();
-  const [loading, setLoading] = useState(true);
+  const [sourcePost, setSourcePost] = useState<(BlogPostData & { viewCount?: number }) | undefined>(() =>
+    id ? cmsApi.getCachedPost(id) : undefined,
+  );
+  const [loading, setLoading] = useState(!sourcePost);
 
-  const post = sourcePost ? localizeBlogPost(sourcePost, language) : undefined;
+  const activeSourcePost = sourcePost?.id === id ? sourcePost : undefined;
+  const post = activeSourcePost ? localizeBlogPost(activeSourcePost, language) : undefined;
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    const cachedPost = cmsApi.getCachedPost(id);
+
+    setSourcePost(cachedPost);
 
     const loadPost = async () => {
       setLoading(true);
@@ -41,11 +47,11 @@ const BlogPost = () => {
     };
   }, [id, language]);
 
-  if (loading) {
+  if (loading && !activeSourcePost) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">
-          Loading...
+          {language === "vi" ? "Đang tải bài viết..." : "Loading article..."}
         </div>
       </Layout>
     );
@@ -110,7 +116,7 @@ const BlogPost = () => {
 
             <div className="flex items-center">
               <Eye className="h-4 w-4 mr-2" />
-              {`${(sourcePost?.viewCount ?? 0).toLocaleString(locale)} ${t("post.views")}`}
+              {`${(activeSourcePost?.viewCount ?? 0).toLocaleString(locale)} ${t("post.views")}`}
             </div>
           </div>
         </header>

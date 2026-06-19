@@ -7,6 +7,10 @@ const isInvalidProductionApiBaseUrl =
   !import.meta.env.DEV &&
   (!hasValidApiBaseUrl || configuredApiBaseUrl.includes("github.io"));
 const API_BASE_URL = isInvalidProductionApiBaseUrl ? DEFAULT_PRODUCTION_API_BASE_URL : configuredApiBaseUrl || "";
+const API_TIMEOUT_MS = 6000;
+const CACHE_TTL_MS = 1000 * 60 * 30;
+const POSTS_CACHE_KEY = "portfolio-cms-posts-cache";
+const POST_CACHE_KEY_PREFIX = "portfolio-cms-post-cache:";
 
 export type PostStatus = "Draft" | "Published" | "Archived" | 0 | 1 | 2;
 
@@ -135,14 +139,56 @@ const fallbackTagDtos = (): CmsTag[] => {
   return Array.from(counts.entries()).map(([name, postCount]) => ({ id: slugify(name), name, slug: slugify(name), postCount }));
 };
 
+type CachedValue<T> = {
+  savedAt: number;
+  value: T;
+};
+
+const canUseStorage = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+
+const readCache = <T>(key: string): T | null => {
+  if (!canUseStorage()) return null;
+
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+
+    const cached = JSON.parse(raw) as CachedValue<T>;
+    if (!cached?.savedAt || Date.now() - cached.savedAt > CACHE_TTL_MS) {
+      window.localStorage.removeItem(key);
+      return null;
+    }
+
+    return cached.value;
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = <T>(key: string, value: T) => {
+  if (!canUseStorage()) return;
+
+  try {
+    window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value } satisfies CachedValue<T>));
+  } catch {
+    // Ignore storage quota/private-mode errors; network and bundled fallback still work.
+  }
+};
+
+const postCacheKey = (slug: string) => `${POST_CACHE_KEY_PREFIX}${slug}`;
+
 async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
+    signal: options.signal ?? controller.signal,
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
-  });
+  }).finally(() => globalThis.clearTimeout(timeoutId));
 
   if (!response.ok) {
     const message = await response.text();
@@ -163,25 +209,56 @@ async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T
 export const cmsApi = {
   hasBackend: true,
 
+  getCachedPost(slug: string) {
+    const cachedPost = readCache<BlogPost & { viewCount?: number; coverImageUrl?: string | null }>(postCacheKey(slug));
+    const bundledPost = fallbackPosts.find((post) => post.id === slug);
+
+    if (!cachedPost) return bundledPost;
+    if (!cachedPost.content && bundledPost) return { ...cachedPost, content: bundledPost.content, contentVi: bundledPost.contentVi };
+
+    return cachedPost;
+  },
+
   async getPosts(language: "vi" | "en", options: { featured?: boolean; pageSize?: number } = {}) {
+    const canUseListCache = options.featured === undefined;
+    const cachedPosts = canUseListCache ? readCache<(BlogPost & { viewCount?: number; coverImageUrl?: string | null })[]>(POSTS_CACHE_KEY) : null;
+
     try {
       const params = new URLSearchParams({ pageSize: String(options.pageSize ?? 100) });
       if (options.featured !== undefined) params.set("featured", String(options.featured));
       const result = await apiRequest<PagedResult<CmsPostListItem>>(`/api/posts?${params}`);
-      return result.items.map((post) => toBlogPost(post, language));
+      const posts = result.items.map((post) => toBlogPost(post, language));
+
+      if (canUseListCache) {
+        writeCache(POSTS_CACHE_KEY, posts);
+        posts.forEach((post) => {
+          const existing = readCache<BlogPost & { viewCount?: number; coverImageUrl?: string | null }>(postCacheKey(post.id));
+          writeCache(postCacheKey(post.id), { ...existing, ...post });
+        });
+      }
+
+      return posts;
     } catch (error) {
       console.warn("Using fallback blog data:", error);
+      if (cachedPosts?.length) return cachedPosts;
       return [...fallbackPosts];
     }
   },
 
   async getPost(slug: string, language: "vi" | "en") {
+    const cachedPost = readCache<BlogPost & { viewCount?: number; coverImageUrl?: string | null }>(postCacheKey(slug));
+
     try {
       const post = await apiRequest<CmsPostDetail>(`/api/posts/${encodeURIComponent(slug)}`);
-      return toBlogPost(post, language);
+      const mappedPost = toBlogPost(post, language);
+      writeCache(postCacheKey(slug), mappedPost);
+      return mappedPost;
     } catch (error) {
       console.warn("Using fallback blog post:", error);
-      return fallbackPosts.find((post) => post.id === slug);
+      const bundledPost = fallbackPosts.find((post) => post.id === slug);
+      if (!cachedPost) return bundledPost;
+      if (!cachedPost.content && bundledPost) return { ...cachedPost, content: bundledPost.content, contentVi: bundledPost.contentVi };
+      return cachedPost;
     }
   },
 
