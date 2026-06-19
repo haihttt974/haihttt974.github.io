@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
-import { Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { EffectsProvider } from "@/contexts/EffectsContext";
 import { EffectsController } from "@/components/effects/EffectsController";
 import { EffectsRenderer } from "@/components/effects/EffectsRenderer";
@@ -25,51 +25,45 @@ import NotFound from "./pages/NotFound";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { AdminWorkspaceProvider } from "@/contexts/AdminWorkspaceContext";
 import { AdminLayout } from "@/components/layout/AdminLayout";
+import { getAdminToken } from "@/lib/adminAuth";
 
 const queryClient = new QueryClient();
 
-const PublicRoutes = () => {
-  const location = useLocation();
+const adminPages: Record<string, JSX.Element> = {
+  dashboard: <AdminDashboard />,
+  posts: <AdminPosts />,
+  categories: <AdminCategories />,
+  tags: <AdminTags />,
+  media: <AdminMedia />,
+  account: <AdminAccount />,
+};
+
+const AdminRouteGate = () => {
+  const { section } = useParams();
+  const token = getAdminToken();
+
+  if (!section) {
+    return token ? <Navigate to="/admin/dashboard" replace /> : <AdminLogin />;
+  }
+
+  if (!token) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  const page = adminPages[section];
+  if (!page) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
 
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
-        <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
-        <Route path="/blog/:id" element={<PageTransition><BlogPost /></PageTransition>} />
-        <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
-        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
-      </Routes>
-    </AnimatePresence>
+    <AdminWorkspaceProvider>
+      <AdminLayout>{page}</AdminLayout>
+    </AdminWorkspaceProvider>
   );
 };
 
-const AdminRoutes = () => (
-  <Routes>
-    <Route path="/admin" element={<AdminLogin />} />
-    <Route
-      path="/admin/*"
-      element={
-        <AdminWorkspaceProvider>
-          <AdminLayout />
-        </AdminWorkspaceProvider>
-      }
-    >
-      <Route index element={<Navigate to="dashboard" replace />} />
-      <Route path="dashboard" element={<AdminDashboard />} />
-      <Route path="posts" element={<AdminPosts />} />
-      <Route path="categories" element={<AdminCategories />} />
-      <Route path="tags" element={<AdminTags />} />
-      <Route path="media" element={<AdminMedia />} />
-      <Route path="account" element={<AdminAccount />} />
-    </Route>
-  </Routes>
-);
-
 export default function App() {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="haiit-theme">
@@ -83,7 +77,18 @@ export default function App() {
               <EffectsController />
 
               <LazyMotion features={domAnimation} strict>
-                {isAdminRoute ? <AdminRoutes /> : <PublicRoutes />}
+                <AnimatePresence mode="wait" initial={false}>
+                  <Routes location={location} key={location.pathname}>
+                    <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+                    <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
+                    <Route path="/blog/:id" element={<PageTransition><BlogPost /></PageTransition>} />
+                    <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
+                    <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+                    <Route path="/admin" element={<AdminRouteGate />} />
+                    <Route path="/admin/:section" element={<AdminRouteGate />} />
+                    <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+                  </Routes>
+                </AnimatePresence>
               </LazyMotion>
             </EffectsProvider>
           </TooltipProvider>

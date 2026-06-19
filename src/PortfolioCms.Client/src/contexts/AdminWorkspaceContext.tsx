@@ -271,7 +271,7 @@ export const AdminWorkspaceProvider = ({ children }: { children: ReactNode }) =>
   const logout = () => {
     clearAdminToken();
     setTokenState("");
-    navigate("/admin");
+    navigate("/", { replace: true });
   };
 
   const navigateToSection = (section: AdminSection) => navigate(adminSectionPaths[section]);

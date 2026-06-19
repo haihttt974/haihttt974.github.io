@@ -1,6 +1,7 @@
 import { KeyRound, Save, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useAdminWorkspace } from "@/contexts/AdminWorkspaceContext";
 import { adminPanel, adminPrimaryButton, adminInput } from "@/components/admin/adminStyles";
 
@@ -37,9 +38,9 @@ export default function AdminAccount() {
           <p className="text-sm text-slate-500">Mật khẩu mới tối thiểu 8 ký tự.</p>
         </div>
         <div className="space-y-3">
-          <Input className={adminInput} value={passwordForm.currentPassword} onChange={(event) => setPasswordForm({ ...passwordForm, currentPassword: event.target.value })} placeholder="Mật khẩu hiện tại" type="password" />
-          <Input className={adminInput} value={passwordForm.newPassword} onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })} placeholder="Mật khẩu mới" type="password" />
-          <Input className={adminInput} value={passwordForm.confirmPassword} onChange={(event) => setPasswordForm({ ...passwordForm, confirmPassword: event.target.value })} placeholder="Xác nhận mật khẩu mới" type="password" />
+          <PasswordInput className={adminInput} value={passwordForm.currentPassword} onChange={(event) => setPasswordForm({ ...passwordForm, currentPassword: event.target.value })} placeholder="Mật khẩu hiện tại" />
+          <PasswordInput className={adminInput} value={passwordForm.newPassword} onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })} placeholder="Mật khẩu mới" />
+          <PasswordInput className={adminInput} value={passwordForm.confirmPassword} onChange={(event) => setPasswordForm({ ...passwordForm, confirmPassword: event.target.value })} placeholder="Xác nhận mật khẩu mới" />
           <Button type="submit" className={adminPrimaryButton}>
             <KeyRound className="h-4 w-4" />
             Đổi mật khẩu

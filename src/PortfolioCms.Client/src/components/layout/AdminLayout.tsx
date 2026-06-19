@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useLocation, Navigate } from "react-router-dom";
+import type { ReactNode } from "react";
 import {
   BarChart3,
   BookOpen,
@@ -51,7 +52,11 @@ const titles: Record<string, string> = {
   "/admin/account": "Tài khoản",
 };
 
-export const AdminLayout = () => {
+type AdminLayoutProps = {
+  children?: ReactNode;
+};
+
+export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
   const {
     token,
@@ -181,7 +186,7 @@ export const AdminLayout = () => {
         </header>
 
         <div className="p-4 lg:p-6">
-          {isLoading ? <DbLoadingState variant="dashboard" className="min-h-[calc(100vh-7rem)]" /> : <Outlet />}
+          {isLoading ? <DbLoadingState variant="dashboard" className="min-h-[calc(100vh-7rem)]" /> : children ?? <Outlet />}
         </div>
       </section>
 

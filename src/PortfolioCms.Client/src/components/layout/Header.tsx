@@ -59,7 +59,7 @@ export const Header = () => {
             {isAdminLoggedIn && (
               <li>
                 <Link
-                  to="/admin"
+                  to="/admin/dashboard"
                   className={`flex items-center gap-2 rounded-md px-3 py-2 font-mono text-xs transition-colors ${
                     isActive("/admin")
                       ? "bg-primary/10 text-primary"
@@ -113,7 +113,7 @@ export const Header = () => {
           <div className="border-t border-border/60 py-4 md:hidden">
             {isAdminLoggedIn && (
               <Link
-                to="/admin"
+                to="/admin/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`mb-2 flex items-center justify-between rounded-lg px-4 py-3 font-mono text-sm ${
                   isActive("/admin") ? "bg-primary/10 text-primary" : "text-muted-foreground"
