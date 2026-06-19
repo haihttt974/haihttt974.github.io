@@ -21,7 +21,9 @@ VITE_API_BASE_URL=
 ```
 
 Leaving `VITE_API_BASE_URL` empty in development makes Vite proxy `/api` requests to `http://localhost:5295`.
-This also works when opening the frontend through a LAN URL such as `http://192.168.176.1:8080/admin`.
+This avoids CORS failures when running the admin locally.
+
+To make local admin and Neon share the same data, run the local API with `DATABASE_URL` pointing to the same Neon connection string used in production.
 
 For GitHub Pages production, create `src/PortfolioCms.Client/.env.production` with your deployed backend URL, for example:
 
@@ -46,6 +48,8 @@ Default local database connection:
 ```text
 Host=localhost;Port=5432;Database=portfolio_cms;Username=postgres;Password=postgres
 ```
+
+The development API now defaults to PostgreSQL as well, so local testing follows the same engine as production.
 
 The backend auto-runs EF migrations and seeds:
 

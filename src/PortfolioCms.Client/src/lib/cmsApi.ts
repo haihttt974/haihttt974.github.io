@@ -1,4 +1,4 @@
-import { BlogPost, Category, blogPosts as fallbackPosts, categories as fallbackCategories } from "@/data/blogData";
+import { BlogPost, Category } from "@/data/blogData";
 
 const DEFAULT_PRODUCTION_API_BASE_URL = "https://portfolio-cms-api-go5c.onrender.com";
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
@@ -8,10 +8,6 @@ const isInvalidProductionApiBaseUrl =
   (!hasValidApiBaseUrl || configuredApiBaseUrl.includes("github.io"));
 const API_BASE_URL = isInvalidProductionApiBaseUrl ? DEFAULT_PRODUCTION_API_BASE_URL : configuredApiBaseUrl || "";
 const API_TIMEOUT_MS = 6000;
-const CACHE_TTL_MS = 1000 * 60 * 30;
-const POSTS_CACHE_KEY = "portfolio-cms-posts-cache";
-const POST_CACHE_KEY_PREFIX = "portfolio-cms-post-cache:";
-
 export type PostStatus = "Draft" | "Published" | "Archived" | 0 | 1 | 2;
 
 export interface CmsCategory {
@@ -140,61 +136,17 @@ const toBlogPost = (post: CmsPostListItem | CmsPostDetail, language: "vi" | "en"
   coverImageUrl: post.coverImageUrl,
 });
 
-const fallbackCategoryDtos = (): CmsCategory[] =>
-  fallbackCategories.map((category, index) => ({
-    id: category.id,
-    name: category.name,
-    slug: category.id,
-    description: category.description,
-    color: category.color,
-    sortOrder: index + 1,
-    isActive: true,
-    postCount: fallbackPosts.filter((post) => post.category === category.id).length,
-  }));
-
-const fallbackTagDtos = (): CmsTag[] => {
-  const counts = new Map<string, number>();
-  fallbackPosts.forEach((post) => post.tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1)));
-  return Array.from(counts.entries()).map(([name, postCount]) => ({ id: slugify(name), name, slug: slugify(name), postCount }));
-};
-
-type CachedValue<T> = {
-  savedAt: number;
-  value: T;
-};
-
-const canUseStorage = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-
 const readCache = <T>(key: string): T | null => {
-  if (!canUseStorage()) return null;
-
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return null;
-
-    const cached = JSON.parse(raw) as CachedValue<T>;
-    if (!cached?.savedAt || Date.now() - cached.savedAt > CACHE_TTL_MS) {
-      window.localStorage.removeItem(key);
-      return null;
-    }
-
-    return cached.value;
-  } catch {
-    return null;
-  }
+  void key;
+  return null;
 };
 
 const writeCache = <T>(key: string, value: T) => {
-  if (!canUseStorage()) return;
-
-  try {
-    window.localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value } satisfies CachedValue<T>));
-  } catch {
-    // Ignore storage quota/private-mode errors; network and bundled fallback still work.
-  }
+  void key;
+  void value;
 };
 
-const postCacheKey = (slug: string) => `${POST_CACHE_KEY_PREFIX}${slug}`;
+const postCacheKey = (slug: string) => `portfolio-cms-post-cache:${slug}`;
 
 async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const controller = new AbortController();
@@ -229,38 +181,19 @@ export const cmsApi = {
   hasBackend: true,
 
   getCachedPost(slug: string) {
-    const cachedPost = readCache<BlogPost & { viewCount?: number; coverImageUrl?: string | null }>(postCacheKey(slug));
-    const bundledPost = fallbackPosts.find((post) => post.id === slug);
-
-    if (!cachedPost) return bundledPost;
-    if (!cachedPost.content && bundledPost) return { ...cachedPost, content: bundledPost.content, contentVi: bundledPost.contentVi };
-
-    return cachedPost;
+    return readCache<BlogPost & { viewCount?: number; coverImageUrl?: string | null }>(postCacheKey(slug));
   },
 
   async getPosts(language: "vi" | "en", options: { featured?: boolean; pageSize?: number } = {}) {
-    const canUseListCache = options.featured === undefined;
-    const cachedPosts = canUseListCache ? readCache<(BlogPost & { viewCount?: number; coverImageUrl?: string | null })[]>(POSTS_CACHE_KEY) : null;
-
     try {
       const params = new URLSearchParams({ pageSize: String(options.pageSize ?? 100) });
       if (options.featured !== undefined) params.set("featured", String(options.featured));
       const result = await apiRequest<PagedResult<CmsPostListItem>>(`/api/posts?${params}`);
       const posts = result.items.map((post) => toBlogPost(post, language));
-
-      if (canUseListCache) {
-        writeCache(POSTS_CACHE_KEY, posts);
-        posts.forEach((post) => {
-          const existing = readCache<BlogPost & { viewCount?: number; coverImageUrl?: string | null }>(postCacheKey(post.id));
-          writeCache(postCacheKey(post.id), { ...existing, ...post });
-        });
-      }
-
       return posts;
     } catch (error) {
-      console.warn("Using fallback blog data:", error);
-      if (cachedPosts?.length) return cachedPosts;
-      return [...fallbackPosts];
+      console.error("Failed to load blog data:", error);
+      return [];
     }
   },
 
@@ -270,14 +203,10 @@ export const cmsApi = {
     try {
       const post = await apiRequest<CmsPostDetail>(`/api/posts/${encodeURIComponent(slug)}`);
       const mappedPost = toBlogPost(post, language);
-      writeCache(postCacheKey(slug), mappedPost);
       return mappedPost;
     } catch (error) {
-      console.warn("Using fallback blog post:", error);
-      const bundledPost = fallbackPosts.find((post) => post.id === slug);
-      if (!cachedPost) return bundledPost;
-      if (!cachedPost.content && bundledPost) return { ...cachedPost, content: bundledPost.content, contentVi: bundledPost.contentVi };
-      return cachedPost;
+      console.error("Failed to load blog post:", error);
+      return null;
     }
   },
 
@@ -293,7 +222,7 @@ export const cmsApi = {
     try {
       return await apiRequest<CmsCategory[]>("/api/categories");
     } catch {
-      return fallbackCategoryDtos();
+      return [];
     }
   },
 
@@ -301,7 +230,7 @@ export const cmsApi = {
     try {
       return await apiRequest<CmsTag[]>("/api/tags");
     } catch {
-      return fallbackTagDtos();
+      return [];
     }
   },
 

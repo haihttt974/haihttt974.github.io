@@ -64,6 +64,8 @@ const emptyPost = (categoryId = ""): UpsertPostRequest => ({
   publishedAt: null,
 });
 
+const isUnauthorizedError = (error: unknown) => error instanceof Error && /unauthorized|401/i.test(error.message);
+
 type AdminWorkspaceValue = {
   token: string;
   setToken: (value: string) => void;
@@ -198,6 +200,18 @@ export const AdminWorkspaceProvider = ({ children }: { children: ReactNode }) =>
     }
   };
 
+  const handleAuthFailure = useCallback(() => {
+    clearAdminToken();
+    setTokenState("");
+    setProfile(null);
+    setDashboard(null);
+    setPosts([]);
+    setCategories([]);
+    setTags([]);
+    setMedia([]);
+    navigate("/admin", { replace: true });
+  }, [navigate]);
+
   const loadAdmin = useCallback(async () => {
     if (!adminApi) return;
     setIsLoading(true);
@@ -219,10 +233,16 @@ export const AdminWorkspaceProvider = ({ children }: { children: ReactNode }) =>
       setTags(tagData);
       setMedia(mediaData);
       setPostForm((current) => (current.categoryId ? current : emptyPost(categoryData[0]?.id ?? "")));
+    } catch (error) {
+      if (isUnauthorizedError(error)) {
+        handleAuthFailure();
+        return;
+      }
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [adminApi]);
+  }, [adminApi, handleAuthFailure]);
 
   useEffect(() => {
     loadAdmin().catch((error) => notifyError("Không tải được dữ liệu admin", error));
