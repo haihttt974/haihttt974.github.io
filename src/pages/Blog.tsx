@@ -373,7 +373,7 @@ const Blog = () => {
         ) : filteredPosts.length > 0 ? (
           <m.div
             key={`${selectedCategory}-${tagParam}-${searchQuery}-${language}`}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3"
             variants={reduceMotion ? undefined : staggerContainer}
             initial={reduceMotion ? false : "hidden"}
             animate="visible"
@@ -382,36 +382,36 @@ const Blog = () => {
               <m.article
                 key={post.id}
                 variants={reduceMotion ? undefined : staggerItem}
-                className="group card-gradient border border-border/50 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300"
+                className="group card-gradient flex h-full flex-col overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:border-primary/50"
               >
-                <div className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <Badge variant="secondary" className="text-xs">
-                    {getCategoryName(post.category)}
-                  </Badge>
+                <div className="flex h-full flex-col p-6">
+                  <div className="mb-4 flex min-h-7 flex-wrap items-center gap-2.5">
+                    <Badge variant="secondary" className="max-w-full truncate text-xs">
+                      {getCategoryName(post.category)}
+                    </Badge>
 
-                  <div className="flex items-center text-muted-foreground text-sm">
-                    <Clock className="h-4 w-4 mr-1" />
-                    {post.readTime}
-                  </div>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Clock className="mr-1 h-4 w-4" />
+                      {post.readTime}
+                    </div>
 
-                  <div className="flex items-center text-muted-foreground text-sm">
-                    <Eye className="h-4 w-4 mr-1" />
-                    {(post.viewCount ?? 0).toLocaleString(locale)}
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Eye className="mr-1 h-4 w-4" />
+                      {(post.viewCount ?? 0).toLocaleString(locale)}
+                    </div>
                   </div>
-                </div>
 
                   <Link to={`/blog/${post.id}`}>
-                    <h2 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                    <h2 className="mb-3 min-h-[3.5rem] text-xl font-semibold leading-7 line-clamp-2 transition-colors group-hover:text-primary">
                       {post.title}
                     </h2>
                   </Link>
 
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                  <p className="mb-4 min-h-[4.5rem] line-clamp-3 text-sm leading-6 text-muted-foreground">
                     {post.excerpt}
                   </p>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="mb-5 flex h-7 gap-2 overflow-hidden">
                     {post.tags.slice(0, 3).map((tag) => {
                       const isSelected = selectedTags.some((selectedTag) => selectedTag.toLowerCase() === tag.toLowerCase());
 
@@ -420,24 +420,24 @@ const Blog = () => {
                           key={tag}
                           type="button"
                           onClick={() => toggleTagFilter(tag)}
-                          className={`inline-flex min-h-7 items-center rounded px-2.5 py-1 text-xs transition-colors ${
+                          className={`inline-flex h-7 max-w-[8.75rem] shrink-0 items-center rounded px-2.5 py-1 text-xs transition-colors ${
                             isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
                           }`}
                         >
-                          <Tag className="h-3 w-3 mr-1" />
-                          {tag}
+                          <Tag className="mr-1 h-3 w-3 shrink-0" />
+                          <span className="truncate">{tag}</span>
                         </button>
                       );
                     })}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                    <span className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between gap-4 border-t border-border/50 pt-4">
+                    <span className="min-w-0 truncate text-sm text-muted-foreground">
                       {new Date(post.date).toLocaleDateString(locale)}
                     </span>
                     <Link
                       to={`/blog/${post.id}`}
-                      className="text-primary text-sm font-medium"
+                      className="shrink-0 text-sm font-medium text-primary"
                     >
                       {t("blog.readMore")}
                     </Link>

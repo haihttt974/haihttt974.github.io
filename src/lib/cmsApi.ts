@@ -26,6 +26,7 @@ export interface CmsPostListItem {
   title: string;
   titleVi?: string | null;
   slug: string;
+  date: string;
   category: string;
   excerpt: string;
   excerptVi?: string | null;
@@ -131,6 +132,7 @@ const toListItem = (post: BlogPost & { viewCount: number }, language: "vi" | "en
   title: language === "vi" ? post.titleVi ?? post.title : post.title,
   titleVi: post.titleVi ?? undefined,
   slug: post.id,
+  date: post.date,
   category: post.category,
   excerpt: language === "vi" ? post.excerptVi ?? post.excerpt : post.excerpt,
   excerptVi: post.excerptVi ?? undefined,
