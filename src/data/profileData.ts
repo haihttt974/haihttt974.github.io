@@ -44,8 +44,16 @@ export const professionalExperience = [
       en: "Developing and maintaining HIS, EMR, and Admin Management System modules with Angular, ASP.NET Core, and SQL Server.",
     },
     highlights: {
-      vi: ["CRUD, bộ lọc tìm kiếm, phân trang và component tái sử dụng", "Kiểm tra dữ liệu, tối ưu truy vấn và xử lý sự cố SQL Server", "Điều tra lỗi, regression testing, merge branch và chuẩn bị triển khai"],
-      en: ["CRUD, search filters, pagination, and reusable components", "Data verification, query optimization, and SQL Server troubleshooting", "Defect investigation, regression testing, branch merging, and deployment preparation"],
+      vi: [
+        "CRUD, bộ lọc tìm kiếm, phân trang và component tái sử dụng",
+        "Kiểm tra dữ liệu, tối ưu truy vấn và xử lý sự cố SQL Server",
+        "Điều tra lỗi, regression testing, merge branch và chuẩn bị triển khai",
+      ],
+      en: [
+        "CRUD, search filters, pagination, and reusable components",
+        "Data verification, query optimization, and SQL Server troubleshooting",
+        "Defect investigation, regression testing, branch merging, and deployment preparation",
+      ],
     },
   },
 ];

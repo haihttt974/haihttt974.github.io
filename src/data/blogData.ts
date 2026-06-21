@@ -1,4 +1,4 @@
-﻿export interface Category {
+export interface Category {
   id: string;
   name: string;
   description: string;
@@ -78,8 +78,8 @@ export const projects: Project[] = [
   {
     id: "capital-weather-tracker",
     title: "Capital Weather Tracker",
-    description: "Há»‡ thá»‘ng xá»­ lÃ½ dá»¯ liá»‡u thá»i tiáº¿t thá»i gian thá»±c cho cÃ¡c thá»§ Ä‘Ã´ trÃªn tháº¿ giá»›i.",
-    longDescription: "á»¨ng dá»¥ng thu tháº­p vÃ  hiá»ƒn thá»‹ dá»¯ liá»‡u thá»i tiáº¿t real-time tá»« OpenWeatherMap API, xá»­ lÃ½ vÃ  visualize dá»¯ liá»‡u cho táº¥t cáº£ cÃ¡c thá»§ Ä‘Ã´ trÃªn tháº¿ giá»›i vá»›i cáº­p nháº­t liÃªn tá»¥c.",
+    description: "Hệ thống xử lý dữ liệu thời tiết thời gian thực cho các thủ đô trên thế giới.",
+    longDescription: "Ứng dụng thu thập và hiển thị dữ liệu thời tiết real-time từ OpenWeatherMap API, xử lý và visualize dữ liệu cho tất cả các thủ đô trên thế giới với cập nhật liên tục.",
     technologies: ["Python", "OpenWeatherMap API", "Data Processing"],
     github: "https://github.com/haihttt974/capital-weather-tracker",
     image: "/placeholder.svg",
@@ -88,8 +88,8 @@ export const projects: Project[] = [
   {
     id: "sorting-visualizer",
     title: "Sorting Visualizer",
-    description: "á»¨ng dá»¥ng trá»±c quan hÃ³a cÃ¡c thuáº­t toÃ¡n sáº¯p xáº¿p vá»›i animation mÆ°á»£t mÃ .",
-    longDescription: "CÃ´ng cá»¥ giÃ¡o dá»¥c giÃºp hiá»ƒu rÃµ cÃ¡ch hoáº¡t Ä‘á»™ng cá»§a cÃ¡c thuáº­t toÃ¡n sáº¯p xáº¿p nhÆ° Bubble Sort, Quick Sort, Merge Sort thÃ´ng qua visualization trá»±c quan.",
+    description: "Ứng dụng trực quan hóa các thuật toán sắp xếp với animation mượt mà.",
+    longDescription: "Công cụ giáo dục giúp hiểu rõ cách hoạt động của các thuật toán sắp xếp như Bubble Sort, Quick Sort, Merge Sort thông qua visualization trực quan.",
     technologies: ["TypeScript", "Algorithms", "Visualization"],
     github: "https://github.com/haihttt974/sorting-visualizer",
     image: "/placeholder.svg",
@@ -98,8 +98,8 @@ export const projects: Project[] = [
   {
     id: "bookstore-aspnet",
     title: "BookStore ASP.NET",
-    description: "Website quáº£n lÃ½ hiá»‡u sÃ¡ch hoÃ n chá»‰nh vá»›i ASP.NET Core.",
-    longDescription: "Há»‡ thá»‘ng quáº£n lÃ½ hiá»‡u sÃ¡ch full-stack vá»›i chá»©c nÄƒng CRUD, quáº£n lÃ½ kho, Ä‘Æ¡n hÃ ng vÃ  bÃ¡o cÃ¡o doanh thu. XÃ¢y dá»±ng trÃªn ASP.NET Core vÃ  SQL Server.",
+    description: "Website quản lý hiệu sách hoàn chỉnh với ASP.NET Core.",
+    longDescription: "Hệ thống quản lý hiệu sách full-stack với chức năng CRUD, quản lý kho, đơn hàng và báo cáo doanh thu. Xây dựng trên ASP.NET Core và SQL Server.",
     technologies: ["C#", "ASP.NET Core", "SQL Server", "Entity Framework"],
     github: "https://github.com/haihttt974/thltweb-BookStore-asp.net",
     image: "/placeholder.svg",
@@ -107,9 +107,9 @@ export const projects: Project[] = [
   },
   {
     id: "gplx-mobile-app",
-    title: "Ã”n thi GPLX Mobile",
-    description: "á»¨ng dá»¥ng di Ä‘á»™ng Ã´n thi giáº¥y phÃ©p lÃ¡i xe vá»›i Flutter.",
-    longDescription: "á»¨ng dá»¥ng mobile cross-platform giÃºp ngÆ°á»i dÃ¹ng Ã´n luyá»‡n lÃ½ thuyáº¿t thi báº±ng lÃ¡i xe vá»›i bá»™ cÃ¢u há»i Ä‘áº§y Ä‘á»§, thi thá»­ vÃ  theo dÃµi tiáº¿n Ä‘á»™ há»c táº­p.",
+    title: "Ôn thi GPLX Mobile",
+    description: "Ứng dụng di động ôn thi giấy phép lái xe với Flutter.",
+    longDescription: "Ứng dụng mobile cross-platform giúp người dùng ôn luyện lý thuyết thi bằng lái xe với bộ câu hỏi đầy đủ, thi thử và theo dõi tiến độ học tập.",
     technologies: ["Dart", "Flutter", "Mobile Development"],
     github: "https://github.com/haihttt974/ltmobile_gplx",
     image: "/placeholder.svg",
@@ -117,8 +117,8 @@ export const projects: Project[] = [
   {
     id: "temperature-influxdb",
     title: "Temperature VN InfluxDB",
-    description: "Há»‡ thá»‘ng thu tháº­p vÃ  lÆ°u trá»¯ dá»¯ liá»‡u nhiá»‡t Ä‘á»™ vÃ o InfluxDB.",
-    longDescription: "Pipeline dá»¯ liá»‡u IoT thu tháº­p nhiá»‡t Ä‘á»™ tá»« cÃ¡c nguá»“n khÃ¡c nhau táº¡i Viá»‡t Nam, lÆ°u trá»¯ vÃ o InfluxDB cho phÃ¢n tÃ­ch time-series vÃ  visualization.",
+    description: "Hệ thống thu thập và lưu trữ dữ liệu nhiệt độ vào InfluxDB.",
+    longDescription: "Pipeline dữ liệu IoT thu thập nhiệt độ từ các nguồn khác nhau tại Việt Nam, lưu trữ vào InfluxDB cho phân tích time-series và visualization.",
     technologies: ["Python", "InfluxDB", "IoT", "Time Series"],
     github: "https://github.com/haihttt974/send-temperature-vn-influxdb",
     image: "/placeholder.svg",
@@ -126,8 +126,8 @@ export const projects: Project[] = [
   {
     id: "christmas-tree",
     title: "Christmas Tree Effect",
-    description: "Hiá»‡u á»©ng cÃ¢y thÃ´ng Noel tÆ°Æ¡ng tÃ¡c vá»›i HTML/CSS/JS.",
-    longDescription: "Trang web hiá»‡u á»©ng GiÃ¡ng Sinh vá»›i cÃ¢y thÃ´ng 3D tÆ°Æ¡ng tÃ¡c, tuyáº¿t rÆ¡i vÃ  Ã¡nh sÃ¡ng lung linh. HoÃ n toÃ n viáº¿t báº±ng vanilla HTML, CSS vÃ  JavaScript.",
+    description: "Hiệu ứng cây thông Noel tương tác với HTML/CSS/JS.",
+    longDescription: "Trang web hiệu ứng Giáng Sinh với cây thông 3D tương tác, tuyết rơi và ánh sáng lung linh. Hoàn toàn viết bằng vanilla HTML, CSS và JavaScript.",
     technologies: ["HTML5", "CSS3", "JavaScript", "Animation"],
     github: "https://github.com/haihttt974/christmas_tree.github.io",
     demo: "https://haihttt974.github.io/christmas_tree.github.io/",
@@ -136,8 +136,8 @@ export const projects: Project[] = [
   {
     id: "countdown-newyear",
     title: "Countdown New Year",
-    description: "Äá»“ng há»“ Ä‘áº¿m ngÆ°á»£c nÄƒm má»›i vá»›i hiá»‡u á»©ng Ä‘áº¹p máº¯t.",
-    longDescription: "Trang countdown Ä‘Ã³n nÄƒm má»›i vá»›i thiáº¿t káº¿ hiá»‡n Ä‘áº¡i, hiá»‡u á»©ng confetti vÃ  animation mÆ°á»£t mÃ  khi Ä‘á»“ng há»“ Ä‘iá»ƒm 0.",
+    description: "Đồng hồ đếm ngược năm mới với hiệu ứng đẹp mắt.",
+    longDescription: "Trang countdown đón năm mới với thiết kế hiện đại, hiệu ứng confetti và animation mượt mà khi đồng hồ điểm 0.",
     technologies: ["HTML5", "CSS3", "JavaScript"],
     github: "https://github.com/haihttt974/CountdownNewYear.github.io",
     demo: "https://haihttt974.github.io/CountdownNewYear.github.io/",
@@ -146,8 +146,8 @@ export const projects: Project[] = [
   {
     id: "firework-effect",
     title: "Firework Effect",
-    description: "Hiá»‡u á»©ng phÃ¡o hoa sá»‘ng Ä‘á»™ng cho cÃ¡c dá»‹p lá»… há»™i.",
-    longDescription: "MÃ´ phá»ng phÃ¡o hoa vá»›i hiá»‡u á»©ng particle system, mÃ u sáº¯c rá»±c rá»¡ vÃ  Ã¢m thanh. PhÃ¹ há»£p cho cÃ¡c trang countdown vÃ  lá»… há»™i.",
+    description: "Hiệu ứng pháo hoa sống động cho các dịp lễ hội.",
+    longDescription: "Mô phỏng pháo hoa với hiệu ứng particle system, màu sắc rực rỡ và âm thanh. Phù hợp cho các trang countdown và lễ hội.",
     technologies: ["HTML5", "Canvas", "JavaScript", "Animation"],
     github: "https://github.com/haihttt974/Hfirework.github.io",
     demo: "https://haihttt974.github.io/Hfirework.github.io/",
@@ -155,24 +155,24 @@ export const projects: Project[] = [
   },
 ];
 
-// ThÃ´ng tin cÃ¡ nhÃ¢n tá»« GitHub cá»§a LÃª Duy Háº£i (haihttt974)
+// Thông tin cá nhân từ GitHub của Lê Duy Hải (haihttt974)
 export const aboutData = {
-  name: "LÃª Duy Háº£i",
+  name: "Lê Duy Hải",
   nickname: "Hai IT",
   username: "haihttt974",
   title: "Information Systems Developer",
-  subtitle: "Database â€¢ Server-side â€¢ DevOps",
+  subtitle: "Database • Server-side • DevOps",
   avatar: "https://avatars.githubusercontent.com/u/202379592?v=4",
-  address: "ÄÃ´ng HÆ°ng Thuáº­n, Ho Chi Minh City",
-  bio: `TÃ´i lÃ  má»™t chuyÃªn gia vá» Há»‡ thá»‘ng thÃ´ng tin (Information Systems), táº­p trung vÃ o viá»‡c xÃ¢y dá»±ng cÃ¡c giáº£i phÃ¡p cÃ³ kháº£ nÄƒng má»Ÿ rá»™ng (Scalable) vÃ  tin cáº­y (Reliable).
+  address: "Đông Hưng Thuận, Ho Chi Minh City",
+  bio: `Tôi là một chuyên gia về Hệ thống thông tin (Information Systems), tập trung vào việc xây dựng các giải pháp có khả năng mở rộng (Scalable) và tin cậy (Reliable).
 
-ChuyÃªn mÃ´n cá»§a tÃ´i bao gá»“m: CÆ¡ sá»Ÿ dá»¯ liá»‡u, Server-side Development vÃ  DevOps. TÃ´i Ä‘am mÃª viá»‡c tá»‘i Æ°u hÃ³a hiá»‡u suáº¥t há»‡ thá»‘ng vÃ  xÃ¢y dá»±ng cÃ¡c kiáº¿n trÃºc pháº§n má»m bá»n vá»¯ng.
+Chuyên môn của tôi bao gồm: Cơ sở dữ liệu, Server-side Development và DevOps. Tôi đam mê việc tối ưu hóa hiệu suất hệ thống và xây dựng các kiến trúc phần mềm bền vững.
 
-NgoÃ i láº­p trÃ¬nh, tÃ´i cÃ²n lÃ  gia sÆ° ToÃ¡n, chia sáº» kiáº¿n thá»©c vÃ  giÃºp Ä‘á»¡ há»c sinh phÃ¡t triá»ƒn tÆ° duy logic.`,
-  
+Ngoài lập trình, tôi còn là gia sư Toán, chia sẻ kiến thức và giúp đỡ học sinh phát triển tư duy logic.`,
+
   skills: [
     {
-      category: "NgÃ´n ngá»¯ láº­p trÃ¬nh",
+      category: "Ngôn ngữ lập trình",
       items: ["C", "C++", "C#", "Java", "PHP", "Python", "JavaScript", "TypeScript", "Dart"],
     },
     {
@@ -219,15 +219,14 @@ NgoÃ i láº­p trÃ¬nh, tÃ´i cÃ²n lÃ  gia sÆ° ToÃ¡n, chia sáº» 
     {
       title: "Information Systems Developer",
       company: "Freelance & Personal Projects",
-      period: "2023 - Hiá»‡n táº¡i",
-      description: "PhÃ¡t triá»ƒn cÃ¡c á»©ng dá»¥ng web, mobile vÃ  há»‡ thá»‘ng xá»­ lÃ½ dá»¯ liá»‡u. ChuyÃªn sÃ¢u vá» Database, Server-side vÃ  DevOps.",
+      period: "2023 - Hiện tại",
+      description: "Phát triển các ứng dụng web, mobile và hệ thống xử lý dữ liệu. Chuyên sâu về Database, Server-side và DevOps.",
     },
     {
       title: "Math Tutor",
       company: "Private Tutoring",
-      period: "2022 - Hiá»‡n táº¡i",
-      description: "Gia sÆ° ToÃ¡n há»c, giÃºp há»c sinh phÃ¡t triá»ƒn tÆ° duy logic vÃ  giáº£i quyáº¿t váº¥n Ä‘á».",
+      period: "2022 - Hiện tại",
+      description: "Gia sư Toán học, giúp học sinh phát triển tư duy logic và giải quyết vấn đề.",
     },
   ],
 };
-
