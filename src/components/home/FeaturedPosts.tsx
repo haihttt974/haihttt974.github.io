@@ -1,18 +1,17 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, Eye } from "lucide-react";
 import { categories } from "@/data/blogData";
-import { BlogPost, localizeBlogPost } from "@/data/blog-posts";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
 import { revealSection, staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
-import { cmsApi } from "@/lib/cmsApi";
+import { CmsPostListItem, cmsApi } from "@/lib/cmsApi";
 import { LoadingState } from "@/components/loading/LoadingState";
 
 export const FeaturedPosts = () => {
   const { t, locale, language } = useLanguage();
   const reduceMotion = useReducedMotion();
-  const [featuredPosts, setFeaturedPosts] = useState<(BlogPost & { viewCount?: number })[]>([]);
+  const [featuredPosts, setFeaturedPosts] = useState<CmsPostListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const categoryName = (id: string) => categories.some((category) => category.id === id) ? t(`category.${id}`) : id;
 
@@ -53,9 +52,7 @@ export const FeaturedPosts = () => {
           <LoadingState className="min-h-[28rem]" label={language === "vi" ? "Đang tải" : "Loading"} />
         ) : (
           <m.div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]" variants={reduceMotion ? undefined : staggerContainer}>
-          {featuredPosts.map((sourcePost, index) => {
-            const post = localizeBlogPost(sourcePost, language);
-            return (
+          {featuredPosts.map((post, index) => (
             <m.article key={post.id} variants={reduceMotion ? undefined : staggerItem} className={`group journal-card p-6 md:p-8 ${index === 0 ? "lg:row-span-2" : ""}`}>
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-5 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground">
                 <span className="text-primary">Note / 0{index + 1}</span>
@@ -68,11 +65,11 @@ export const FeaturedPosts = () => {
               <div className="mt-8 flex flex-wrap items-center gap-5 border-t border-border/70 pt-5 font-mono text-xs text-muted-foreground">
                 <span>{new Date(post.date).toLocaleDateString(locale)}</span>
                 <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" />{post.readTime}</span>
-                <span className="flex items-center gap-1.5"><Eye className="h-3 w-3" />{(sourcePost.viewCount ?? 0).toLocaleString(locale)}</span>
+                <span className="flex items-center gap-1.5"><Eye className="h-3 w-3" />{(post.viewCount ?? 0).toLocaleString(locale)}</span>
                 <Link to={`/blog/${post.id}`} className="ml-auto flex items-center gap-1.5 text-primary">{t("home.notes.read")} <ArrowRight className="h-3 w-3" /></Link>
               </div>
             </m.article>
-          )})}
+          ))}
           </m.div>
         )}
       </div>

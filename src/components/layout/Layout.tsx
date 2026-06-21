@@ -8,11 +8,16 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   useEffect(() => {
+    const hasSavedBlogScroll =
+      pathname === "/blog" && window.sessionStorage.getItem(`blog-scroll:${pathname}${search}`);
+
+    if (hasSavedBlogScroll) return;
+
     window.scrollTo({ top: 0, behavior: "instant" });
-  }, [pathname]);
+  }, [pathname, search]);
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden">

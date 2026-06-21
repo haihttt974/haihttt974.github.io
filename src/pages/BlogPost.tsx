@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye } from "lucide-react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { BlogPost as BlogPostData, localizeBlogPost } from "@/data/blog-posts";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,10 @@ const BlogPost = () => {
   const { t, locale, language } = useLanguage();
   const { toast } = useToast();
   const { id } = useParams();
+  const location = useLocation();
+  const fromBlog = typeof location.state?.from === "string" && location.state.from.startsWith("/blog")
+    ? location.state.from
+    : "/blog";
   const [sourcePost, setSourcePost] = useState<(BlogPostData & { viewCount?: number }) | undefined>(() =>
     id ? cmsApi.getCachedPost(id) : undefined,
   );
@@ -69,7 +73,7 @@ const BlogPost = () => {
             {t("post.notFoundDesc")}
           </p>
           <Button asChild>
-            <Link to="/blog">
+            <Link to={fromBlog}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               {t("post.back")}
             </Link>
@@ -99,7 +103,7 @@ const BlogPost = () => {
     <Layout>
       <article className="container mx-auto px-4 py-12">
         <Link
-          to="/blog"
+          to={fromBlog}
           className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors mb-8"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />

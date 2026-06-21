@@ -1,8 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { BadgeCheck, Blocks, BookOpenCheck, Check, ChevronDown, Clock, Code2, Filter, Folder, Map as MapIcon, Network, Search, Shapes, Tag, X } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { BadgeCheck, Blocks, BookOpenCheck, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Code2, Filter, Folder, Map as MapIcon, Network, Search, Shapes, Tag, X } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { BlogPost, localizeBlogPost } from "@/data/blog-posts";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,15 +10,17 @@ import { Eye } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
 import { staggerContainer, staggerItem } from "@/lib/motion";
-import { CmsCategory, CmsTag, cmsApi } from "@/lib/cmsApi";
+import { CmsCategory, CmsPostListItem, CmsTag, cmsApi } from "@/lib/cmsApi";
 import { LoadingState } from "@/components/loading/LoadingState";
 
 const Blog = () => {
   const { t, locale, language } = useLanguage();
   const reduceMotion = useReducedMotion();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const restoredScrollRef = useRef(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [blogPosts, setBlogPosts] = useState<(BlogPost & { viewCount?: number })[]>([]);
+  const [blogPosts, setBlogPosts] = useState<CmsPostListItem[]>([]);
   const [categories, setCategories] = useState<CmsCategory[]>([]);
   const [tags, setTags] = useState<CmsTag[]>([]);
   const [categorySearch, setCategorySearch] = useState("");
@@ -28,6 +29,10 @@ const Blog = () => {
   
   const selectedCategory = searchParams.get("category") || "all";
   const tagParam = searchParams.get("tag") || "";
+  const postsPerPage = 9;
+  const currentPage = Math.max(1, Number(searchParams.get("page")) || 1);
+  const blogReturnPath = `${location.pathname}${location.search}`;
+  const blogScrollKey = `blog-scroll:${blogReturnPath}`;
   const selectedTags = useMemo(
     () => tagParam.split(",").map((tag) => tag.trim()).filter(Boolean),
     [tagParam],
@@ -60,7 +65,7 @@ const Blog = () => {
   }, [categories]);
 
   const filteredPosts = useMemo(() => {
-    return blogPosts.map((sourcePost) => ({ ...localizeBlogPost(sourcePost, language), viewCount: sourcePost.viewCount })).filter((post) => {
+    return blogPosts.filter((post) => {
       const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
       const matchesTags =
         selectedTags.length === 0 ||
@@ -73,7 +78,19 @@ const Blog = () => {
         post.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesCategory && matchesTags && matchesSearch;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [blogPosts, selectedCategory, selectedTags, searchQuery, language]);
+  }, [blogPosts, selectedCategory, selectedTags, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / postsPerPage));
+  const paginatedPosts = useMemo(
+    () => filteredPosts.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage),
+    [currentPage, filteredPosts],
+  );
+  const visiblePages = useMemo(() => {
+    const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+    const end = Math.min(totalPages, start + 4);
+
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+  }, [currentPage, totalPages]);
 
   const getCategoryName = (categoryId: string) =>
     categories.find((c) => c.slug === categoryId)?.name || t(`category.${categoryId}`) || categoryId;
@@ -101,6 +118,7 @@ const Blog = () => {
       nextParams.set("category", categoryId);
     }
 
+    nextParams.delete("page");
     setSearchParams(nextParams);
   };
 
@@ -113,6 +131,7 @@ const Blog = () => {
       nextParams.set("tag", tags.join(","));
     }
 
+    nextParams.delete("page");
     setSearchParams(nextParams);
   };
 
@@ -128,6 +147,32 @@ const Blog = () => {
   const clearFilters = () => {
     setSearchParams({});
     setSearchQuery("");
+  };
+
+  const updateSearchQuery = (value: string) => {
+    setSearchQuery(value);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("page");
+    setSearchParams(nextParams);
+  };
+
+  const setPage = (page: number) => {
+    const nextPage = Math.min(Math.max(1, page), totalPages);
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (nextPage === 1) {
+      nextParams.delete("page");
+    } else {
+      nextParams.set("page", String(nextPage));
+    }
+
+    setSearchParams(nextParams);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const rememberBlogPosition = () => {
+    const scrollY = window.scrollY;
+    window.sessionStorage.setItem(blogScrollKey, String(scrollY));
   };
 
   useEffect(() => {
@@ -158,6 +203,35 @@ const Blog = () => {
     };
   }, [language]);
 
+  useEffect(() => {
+    if (isLoading || filteredPosts.length === 0) return;
+    if (currentPage > totalPages) setPage(totalPages);
+  }, [currentPage, filteredPosts.length, isLoading, totalPages]);
+
+  useEffect(() => {
+    restoredScrollRef.current = false;
+  }, [blogReturnPath]);
+
+  useEffect(() => {
+    if (isLoading || restoredScrollRef.current) return;
+
+    const savedY = window.sessionStorage.getItem(blogScrollKey);
+    if (!savedY) return;
+
+    const targetY = Number(savedY) || 0;
+    restoredScrollRef.current = true;
+    window.sessionStorage.removeItem(blogScrollKey);
+
+    const restore = () => window.scrollTo({ top: targetY, behavior: "instant" });
+    window.requestAnimationFrame(() => {
+      restore();
+      window.requestAnimationFrame(restore);
+    });
+
+    const timers = [80, 180, 360].map((delay) => window.setTimeout(restore, delay));
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [blogScrollKey, isLoading, paginatedPosts.length]);
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
@@ -180,7 +254,7 @@ const Blog = () => {
                 type="search"
                 placeholder={t("blog.search")}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => updateSearchQuery(e.target.value)}
                 className="h-10 rounded-lg border-border/70 bg-background/85 pl-9 text-sm shadow-sm"
               />
             </div>
@@ -371,81 +445,138 @@ const Blog = () => {
         {isLoading ? (
           <LoadingState className="min-h-[36rem]" label={language === "vi" ? "Đang tải" : "Loading"} />
         ) : filteredPosts.length > 0 ? (
-          <m.div
-            key={`${selectedCategory}-${tagParam}-${searchQuery}-${language}`}
-            className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3"
-            variants={reduceMotion ? undefined : staggerContainer}
-            initial={reduceMotion ? false : "hidden"}
-            animate="visible"
-          >
-            {filteredPosts.map((post) => (
-              <m.article
-                key={post.id}
-                variants={reduceMotion ? undefined : staggerItem}
-                className="group card-gradient flex h-full flex-col overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:border-primary/50"
-              >
-                <div className="flex h-full flex-col p-6">
-                  <div className="mb-4 flex min-h-7 flex-wrap items-center gap-2.5">
-                    <Badge variant="secondary" className="max-w-full truncate text-xs">
-                      {getCategoryName(post.category)}
-                    </Badge>
+          <>
+            <m.div
+              key={`${selectedCategory}-${tagParam}-${searchQuery}-${language}-${currentPage}`}
+              className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3"
+              variants={reduceMotion ? undefined : staggerContainer}
+              initial={reduceMotion ? false : "hidden"}
+              animate="visible"
+            >
+              {paginatedPosts.map((post) => (
+                <m.article
+                  key={post.id}
+                  variants={reduceMotion ? undefined : staggerItem}
+                  className="group card-gradient flex h-full flex-col overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:border-primary/50"
+                >
+                  <div className="flex h-full flex-col p-6">
+                    <div className="mb-4 flex min-h-7 flex-wrap items-center gap-2.5">
+                      <Badge variant="secondary" className="max-w-full truncate text-xs">
+                        {getCategoryName(post.category)}
+                      </Badge>
 
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Clock className="mr-1 h-4 w-4" />
-                      {post.readTime}
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Clock className="mr-1 h-4 w-4" />
+                        {post.readTime}
+                      </div>
+
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Eye className="mr-1 h-4 w-4" />
+                        {(post.viewCount ?? 0).toLocaleString(locale)}
+                      </div>
                     </div>
 
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Eye className="mr-1 h-4 w-4" />
-                      {(post.viewCount ?? 0).toLocaleString(locale)}
-                    </div>
-                  </div>
-
-                  <Link to={`/blog/${post.id}`}>
-                    <h2 className="mb-3 min-h-[3.5rem] text-xl font-semibold leading-7 line-clamp-2 transition-colors group-hover:text-primary">
-                      {post.title}
-                    </h2>
-                  </Link>
-
-                  <p className="mb-4 min-h-[4.5rem] line-clamp-3 text-sm leading-6 text-muted-foreground">
-                    {post.excerpt}
-                  </p>
-
-                  <div className="mb-5 flex h-7 gap-2 overflow-hidden">
-                    {post.tags.slice(0, 3).map((tag) => {
-                      const isSelected = selectedTags.some((selectedTag) => selectedTag.toLowerCase() === tag.toLowerCase());
-
-                      return (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => toggleTagFilter(tag)}
-                          className={`inline-flex h-7 max-w-[8.75rem] shrink-0 items-center rounded px-2.5 py-1 text-xs transition-colors ${
-                            isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          <Tag className="mr-1 h-3 w-3 shrink-0" />
-                          <span className="truncate">{tag}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4 border-t border-border/50 pt-4">
-                    <span className="min-w-0 truncate text-sm text-muted-foreground">
-                      {new Date(post.date).toLocaleDateString(locale)}
-                    </span>
                     <Link
                       to={`/blog/${post.id}`}
-                      className="shrink-0 text-sm font-medium text-primary"
+                      state={{ from: blogReturnPath }}
+                      onClick={rememberBlogPosition}
                     >
-                      {t("blog.readMore")}
+                      <h2 className="mb-3 min-h-[3.5rem] text-xl font-semibold leading-7 line-clamp-2 transition-colors group-hover:text-primary">
+                        {post.title}
+                      </h2>
                     </Link>
+
+                    <p className="mb-4 min-h-[4.5rem] line-clamp-3 text-sm leading-6 text-muted-foreground">
+                      {post.excerpt}
+                    </p>
+
+                    <div className="mb-5 flex h-7 gap-2 overflow-hidden">
+                      {post.tags.slice(0, 3).map((tag) => {
+                        const isSelected = selectedTags.some((selectedTag) => selectedTag.toLowerCase() === tag.toLowerCase());
+
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => toggleTagFilter(tag)}
+                            className={`inline-flex h-7 max-w-[8.75rem] shrink-0 items-center rounded px-2.5 py-1 text-xs transition-colors ${
+                              isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            <Tag className="mr-1 h-3 w-3 shrink-0" />
+                            <span className="truncate">{tag}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 border-t border-border/50 pt-4">
+                      <span className="min-w-0 truncate text-sm text-muted-foreground">
+                        {new Date(post.date).toLocaleDateString(locale)}
+                      </span>
+                      <Link
+                        to={`/blog/${post.id}`}
+                        state={{ from: blogReturnPath }}
+                        onClick={rememberBlogPosition}
+                        className="shrink-0 text-sm font-medium text-primary"
+                      >
+                        {t("blog.readMore")}
+                      </Link>
+                    </div>
                   </div>
+                </m.article>
+              ))}
+            </m.div>
+
+            {totalPages > 1 && (
+              <nav className="mt-10 flex flex-col items-center justify-between gap-4 rounded-xl border border-border/70 bg-background/75 p-3 shadow-sm backdrop-blur sm:flex-row">
+                <p className="text-sm text-muted-foreground">
+                  {language === "vi"
+                    ? `Hiển thị ${(currentPage - 1) * postsPerPage + 1}-${Math.min(currentPage * postsPerPage, filteredPosts.length)} / ${filteredPosts.length} bài`
+                    : `Showing ${(currentPage - 1) * postsPerPage + 1}-${Math.min(currentPage * postsPerPage, filteredPosts.length)} of ${filteredPosts.length} posts`}
+                </p>
+
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 rounded-full px-3"
+                    disabled={currentPage === 1}
+                    onClick={() => setPage(currentPage - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">{language === "vi" ? "Trước" : "Prev"}</span>
+                  </Button>
+
+                  {visiblePages.map((page) => (
+                    <Button
+                      key={page}
+                      type="button"
+                      variant={page === currentPage ? "default" : "outline"}
+                      size="sm"
+                      className="h-9 w-9 rounded-full p-0"
+                      onClick={() => setPage(page)}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 rounded-full px-3"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setPage(currentPage + 1)}
+                  >
+                    <span className="hidden sm:inline">{language === "vi" ? "Sau" : "Next"}</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              </m.article>
-            ))}
-          </m.div>
+              </nav>
+            )}
+          </>
         ) : (
           <div className="text-center py-20">
             <Filter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
