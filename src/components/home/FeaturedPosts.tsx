@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, Eye } from "lucide-react";
-import { BlogPost, categories, localizeBlogPost } from "@/data/blogData";
+import { categories } from "@/data/blogData";
+import { BlogPost, localizeBlogPost } from "@/data/blog-posts";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";

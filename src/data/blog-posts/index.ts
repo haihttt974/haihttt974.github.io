@@ -8,4 +8,17 @@ import { blogPost as typescriptTypeSystemPracticalGuide } from "./typescript-typ
 import { blogPost as pythonProductionCodeBeyondScripts } from "./python-production-code-beyond-scripts";
 import { blogPost as csharpModernBackendGuide } from "./csharp-modern-backend-guide";
 
-export const blogPosts = [understandingSolidPrinciples, reactPerformanceOptimization, typescriptAdvancedTypes, microservicesArchitecture, cleanCodePractices, frontendDeveloperRoadmap2024, typescriptTypeSystemPracticalGuide, pythonProductionCodeBeyondScripts, csharpModernBackendGuide];
+export type { BlogPost } from "./types";
+export { localizeBlogPost } from "./types";
+
+export const blogPosts = [
+  understandingSolidPrinciples,
+  reactPerformanceOptimization,
+  typescriptAdvancedTypes,
+  microservicesArchitecture,
+  cleanCodePractices,
+  frontendDeveloperRoadmap2024,
+  typescriptTypeSystemPracticalGuide,
+  pythonProductionCodeBeyondScripts,
+  csharpModernBackendGuide,
+];

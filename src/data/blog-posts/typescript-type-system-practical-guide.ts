@@ -1,4 +1,4 @@
-import type { BlogPost } from "../blogData";
+import type { BlogPost } from "./types";
 
 export const blogPost: BlogPost = {
 id: "typescript-type-system-practical-guide",

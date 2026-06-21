@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { BadgeCheck, Blocks, BookOpenCheck, Check, ChevronDown, Clock, Code2, Filter, Folder, Map as MapIcon, Network, Search, Shapes, Tag, X } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { localizeBlogPost, BlogPost } from "@/data/blogData";
+import { BlogPost, localizeBlogPost } from "@/data/blog-posts";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

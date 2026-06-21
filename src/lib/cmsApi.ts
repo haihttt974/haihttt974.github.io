@@ -1,4 +1,5 @@
-import { BlogPost, Category, blogPosts, categories, localizeBlogPost } from "@/data/blogData";
+import { Category, categories } from "@/data/blogData";
+import { BlogPost, blogPosts, localizeBlogPost } from "@/data/blog-posts";
 
 export type PostStatus = "Draft" | "Published" | "Archived";
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye } from "lucide-react";
 import { useParams, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
-import { BlogPost as BlogPostData, localizeBlogPost } from "@/data/blogData";
+import { BlogPost as BlogPostData, localizeBlogPost } from "@/data/blog-posts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
