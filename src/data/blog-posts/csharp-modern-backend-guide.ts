@@ -178,6 +178,6 @@ C# tốt nhất không phải là C# thông minh nhất. Mã tốt truyền đ�
     category: "languages",
     tags: ["C#", ".NET", "Backend", "Domain Modeling"],
     date: "2026-06-06",
-    readTime: "12 min",
-    readTimeVi: "12 phút",
+    readTime: "6 min",
+    readTimeVi: "6 phút",
 };

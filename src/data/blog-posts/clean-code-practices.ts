@@ -22,7 +22,7 @@ Tên biến, hàm và module nên giúp người đọc hiểu mục đích mà 
 Một hàm tốt thường thực hiện một công việc ở cùng một mức trừu tượng và có đầu vào, đầu ra dễ dự đoán.`,
   category: "practices",
   tags: ["Clean Code", "Refactoring", "Best Practices"],
-  date: "2024-01-03",
-  readTime: "10 min",
-  readTimeVi: "10 phút",
+  date: "2026-05-21",
+  readTime: "3 min",
+  readTimeVi: "3 phút",
 };

@@ -8,7 +8,7 @@ id: "typescript-type-system-practical-guide",
     excerptVi: "Hướng dẫn thực tế về cách mô hình hóa quy tắc nghiệp vụ bằng union, generic, narrowing và các biên an toàn kiểu dữ liệu.",
     content: `# TypeScript's Type System: From Safer Code to Better Domain Design
 
-TypeScript is most valuable when it does more than annotate JavaScript. Used well, its type system becomes a design tool: it makes invalid states difficult to represent, clarifies contracts between modules, and moves many mistakes from production into the editor.
+TypeScript is most valuable when it does more than annotate JavaScript. Used well, its type system becomes a design tool: it makes invalid states difficult to represent, clarifies contracts between modules, and moves many mistakes into the editor before they become runtime bugs.
 
 ## Start with domain states, not primitive types
 
@@ -46,7 +46,7 @@ function parseUser(input: unknown): User {
 }
 \`\`\`
 
-\`any\` disables checking and lets uncertainty spread. \`unknown\` forces validation before use. In production applications, pair this pattern with a schema validator such as Zod.
+\`any\` disables checking and lets uncertainty spread. \`unknown\` forces validation before use. In applications that depend on external data, pair this pattern with a schema validator such as Zod.
 
 ## Generics should preserve relationships
 
@@ -94,7 +94,7 @@ function orderLabel(order: Order): string {
 TypeScript cannot replace tests or runtime validation. Its real strength is making assumptions visible. When the model communicates the domain clearly, implementation becomes easier to review, refactor, and extend.`,
     contentVi: `# Hệ thống kiểu TypeScript: Từ mã an toàn đến thiết kế nghiệp vụ tốt hơn
 
-TypeScript mang lại giá trị lớn nhất khi không chỉ được dùng để thêm chú thích kiểu cho JavaScript. Khi sử dụng đúng, hệ thống kiểu trở thành một công cụ thiết kế: trạng thái không hợp lệ khó xuất hiện, hợp đồng giữa các module rõ ràng hơn và nhiều lỗi được phát hiện ngay trong trình soạn thảo thay vì production.
+TypeScript mang lại giá trị lớn nhất khi không chỉ được dùng để thêm chú thích kiểu cho JavaScript. Khi sử dụng đúng, hệ thống kiểu trở thành một công cụ thiết kế: trạng thái không hợp lệ khó xuất hiện, hợp đồng giữa các module rõ ràng hơn và nhiều lỗi được phát hiện ngay trong trình soạn thảo trước khi trở thành lỗi runtime.
 
 ## Bắt đầu từ trạng thái nghiệp vụ, không phải kiểu nguyên thủy
 
@@ -171,7 +171,7 @@ TypeScript không thay thế kiểm thử hay xác thực runtime. Sức mạnh 
     category: "languages",
     tags: ["TypeScript", "Type System", "Domain Modeling", "Generics"],
     date: "2026-06-13",
-    readTime: "14 min",
-    readTimeVi: "14 phút",
+    readTime: "5 min",
+    readTimeVi: "5 phút",
     featured: true,
 };

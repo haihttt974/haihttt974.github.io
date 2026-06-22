@@ -1,14 +1,14 @@
 import type { BlogPost } from "./types";
 
 export const blogPost: BlogPost = {
-id: "python-production-code-beyond-scripts",
-    title: "Python Beyond Scripts: Structuring Reliable Production Applications",
-    titleVi: "Python vượt ra ngoài script: Xây dựng ứng dụng production đáng tin cậy",
-    excerpt: "How to move from quick Python scripts to maintainable applications through clear boundaries, type hints, dependency management, testing, and observability.",
-    excerptVi: "Cách chuyển từ script Python nhanh sang ứng dụng dễ bảo trì bằng ranh giới rõ ràng, type hint, quản lý dependency, kiểm thử và observability.",
-    content: `# Python Beyond Scripts
+  id: "python-reliable-applications",
+  title: "Python Beyond Scripts: Structuring Reliable Applications",
+  titleVi: "Python vượt ra ngoài script: Xây dựng ứng dụng đáng tin cậy",
+  excerpt: "How to move from quick Python scripts to maintainable applications with clear boundaries, type hints, dependency management, testing, and observability.",
+  excerptVi: "Cách chuyển từ script Python nhanh sang ứng dụng dễ bảo trì bằng ranh giới rõ ràng, type hint, quản lý dependency, kiểm thử và observability.",
+  content: `# Python Beyond Scripts: Structuring Reliable Applications
 
-Python makes the first version easy. That is one of its greatest strengths, but it can also hide structural problems until the application grows. Production-ready Python is not about making the language more complicated. It is about making behavior explicit.
+Python makes the first version easy. That is one of its greatest strengths, but it can also hide structural problems until the application grows. Reliable Python is not about making the language more complicated. It is about making behavior explicit.
 
 ## Separate policy from infrastructure
 
@@ -63,7 +63,7 @@ The original cause remains available while the calling layer receives an error t
 
 ## Build an observability baseline
 
-A production service should answer three questions: what happened, where did it happen, and which request was affected. Use structured logs, correlation IDs, metrics for important operations, and health checks that verify critical dependencies.
+A reliable service should answer three questions: what happened, where did it happen, and which request was affected. Use structured logs, correlation IDs, metrics for important operations, and health checks that verify critical dependencies.
 
 ## A practical project shape
 
@@ -81,7 +81,7 @@ tests/
 
 The exact folders matter less than the dependency direction. Domain logic should not import the API or database layer.
 
-## Production checklist
+## Reliability checklist
 
 - Format and lint automatically.
 - Run type checking and tests in CI.
@@ -91,9 +91,9 @@ The exact folders matter less than the dependency direction. Domain logic should
 - Test failure paths, not only successful ones.
 
 Good Python remains readable and direct. Reliability comes from disciplined boundaries and feedback loops, not from turning a small application into an abstract framework.`,
-    contentVi: `# Python vượt ra ngoài script
+  contentVi: `# Python vượt ra ngoài script: Xây dựng ứng dụng đáng tin cậy
 
-Python giúp tạo phiên bản đầu tiên rất nhanh. Đây là một trong những điểm mạnh lớn nhất của ngôn ngữ, nhưng nó cũng có thể che giấu vấn đề cấu trúc cho đến khi ứng dụng phát triển. Python sẵn sàng cho production không đồng nghĩa với việc làm ngôn ngữ phức tạp hơn; mục tiêu là làm hành vi của hệ thống trở nên rõ ràng.
+Python giúp tạo phiên bản đầu tiên rất nhanh. Đây là một trong những điểm mạnh lớn nhất của ngôn ngữ, nhưng nó cũng có thể che giấu vấn đề cấu trúc cho đến khi ứng dụng phát triển. Python đáng tin cậy không đồng nghĩa với việc làm ngôn ngữ phức tạp hơn; mục tiêu là làm hành vi của hệ thống trở nên rõ ràng.
 
 ## Tách chính sách nghiệp vụ khỏi hạ tầng
 
@@ -118,7 +118,7 @@ Hàm này có kết quả dễ dự đoán, kiểm thử nhanh và không phụ 
 
 ## Xem type hint như một hình thức giao tiếp
 
-Python vẫn là ngôn ngữ động ở runtime, nhưng type hint cải thiện phản hồi từ editor và làm rõ hợp đồng:
+Python vẫn là ngôn ngữ động ở runtime, nhưng type hint cải thiện phản hồi từ editor và làm rõ hợp đồng giữa các phần của chương trình:
 
 \`\`\`py
 from collections.abc import Iterable
@@ -148,7 +148,7 @@ Nguyên nhân gốc vẫn được giữ lại, trong khi tầng gọi nhận đ
 
 ## Xây nền tảng observability
 
-Một dịch vụ production cần trả lời được ba câu hỏi: chuyện gì đã xảy ra, xảy ra ở đâu và request nào bị ảnh hưởng. Hãy dùng structured log, correlation ID, metric cho thao tác quan trọng và health check cho dependency thiết yếu.
+Một dịch vụ đáng tin cậy cần trả lời được ba câu hỏi: chuyện gì đã xảy ra, xảy ra ở đâu và request nào bị ảnh hưởng. Hãy dùng structured log, correlation ID, metric cho thao tác quan trọng và health check cho dependency thiết yếu.
 
 ## Cấu trúc dự án tham khảo
 
@@ -166,7 +166,7 @@ tests/
 
 Tên thư mục không quan trọng bằng hướng phụ thuộc. Nghiệp vụ không nên import tầng API hoặc database.
 
-## Checklist production
+## Checklist độ tin cậy
 
 - Tự động format và lint.
 - Chạy type checking cùng test trong CI.
@@ -176,9 +176,9 @@ Tên thư mục không quan trọng bằng hướng phụ thuộc. Nghiệp vụ
 - Kiểm thử luồng thất bại, không chỉ luồng thành công.
 
 Python tốt vẫn nên dễ đọc và trực tiếp. Độ tin cậy đến từ ranh giới rõ ràng cùng vòng phản hồi kỷ luật, không phải từ việc biến ứng dụng nhỏ thành một framework trừu tượng.`,
-    category: "languages",
-    tags: ["Python", "Production", "Architecture", "Testing"],
-    date: "2026-06-10",
-    readTime: "13 min",
-    readTimeVi: "13 phút",
+  category: "languages",
+  tags: ["Python", "Architecture", "Testing", "Maintainability"],
+  date: "2026-06-10",
+  readTime: "6 min",
+  readTimeVi: "6 phút",
 };

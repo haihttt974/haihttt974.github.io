@@ -1,15 +1,15 @@
 import type { BlogPost } from "./types";
 
 export const blogPost: BlogPost = {
-  id: "frontend-developer-roadmap-2024",
-  title: "Frontend Developer Roadmap 2024",
-  titleVi: "Lộ trình trở thành Frontend Developer",
-  excerpt: "A comprehensive learning path for becoming a proficient frontend developer in 2024.",
-  excerptVi: "Lộ trình học tập có hệ thống để trở thành một frontend developer vững nền tảng.",
-  content: `# Frontend Developer Roadmap 2024
+  id: "frontend-developer-roadmap",
+  title: "Frontend Developer Roadmap for Building Strong Fundamentals",
+  titleVi: "Lộ trình Frontend Developer để xây nền tảng vững",
+  excerpt: "A practical learning path for building solid frontend fundamentals through HTML, CSS, JavaScript, frameworks, testing, and deployment.",
+  excerptVi: "Lộ trình học tập thực tế để xây nền tảng frontend qua HTML, CSS, JavaScript, framework, kiểm thử và triển khai.",
+  content: `# Frontend Developer Roadmap for Building Strong Fundamentals
 
 Start your journey to becoming a frontend developer...`,
-  contentVi: `# Lộ trình Frontend Developer
+  contentVi: `# Lộ trình Frontend Developer để xây nền tảng vững
 
 Một frontend developer vững vàng cần hiểu nền tảng web trước khi phụ thuộc vào framework.
 
@@ -22,7 +22,7 @@ Học semantic HTML, CSS layout, responsive design, JavaScript và cách trình 
 Chọn một framework, học quản lý trạng thái, routing, gọi API, kiểm thử và triển khai. Mỗi giai đoạn nên kết thúc bằng một sản phẩm có thể sử dụng.`,
   category: "roadmap",
   tags: ["Roadmap", "Frontend", "Career", "Learning"],
-  date: "2024-01-01",
-  readTime: "25 min",
-  readTimeVi: "25 phút",
+  date: "2026-05-20",
+  readTime: "3 min",
+  readTimeVi: "3 phút",
 };

@@ -1,12 +1,11 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { BadgeCheck, Blocks, BookOpenCheck, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Code2, Filter, Folder, Map as MapIcon, Network, Search, Shapes, Tag, X } from "lucide-react";
+import { BadgeCheck, Blocks, BookOpenCheck, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Code2, Eye, Filter, Folder, Map as MapIcon, Network, Search, Shapes, Tag, X } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Eye } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
 import { staggerContainer, staggerItem } from "@/lib/motion";
@@ -39,6 +38,16 @@ const Blog = () => {
   );
 
   const allTags = useMemo(() => tags.map((tag) => ({ name: tag.name, count: tag.postCount })), [tags]);
+
+  const blogStats = useMemo(() => {
+    const totalViews = blogPosts.reduce((sum, post) => sum + (post.viewCount ?? 0), 0);
+    const totalReadMinutes = blogPosts.reduce((sum, post) => sum + (post.readTimeMinutes || 0), 0);
+
+    return {
+      totalViews,
+      totalReadMinutes,
+    };
+  }, [blogPosts]);
 
   const filteredCategories = useMemo(() => {
     const query = categorySearch.trim().toLowerCase();
@@ -236,13 +245,48 @@ const Blog = () => {
     <Layout>
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
-        <div className="max-w-3xl mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-gradient">{t("blog.title")}</span>
-          </h1>
-          <p className="text-xl text-muted-foreground">
-            {t("blog.desc")}
-          </p>
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <h1 className="mb-4 text-4xl font-bold md:text-5xl">
+              <span className="text-gradient">{t("blog.title")}</span>
+            </h1>
+            <p className="text-lg text-muted-foreground md:text-xl">
+              {t("blog.desc")}
+            </p>
+          </div>
+
+          {!isLoading && (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:w-[30rem]">
+              <div className="rounded-lg border border-border/70 bg-background/75 px-3 py-2.5 shadow-sm">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Eye className="h-3.5 w-3.5 text-primary" />
+                  {language === "vi" ? "Lượt xem" : "Views"}
+                </div>
+                <div className="mt-1 text-lg font-semibold">{blogStats.totalViews.toLocaleString(locale)}</div>
+              </div>
+              <div className="rounded-lg border border-border/70 bg-background/75 px-3 py-2.5 shadow-sm">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <BookOpenCheck className="h-3.5 w-3.5 text-primary" />
+                  {language === "vi" ? "Bài" : "Posts"}
+                </div>
+                <div className="mt-1 text-lg font-semibold">{blogPosts.length.toLocaleString(locale)}</div>
+              </div>
+              <div className="rounded-lg border border-border/70 bg-background/75 px-3 py-2.5 shadow-sm">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5 text-primary" />
+                  {language === "vi" ? "Phút" : "Minutes"}
+                </div>
+                <div className="mt-1 text-lg font-semibold">{blogStats.totalReadMinutes.toLocaleString(locale)}</div>
+              </div>
+              <div className="rounded-lg border border-border/70 bg-background/75 px-3 py-2.5 shadow-sm">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Folder className="h-3.5 w-3.5 text-primary" />
+                  {language === "vi" ? "Mục" : "Topics"}
+                </div>
+                <div className="mt-1 text-lg font-semibold">{categories.length.toLocaleString(locale)}</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Search and Filters */}

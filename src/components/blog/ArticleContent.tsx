@@ -19,6 +19,105 @@ const copyToClipboard = async (text: string) => {
   textarea.remove();
 };
 
+const languageAliases: Record<string, string> = {
+  javascript: "js",
+  jsx: "js",
+  typescript: "ts",
+  tsx: "ts",
+  py: "python",
+  cs: "csharp",
+  "c#": "csharp",
+};
+
+const keywordGroups: Record<string, Set<string>> = {
+  js: new Set([
+    "async", "await", "break", "case", "catch", "class", "const", "continue", "default", "do", "else", "export",
+    "extends", "finally", "for", "from", "function", "if", "import", "in", "instanceof", "let", "new", "of", "return",
+    "switch", "throw", "try", "typeof", "var", "void", "while", "yield",
+  ]),
+  ts: new Set([
+    "abstract", "as", "async", "await", "break", "case", "catch", "class", "const", "continue", "default", "do", "else",
+    "enum", "export", "extends", "finally", "for", "from", "function", "if", "implements", "import", "in", "infer",
+    "interface", "keyof", "let", "namespace", "new", "of", "private", "protected", "public", "readonly", "return",
+    "satisfies", "switch", "throw", "try", "type", "typeof", "var", "void", "while",
+  ]),
+  python: new Set([
+    "and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except",
+    "False", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "None", "nonlocal", "not",
+    "or", "pass", "raise", "return", "True", "try", "while", "with", "yield",
+  ]),
+  csharp: new Set([
+    "abstract", "async", "await", "base", "break", "case", "catch", "class", "const", "decimal", "default", "else",
+    "enum", "false", "finally", "for", "foreach", "from", "get", "if", "in", "interface", "internal", "is", "namespace",
+    "new", "null", "private", "protected", "public", "readonly", "record", "return", "sealed", "set", "static", "string",
+    "switch", "this", "throw", "true", "try", "using", "var", "void", "when", "where",
+  ]),
+};
+
+const literalTokens = new Set(["true", "false", "null", "undefined", "True", "False", "None"]);
+const typeTokens = new Set([
+  "Array", "Boolean", "Date", "Decimal", "Error", "Guid", "Iterable", "List", "Map", "Number", "Promise", "Record",
+  "Set", "String", "Task", "ValueError", "dict", "list", "str", "int", "float", "bool",
+]);
+
+const normalizeLanguage = (language: string) => {
+  const value = language.trim().toLowerCase();
+  return languageAliases[value] ?? value;
+};
+
+const tokenPattern =
+  /(\/\*[\s\S]*?\*\/|\/\/.*|#.*|`(?:\\.|[^`])*`|"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|@[A-Za-z_]\w*|\b\d+(?:\.\d+)?\b|\b[A-Za-z_]\w*\b|=>|==={0,1}|!==?|\+\+|--|&&|\|\||[{}[\]().,;:<>+\-*/%=!?|&])/g;
+
+const tokenizeCodeLine = (line: string) => {
+  const tokens: string[] = [];
+  let lastIndex = 0;
+
+  line.replace(tokenPattern, (match, _token, offset: number) => {
+    if (offset > lastIndex) tokens.push(line.slice(lastIndex, offset));
+    tokens.push(match);
+    lastIndex = offset + match.length;
+    return match;
+  });
+
+  if (lastIndex < line.length) tokens.push(line.slice(lastIndex));
+  return tokens;
+};
+
+const nextMeaningfulToken = (tokens: string[], startIndex: number) =>
+  tokens.slice(startIndex + 1).find((token) => token.trim().length > 0);
+
+const tokenClassName = (token: string, language: string, nextToken?: string) => {
+  const normalized = normalizeLanguage(language);
+  const keywords = keywordGroups[normalized] ?? keywordGroups.js;
+
+  if (/^\s+$/.test(token)) return "";
+  if (/^(\/\/|#|\/\*)/.test(token)) return "text-slate-500 italic";
+  if (/^(`|"|')/.test(token)) return "text-emerald-300";
+  if (/^@\w+/.test(token)) return "text-amber-300";
+  if (/^\d/.test(token)) return "text-orange-300";
+  if (literalTokens.has(token)) return "text-purple-300";
+  if (keywords.has(token)) return "text-sky-300 font-medium";
+  if (typeTokens.has(token) || /^[A-Z][A-Za-z0-9_]*$/.test(token)) return "text-cyan-200";
+  if (nextToken === "(") return "text-yellow-200";
+  if (/^[{}[\]().,;:<>+\-*/%=!?|&]+$/.test(token)) return "text-slate-300";
+
+  return "text-slate-100";
+};
+
+const renderHighlightedLine = (line: string, language: string, lineIndex: number) => {
+  const tokens = tokenizeCodeLine(line);
+
+  return tokens.map((token, tokenIndex) => {
+    const className = tokenClassName(token, language, nextMeaningfulToken(tokens, tokenIndex));
+
+    return (
+      <span key={`${lineIndex}-${tokenIndex}`} className={className || undefined}>
+        {token}
+      </span>
+    );
+  });
+};
+
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const { language: currentLanguage } = useLanguage();
   const { toast } = useToast();
@@ -26,6 +125,8 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const resetTimer = useRef<number>();
   const copyLabel = currentLanguage === "vi" ? "Sao chép mã" : "Copy code";
   const copiedLabel = currentLanguage === "vi" ? "Đã sao chép" : "Copied";
+  const displayLanguage = language || "code";
+  const codeLines = code.split("\n");
 
   useEffect(() => () => window.clearTimeout(resetTimer.current), []);
 
@@ -49,15 +150,22 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   };
 
   return (
-    <div className="my-8 overflow-hidden rounded-xl border border-border/80 bg-background/70">
-      <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-2.5 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground">
-        <span>{language || "code"}</span>
+    <div className="my-8 overflow-hidden rounded-xl border border-slate-700/80 bg-slate-950 shadow-sm">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-900/95 px-4 py-2.5 font-mono text-xs uppercase tracking-[.14em] text-slate-400">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+          </span>
+          <span className="min-w-0 truncate">{displayLanguage}</span>
+        </div>
         <div className="flex items-center gap-3">
-          <span className="hidden text-muted-foreground/70 sm:inline">haiit.dev</span>
+          <span className="hidden text-slate-500 sm:inline">haiit.dev</span>
           <button
             type="button"
             onClick={handleCopy}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border/80 bg-background/80 text-foreground transition-colors hover:border-primary/60 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-700 bg-slate-900 text-slate-200 transition-colors hover:border-primary/70 hover:bg-primary/15 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label={copied ? copiedLabel : copyLabel}
             title={copied ? copiedLabel : copyLabel}
           >
@@ -66,7 +174,20 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
           </button>
         </div>
       </div>
-      <pre className="overflow-x-auto p-5 text-sm leading-7"><code>{code}</code></pre>
+      <pre className="overflow-x-auto p-0 text-sm leading-7">
+        <code className="block min-w-max py-4 font-mono">
+          {codeLines.map((line, lineIndex) => (
+            <span key={lineIndex} className="grid grid-cols-[3.25rem_1fr]">
+              <span className="select-none border-r border-slate-800 px-4 text-right text-slate-600">
+                {lineIndex + 1}
+              </span>
+              <span className="whitespace-pre px-4">
+                {line ? renderHighlightedLine(line, language, lineIndex) : " "}
+              </span>
+            </span>
+          ))}
+        </code>
+      </pre>
     </div>
   );
 };
