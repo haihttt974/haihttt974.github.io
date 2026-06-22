@@ -16,6 +16,7 @@ import Projects from "./pages/Projects";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import { PageTransition } from "@/components/motion/PageTransition";
+import { ScrollToTopButton } from "@/components/layout/ScrollToTopButton";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ export default function App() {
               <EffectsController />
 
               <LazyMotion features={domAnimation} strict>
+                <ScrollToTopButton />
                 <AnimatePresence mode="wait" initial={false}>
                   <Routes location={location} key={location.pathname}>
                     <Route path="/" element={<PageTransition><Index /></PageTransition>} />
