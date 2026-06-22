@@ -8,21 +8,197 @@ export const blogPost: BlogPost = {
   excerptVi: "Giới thiệu thực tế về conditional type, mapped type, template literal type và cơ chế suy luận kiểu trong TypeScript.",
   content: `# Understanding TypeScript Advanced Types
 
-TypeScript's type system is incredibly powerful...`,
-  contentVi: `# Kiểu nâng cao trong TypeScript
+TypeScript advanced types are useful when they make relationships explicit. They can model how data changes from one shape to another, enforce valid keys, and reduce duplicated type definitions. The goal is not to write clever types. The goal is to make incorrect usage harder.
 
-Hệ thống kiểu của TypeScript có thể mô tả nhiều quy tắc nghiệp vụ ngay tại thời điểm biên dịch.
+Advanced types become practical when a codebase has shared API responses, form states, domain models, or reusable utilities.
 
-## Conditional type
+## What problem does this solve?
 
-Conditional type cho phép lựa chọn kiểu kết quả dựa trên quan hệ giữa các kiểu đầu vào.
+Simple interfaces are enough for many cases. But some rules are based on relationships:
 
-## Mapped type
+- If a field is optional in one context, it may be required in another.
+- If a route name changes, related parameters should change too.
+- If an API response has a success state and an error state, code should handle both.
+- If a model changes, derived DTO types should update automatically.
 
-Mapped type giúp tạo kiểu mới bằng cách duyệt qua các thuộc tính của kiểu hiện có, rất hữu ích khi xây dựng utility type dùng chung.`,
+Advanced types help express these relationships at compile time instead of relying only on documentation.
+
+## Core concepts
+
+**Conditional types** choose a type based on another type. They are useful for creating utilities that behave differently depending on input.
+
+**Mapped types** create a new type by iterating over keys of an existing type. They are useful for transformations such as readonly models, partial updates, or form error maps.
+
+**Template literal types** build string types from other string types. They can help keep event names, route keys, or translation keys consistent.
+
+**Inference** lets TypeScript extract types from function signatures, arrays, promises, and objects.
+
+## Practical example
+
+Imagine a form system that needs errors for each field in a model:
+
+\`\`\`ts
+type FieldErrors<T> = {
+  [Key in keyof T]?: string;
+};
+
+type RegisterUserForm = {
+  email: string;
+  password: string;
+  displayName: string;
+};
+
+const errors: FieldErrors<RegisterUserForm> = {
+  email: "Email is invalid",
+};
+\`\`\`
+
+If the form adds a field, the error type automatically knows about it. This removes duplicated manual types.
+
+Conditional types can model API results:
+
+\`\`\`ts
+type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+type UnwrapResult<T> = T extends { ok: true; data: infer Data }
+  ? Data
+  : never;
+\`\`\`
+
+The \`infer\` keyword extracts the success data type from a result. This is useful in shared helpers, but it should be used where it improves clarity.
+
+## Common mistakes
+
+- **Making types too clever.** If a type takes longer to understand than the runtime code, it may be overdesigned.
+- **Replacing validation with types.** TypeScript does not validate external data at runtime.
+- **Using \`any\` inside utility types.** This can erase the safety the utility was supposed to provide.
+- **Building generic utilities too early.** Start with concrete types, then extract patterns when duplication is real.
+- **Ignoring compiler messages.** Advanced types are only useful if the error messages remain understandable.
+
+## Best practices
+
+- Use advanced types to model real relationships, not to impress readers.
+- Prefer small utility types with clear names.
+- Keep public types easier to read than internal helper types.
+- Pair TypeScript types with runtime validation for API, local storage, and user input.
+- Add examples near complex utility types.
+- Avoid exporting overly generic helpers unless several modules actually need them.
+
+## When to use and when to avoid
+
+Use advanced types when duplicated types drift apart, when API states need precise modeling, or when reusable utilities preserve relationships between input and output.
+
+Avoid them when a simple interface is enough. A straightforward type is usually better than a generic utility that only handles one case.
+
+## Summary
+
+Advanced TypeScript types are most useful when they protect real assumptions in the codebase.
+
+- Use mapped types for key-based transformations.
+- Use conditional types for input-output relationships.
+- Use template literal types for structured string keys.
+- Keep utility types readable.
+- Validate external data at runtime.`,
+  contentVi: `# Hiểu các kiểu nâng cao trong TypeScript
+
+Kiểu nâng cao trong TypeScript hữu ích khi chúng làm rõ mối quan hệ giữa các phần dữ liệu. Chúng có thể mô hình hóa cách dữ liệu chuyển từ shape này sang shape khác, ép key hợp lệ và giảm việc lặp type thủ công. Mục tiêu không phải là viết type thật phức tạp. Mục tiêu là làm cho cách dùng sai khó xảy ra hơn.
+
+Advanced types trở nên thực tế khi codebase có API response dùng chung, form state, domain model hoặc utility tái sử dụng.
+
+## Chủ đề này giải quyết vấn đề gì?
+
+Interface đơn giản là đủ cho nhiều trường hợp. Nhưng một số rule dựa trên quan hệ:
+
+- Một field optional ở ngữ cảnh này có thể required ở ngữ cảnh khác.
+- Khi route name thay đổi, params liên quan cũng nên thay đổi theo.
+- Nếu API response có success state và error state, code nên xử lý cả hai.
+- Nếu model thay đổi, DTO type dẫn xuất nên cập nhật tự động.
+
+Advanced types giúp diễn đạt các quan hệ này tại compile time thay vì chỉ dựa vào tài liệu.
+
+## Các ý tưởng cốt lõi
+
+**Conditional type** chọn kiểu dựa trên một kiểu khác. Nó hữu ích khi tạo utility có hành vi khác nhau theo input.
+
+**Mapped type** tạo kiểu mới bằng cách duyệt qua key của kiểu hiện có. Nó hữu ích cho readonly model, partial update hoặc map lỗi form.
+
+**Template literal type** tạo string type từ các string type khác. Nó giúp giữ event name, route key hoặc translation key nhất quán.
+
+**Inference** cho phép TypeScript rút ra type từ function signature, array, promise và object.
+
+## Ví dụ thực tế
+
+Hãy xét một form system cần lưu lỗi cho từng field trong model:
+
+\`\`\`ts
+type FieldErrors<T> = {
+  [Key in keyof T]?: string;
+};
+
+type RegisterUserForm = {
+  email: string;
+  password: string;
+  displayName: string;
+};
+
+const errors: FieldErrors<RegisterUserForm> = {
+  email: "Email is invalid",
+};
+\`\`\`
+
+Nếu form thêm field mới, error type tự động biết field đó. Điều này giảm việc viết type thủ công bị lặp.
+
+Conditional type có thể mô hình hóa API result:
+
+\`\`\`ts
+type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+type UnwrapResult<T> = T extends { ok: true; data: infer Data }
+  ? Data
+  : never;
+\`\`\`
+
+Từ khóa \`infer\` rút ra data type trong nhánh success. Cách này hữu ích trong shared helper, nhưng chỉ nên dùng khi nó làm code rõ hơn.
+
+## Lỗi thường gặp
+
+- **Làm type quá thông minh.** Nếu type khó hiểu hơn runtime code, có thể nó đã bị overdesign.
+- **Thay runtime validation bằng type.** TypeScript không validate dữ liệu bên ngoài lúc runtime.
+- **Dùng \`any\` trong utility type.** Điều này có thể xóa mất safety mà utility muốn tạo ra.
+- **Tạo generic utility quá sớm.** Hãy bắt đầu bằng type cụ thể, rồi tách pattern khi duplication là thật.
+- **Bỏ qua compiler message.** Advanced types chỉ hữu ích nếu lỗi compiler vẫn dễ hiểu.
+
+## Best practices
+
+- Dùng advanced types để mô hình hóa quan hệ thật, không phải để gây ấn tượng.
+- Ưu tiên utility type nhỏ và có tên rõ.
+- Giữ public type dễ đọc hơn internal helper type.
+- Kết hợp TypeScript type với runtime validation cho API, local storage và user input.
+- Thêm ví dụ gần utility type phức tạp.
+- Tránh export helper quá generic nếu chưa có nhiều module cần.
+
+## Khi nào nên dùng và khi nào nên tránh
+
+Dùng advanced types khi type bị lặp dễ lệch nhau, khi API state cần mô hình hóa chính xác hoặc khi utility tái sử dụng cần giữ quan hệ giữa input và output.
+
+Tránh dùng khi interface đơn giản đã đủ. Một type trực tiếp thường tốt hơn generic utility chỉ phục vụ một trường hợp.
+
+## Tóm tắt
+
+Kiểu nâng cao trong TypeScript hữu ích nhất khi chúng bảo vệ các giả định thật trong codebase.
+
+- Dùng mapped type cho chuyển đổi dựa trên key.
+- Dùng conditional type cho quan hệ input-output.
+- Dùng template literal type cho string key có cấu trúc.
+- Giữ utility type dễ đọc.
+- Validate dữ liệu bên ngoài ở runtime.`,
   category: "languages",
   tags: ["TypeScript", "Types", "JavaScript"],
   date: "2026-05-22",
-  readTime: "2 min",
-  readTimeVi: "2 phút",
+  readTime: "4 min",
+  readTimeVi: "4 phút",
 };
