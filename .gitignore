@@ -33,5 +33,9 @@ obj/
 
 # Agent assets
 img-agent/
+
+# Local blog content prompt
+BLOG_CONTENT_PROMPT.md
+
 # file push + deploy nhanh
 push-and-deploy.bat
