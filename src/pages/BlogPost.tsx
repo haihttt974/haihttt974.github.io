@@ -10,6 +10,7 @@ import { ArticleContent } from "@/components/blog/ArticleContent";
 import { LoadingState } from "@/components/loading/LoadingState";
 import { cmsApi } from "@/lib/cmsApi";
 import { useToast } from "@/hooks/use-toast";
+import { copyToClipboard } from "@/lib/clipboard";
 
 const BlogPost = () => {
   const { t, locale, language } = useLanguage();
@@ -86,7 +87,7 @@ const BlogPost = () => {
   const categoryName = t(`category.${post.category}`) || post.category;
   const copyPostLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await copyToClipboard(window.location.href);
       toast({
         variant: "success",
         title: language === "vi" ? "Đã sao chép liên kết" : "Link copied",

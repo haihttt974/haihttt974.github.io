@@ -2,22 +2,7 @@ import { Fragment, ReactNode, useEffect, useRef, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
-
-const copyToClipboard = async (text: string) => {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  textarea.remove();
-};
+import { copyToClipboard } from "@/lib/clipboard";
 
 const languageAliases: Record<string, string> = {
   javascript: "js",
