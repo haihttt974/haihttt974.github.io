@@ -147,6 +147,9 @@ const BlogPost = () => {
           <div className="lg:col-span-3">
             <div className="card-gradient rounded-xl border border-border/50 p-6 md:p-12">
               <ArticleContent content={post.content} />
+              <p className="mt-10 border-t border-border/50 pt-4 text-xs leading-5 text-muted-foreground/80">
+                {t("post.sourceNote")}
+              </p>
             </div>
           </div>
 

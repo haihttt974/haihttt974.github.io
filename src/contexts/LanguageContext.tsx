@@ -76,6 +76,10 @@ const dictionary: Dictionary = {
   "post.tags": { vi: "Thẻ", en: "Tags" },
   "post.share": { vi: "Chia sẻ", en: "Share" },
   "post.copy": { vi: "Sao chép liên kết", en: "Copy link" },
+  "post.sourceNote": {
+    vi: "Ghi chú: Bài viết được tổng hợp từ quá trình học, thực hành và tham khảo nhiều nguồn tài liệu khác nhau.",
+    en: "Note: This article is distilled from my learning, hands-on practice, and references across multiple sources.",
+  },
   "category.languages": { vi: "Ngôn ngữ lập trình", en: "Programming Languages" },
   "category.frameworks": { vi: "Framework & thư viện", en: "Frameworks & Libraries" },
   "category.architecture": { vi: "Kiến trúc phần mềm", en: "Software Architecture" },
