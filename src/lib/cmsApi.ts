@@ -1,5 +1,6 @@
 import { Category, categories } from "@/data/blogData";
 import { BlogPost, blogPosts, localizeBlogPost } from "@/data/blog-posts";
+import { fetchViewsJsonp, trackView } from "@/lib/viewsApi";
 
 export type PostStatus = "Draft" | "Published" | "Archived";
 
@@ -50,30 +51,10 @@ export interface CmsPostDetail extends CmsPostListItem {
   contentVi?: string | null;
 }
 
-const STORAGE_KEY_PREFIX = "portfolio-cms-static:";
-const VIEW_COUNT_KEY = `${STORAGE_KEY_PREFIX}view-counts`;
+const VIEW_CACHE_TTL_MS = 30_000;
 
-const canUseStorage = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-
-const readJson = <T,>(key: string, fallback: T): T => {
-  if (!canUseStorage()) return fallback;
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
-};
-
-const writeJson = <T,>(key: string, value: T) => {
-  if (!canUseStorage()) return;
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Ignore quota and private-mode failures.
-  }
-};
+let cachedViewCounts: Record<string, number> | null = null;
+let cachedViewCountsAt = 0;
 
 const slugify = (value: string) =>
   value
@@ -85,16 +66,28 @@ const slugify = (value: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const getViewCounts = () => readJson<Record<string, number>>(VIEW_COUNT_KEY, {});
+const readRemoteViewCounts = async (force = false) => {
+  const now = Date.now();
+  if (!force && cachedViewCounts && now - cachedViewCountsAt < VIEW_CACHE_TTL_MS) {
+    return cachedViewCounts;
+  }
 
-const setViewCounts = (counts: Record<string, number>) => writeJson(VIEW_COUNT_KEY, counts);
+  const entries = await Promise.all(
+    blogPosts.map(async (post) => [post.id, await fetchViewsJsonp(post.id)] as const),
+  );
 
-const getViewCount = (slug: string) => getViewCounts()[slug] ?? 0;
+  cachedViewCounts = Object.fromEntries(entries);
+  cachedViewCountsAt = now;
+  return cachedViewCounts;
+};
 
-const basePosts = (): (BlogPost & { viewCount: number })[] =>
+const getRemoteViewCount = (counts: Record<string, number>, slug: string) =>
+  Number(counts[slug] ?? 0);
+
+const basePosts = (viewCounts: Record<string, number> = {}): (BlogPost & { viewCount: number })[] =>
   blogPosts.map((post) => ({
     ...post,
-    viewCount: getViewCount(post.id),
+    viewCount: getRemoteViewCount(viewCounts, post.id),
   }));
 
 const mapCategory = (category: Category, index: number): CmsCategory => {
@@ -157,33 +150,40 @@ const toDetail = (post: BlogPost & { viewCount: number }, language: "vi" | "en")
   contentVi: post.contentVi ?? undefined,
 });
 
-const currentPosts = (language: "vi" | "en") => basePosts().map((post) => toListItem(post, language));
+const currentPosts = (language: "vi" | "en", viewCounts: Record<string, number>) =>
+  basePosts(viewCounts).map((post) => toListItem(post, language));
 
 export const cmsApi = {
   hasBackend: false,
 
   getCachedPost(slug: string) {
-    const found = basePosts().find((post) => post.id === slug);
+    const found = basePosts(cachedViewCounts ?? {}).find((post) => post.id === slug);
     return found ? { ...found, ...localizeBlogPost(found, "en") } : undefined;
   },
 
   async getPosts(language: "vi" | "en", options: { featured?: boolean; pageSize?: number } = {}) {
-    const items = currentPosts(language).filter((post) =>
+    const viewCounts = await readRemoteViewCounts();
+    const items = currentPosts(language, viewCounts).filter((post) =>
       options.featured === undefined ? true : post.featured === options.featured,
     );
     return items.slice(0, options.pageSize ?? items.length);
   },
 
   async getPost(slug: string, language: "vi" | "en") {
-    const post = basePosts().find((item) => item.id === slug);
+    const viewCounts = await readRemoteViewCounts();
+    const post = basePosts(viewCounts).find((item) => item.id === slug);
     return post ? toDetail(post, language) : null;
   },
 
   async incrementView(slug: string) {
-    const counts = getViewCounts();
-    counts[slug] = (counts[slug] ?? 0) + 1;
-    setViewCounts(counts);
-    return { slug, viewCount: counts[slug] };
+    await trackView(slug);
+    const viewCount = await fetchViewsJsonp(slug);
+    cachedViewCounts = {
+      ...(cachedViewCounts ?? {}),
+      [slug]: viewCount,
+    };
+    cachedViewCountsAt = Date.now();
+    return { slug, viewCount };
   },
 
   async getCategories() {
