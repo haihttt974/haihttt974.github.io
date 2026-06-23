@@ -30,6 +30,8 @@ The third concept is **communication trade-off**. Synchronous HTTP calls are sim
 
 The fourth concept is **observability**. Once a request crosses service boundaries, logs from one process are not enough. You need correlation IDs, structured logs, metrics, and health checks.
 
+The fifth concept is **operational ownership**. A service is not truly owned if nobody is responsible for its dashboards, alerts, deployment pipeline, database migrations, incident response, and cost. Microservices are as much an operating model as they are a code structure.
+
 ## Practical example
 
 A simple e-commerce system might begin as a modular monolith:
@@ -53,6 +55,48 @@ notifications-service
 
 The extraction should happen because the boundary already exists in the code and the operational need is real, not because the word microservice sounds better.
 
+## Data consistency and transactions
+
+The hardest part of microservices is rarely the controller or deployment file. It is data consistency. In a monolith, one database transaction can update orders, payments, and inventory together. In a microservice architecture, those changes may belong to different services and different databases.
+
+That means teams must design for eventual consistency:
+
+- The order service records that an order is awaiting payment.
+- The payment service confirms or rejects the payment.
+- The inventory service reserves or releases stock.
+- The notification service reacts to the final business event.
+
+If one step fails, the system needs compensating actions, retries, and clear status tracking. Trying to recreate one large distributed transaction often makes the design fragile. It is usually better to model the workflow explicitly and make intermediate states visible.
+
+## Synchronous calls versus events
+
+Use synchronous calls when the caller needs an immediate answer to continue. For example, checking whether a customer exists before creating a support ticket may be reasonable. But avoid long chains such as order service calling payment, payment calling inventory, and inventory calling shipping in one request. This creates latency and makes one service outage affect the entire flow.
+
+Use events when something happened and other services may react independently:
+
+\`\`\`text
+OrderPlaced
+PaymentCaptured
+InventoryReserved
+ShipmentRequested
+\`\`\`
+
+Events should describe facts in the past tense. They should not be hidden commands like \`DoPaymentNow\`. Clear event names help teams understand ownership and reduce accidental coupling.
+
+## Readiness checklist before splitting
+
+Before extracting a service, confirm that the team can operate it:
+
+- The module already has a clear business boundary.
+- It can own its data without constant cross-service joins.
+- It has deployment automation and rollback strategy.
+- It has logs, metrics, dashboards, and alerts.
+- It has documented API contracts or event schemas.
+- It has tests around important workflows and failure cases.
+- The owning team can respond when the service fails in production.
+
+If these are not true, the safer move is usually to improve modularity inside the monolith first.
+
 ## Common mistakes
 
 - **Splitting too early.** A small product often benefits more from a modular monolith.
@@ -61,6 +105,8 @@ The extraction should happen because the boundary already exists in the code and
 - **Ignoring failure between services.** Every network call can timeout, retry, or partially fail.
 - **Missing observability.** Debugging distributed systems without logs and traces becomes guesswork.
 - **Using events without ownership.** Events should communicate facts, not become hidden commands.
+- **Underestimating local development.** Running ten services locally without good tooling slows every change.
+- **Forgetting versioning.** Service contracts evolve, and consumers need time to migrate.
 
 ## Best practices
 
@@ -71,6 +117,8 @@ The extraction should happen because the boundary already exists in the code and
 - Add timeouts, retries, and idempotency to cross-service calls.
 - Track correlation IDs across services.
 - Document who owns each service, data store, and operational alert.
+- Prefer explicit workflow states over hidden distributed transactions.
+- Version public APIs and event schemas deliberately.
 
 ## When to use and when to avoid
 
@@ -112,6 +160,8 @@ Nhưng microservices không tự động làm code sạch hơn. Nếu ranh giớ
 
 Ý tưởng thứ tư là **observability**. Khi request đi qua nhiều service, log của một process là không đủ. Bạn cần correlation ID, structured log, metrics và health check.
 
+Ý tưởng thứ năm là **quyền sở hữu vận hành**. Một service chưa thực sự được sở hữu nếu không ai chịu trách nhiệm dashboard, alert, deployment pipeline, migration database, xử lý sự cố và chi phí. Microservices không chỉ là cấu trúc code; nó còn là mô hình vận hành.
+
 ## Ví dụ thực tế
 
 Một hệ thống e-commerce đơn giản có thể bắt đầu bằng modular monolith:
@@ -135,6 +185,48 @@ notifications-service
 
 Việc tách nên xảy ra vì boundary đã rõ trong code và nhu cầu vận hành là thật, không phải vì từ microservice nghe chuyên nghiệp hơn.
 
+## Data consistency và transaction
+
+Phần khó nhất của microservices hiếm khi là controller hay file deploy. Phần khó là tính nhất quán dữ liệu. Trong monolith, một database transaction có thể cập nhật order, payment và inventory cùng lúc. Trong microservices, các thay đổi đó có thể thuộc nhiều service và nhiều database khác nhau.
+
+Điều này buộc team phải thiết kế theo eventual consistency:
+
+- Order service ghi nhận đơn hàng đang chờ thanh toán.
+- Payment service xác nhận hoặc từ chối thanh toán.
+- Inventory service giữ hoặc giải phóng tồn kho.
+- Notification service phản ứng với business event cuối cùng.
+
+Nếu một bước thất bại, hệ thống cần compensating action, retry và trạng thái rõ ràng để theo dõi. Cố tái tạo một distributed transaction lớn thường làm thiết kế mong manh. Thực tế hơn là mô hình hóa workflow rõ ràng và để các trạng thái trung gian hiển thị được.
+
+## Synchronous call và event
+
+Dùng synchronous call khi caller cần câu trả lời ngay để tiếp tục. Ví dụ kiểm tra customer có tồn tại trước khi tạo support ticket có thể hợp lý. Nhưng tránh chuỗi dài như order service gọi payment, payment gọi inventory, inventory gọi shipping trong cùng một request. Cách này tăng latency và khiến một service lỗi kéo theo cả luồng.
+
+Dùng event khi một sự kiện đã xảy ra và service khác có thể phản ứng độc lập:
+
+\`\`\`text
+OrderPlaced
+PaymentCaptured
+InventoryReserved
+ShipmentRequested
+\`\`\`
+
+Event nên mô tả sự thật ở thì quá khứ. Nó không nên là command ẩn như \`DoPaymentNow\`. Tên event rõ giúp team hiểu ownership và giảm coupling vô tình.
+
+## Checklist trước khi tách service
+
+Trước khi tách một service, hãy xác nhận team có thể vận hành nó:
+
+- Module đã có boundary nghiệp vụ rõ.
+- Service có thể sở hữu dữ liệu mà không cần join chéo liên tục.
+- Có deployment automation và chiến lược rollback.
+- Có log, metric, dashboard và alert.
+- Có tài liệu API contract hoặc event schema.
+- Có test cho workflow quan trọng và failure case.
+- Team sở hữu có khả năng phản ứng khi service lỗi ở production.
+
+Nếu các điều này chưa đúng, hướng an toàn hơn thường là cải thiện modularity trong monolith trước.
+
 ## Lỗi thường gặp
 
 - **Tách quá sớm.** Sản phẩm nhỏ thường hưởng lợi nhiều hơn từ modular monolith.
@@ -143,6 +235,8 @@ Việc tách nên xảy ra vì boundary đã rõ trong code và nhu cầu vận 
 - **Bỏ qua lỗi giữa service.** Mọi network call đều có thể timeout, retry hoặc fail một phần.
 - **Thiếu observability.** Debug hệ thống phân tán thiếu log và trace gần như là đoán mò.
 - **Dùng event nhưng không rõ ownership.** Event nên truyền sự kiện đã xảy ra, không nên trở thành command ẩn.
+- **Đánh giá thấp local development.** Chạy mười service ở local mà thiếu tooling tốt sẽ làm mọi thay đổi chậm lại.
+- **Quên versioning.** Contract giữa service sẽ thay đổi, và consumer cần thời gian để migrate.
 
 ## Best practices
 
@@ -153,6 +247,8 @@ Việc tách nên xảy ra vì boundary đã rõ trong code và nhu cầu vận 
 - Thêm timeout, retry và idempotency cho call giữa service.
 - Theo dõi correlation ID xuyên suốt các service.
 - Ghi rõ ai sở hữu service, data store và alert vận hành.
+- Ưu tiên workflow state rõ ràng thay vì distributed transaction ẩn.
+- Version API công khai và event schema có chủ đích.
 
 ## Khi nào nên dùng và khi nào nên tránh
 
@@ -173,7 +269,7 @@ Microservices là một trade-off kiến trúc, không phải mục tiêu mặc 
   category: "architecture",
   tags: ["Microservices", "Docker", "Kubernetes", "System Design"],
   date: "2026-05-26",
-  readTime: "5 min",
-  readTimeVi: "5 phút",
+  readTime: "8 min",
+  readTimeVi: "8 phút",
   featured: true,
 };

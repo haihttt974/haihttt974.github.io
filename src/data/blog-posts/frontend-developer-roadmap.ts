@@ -64,6 +64,36 @@ This approach is better than only watching tutorials because each stage creates 
 - Deploy projects so you experience real build and hosting issues.
 - Review your own UI on mobile, desktop, keyboard navigation, and slow network.
 
+## Skill milestones that prove real progress
+
+A roadmap is only useful if each stage has an observable outcome. Instead of asking "Did I finish a course?", ask whether you can build and explain something without copying every line.
+
+Good milestones:
+
+- **HTML/CSS:** Build a responsive page with semantic structure, accessible form labels, predictable spacing, and no layout overflow on mobile.
+- **JavaScript:** Fetch data, transform it, filter it, handle empty results, and persist a small preference in local storage.
+- **React:** Split a UI into components with clear props, manage local and server state separately, and avoid unnecessary shared state.
+- **Forms:** Validate fields, show inline errors, preserve user input, and handle both client-side and server-side failure.
+- **API integration:** Display loading, empty, error, and success states without the page jumping or becoming confusing.
+- **Deployment:** Ship the project, set environment variables, inspect build output, and fix a production-only issue.
+
+These milestones are more honest than a long list of tools. They show whether knowledge has turned into working judgment.
+
+## Portfolio quality bar
+
+A frontend portfolio project should feel finished. It does not need dozens of features, but it should show care in the workflows it includes. A small app with polished loading states, useful empty states, keyboard navigation, and reliable deployment communicates more maturity than a large app full of unfinished screens.
+
+Before calling a project complete, check:
+
+- Does the main workflow work on mobile and desktop?
+- Can a keyboard user complete the important actions?
+- Are form errors specific enough to fix the input?
+- Does the UI remain stable while data is loading?
+- Are important components reusable without becoming generic too early?
+- Is the repository easy to run from a clean checkout?
+
+This is the difference between a demo and a project that can support a technical conversation.
+
 ## When to use and when to avoid
 
 Use a roadmap when you feel overwhelmed or when you want a structured path toward job-ready fundamentals. It is especially useful for self-study.
@@ -143,6 +173,36 @@ Dùng roadmap khi bạn thấy quá tải hoặc muốn có lộ trình rõ đ�
 
 Tránh xem roadmap như checklist buzzword. Bạn không cần thành thạo mọi library. Bạn cần đủ chiều sâu để xây, debug và giải thích giao diện thật.
 
+## Mốc kỹ năng chứng minh tiến bộ thật
+
+Roadmap chỉ hữu ích khi mỗi giai đoạn có đầu ra quan sát được. Thay vì hỏi "mình đã xem hết khóa học chưa?", hãy hỏi liệu bạn có thể tự xây và giải thích một phần sản phẩm mà không copy từng dòng không.
+
+Các mốc tốt:
+
+- **HTML/CSS:** Xây trang responsive có cấu trúc semantic, label form đúng, spacing ổn định và không tràn layout trên mobile.
+- **JavaScript:** Fetch dữ liệu, biến đổi dữ liệu, filter, xử lý kết quả rỗng và lưu một tùy chọn nhỏ trong local storage.
+- **React:** Tách UI thành component có props rõ, phân biệt local state và server state, tránh shared state không cần thiết.
+- **Form:** Validate field, hiển thị lỗi inline, giữ input người dùng và xử lý cả lỗi client-side lẫn server-side.
+- **API integration:** Hiển thị loading, empty, error và success state mà không làm trang nhảy layout hoặc gây khó hiểu.
+- **Deployment:** Deploy project, cấu hình environment variable, đọc build output và xử lý lỗi chỉ xuất hiện ở production.
+
+Những mốc này trung thực hơn một danh sách tool dài. Chúng cho thấy kiến thức đã chuyển thành năng lực thực thi hay chưa.
+
+## Tiêu chuẩn chất lượng cho portfolio
+
+Một project frontend trong portfolio nên có cảm giác hoàn thiện. Nó không cần quá nhiều feature, nhưng những workflow đã có phải được làm cẩn thận. Một app nhỏ với loading state tốt, empty state hữu ích, keyboard navigation và deployment ổn định thể hiện sự trưởng thành hơn một app lớn nhưng nhiều màn hình dang dở.
+
+Trước khi xem project là hoàn thành, hãy kiểm tra:
+
+- Workflow chính có hoạt động tốt trên mobile và desktop không?
+- Người dùng bàn phím có hoàn thành thao tác quan trọng không?
+- Lỗi form có đủ cụ thể để người dùng sửa input không?
+- UI có ổn định trong lúc tải dữ liệu không?
+- Component quan trọng có tái sử dụng được mà không bị generic quá sớm không?
+- Repository có dễ chạy từ một checkout sạch không?
+
+Đây là khác biệt giữa một demo và một project có thể dùng để trao đổi kỹ thuật nghiêm túc.
+
 ## Tóm tắt
 
 Phát triển frontend bền vững hơn khi lộ trình bắt đầu từ nền tảng rồi tiến tới ứng dụng thật.
@@ -155,6 +215,6 @@ Phát triển frontend bền vững hơn khi lộ trình bắt đầu từ nền
   category: "roadmap",
   tags: ["Roadmap", "Frontend", "Career", "Learning"],
   date: "2026-05-20",
-  readTime: "5 min",
-  readTimeVi: "5 phút",
+  readTime: "8 min",
+  readTimeVi: "8 phút",
 };

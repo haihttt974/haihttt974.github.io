@@ -69,6 +69,40 @@ type UnwrapResult<T> = T extends { ok: true; data: infer Data }
 
 The \`infer\` keyword extracts the success data type from a result. This is useful in shared helpers, but it should be used where it improves clarity.
 
+## Practical example: typed route parameters
+
+Template literal types become useful when string keys carry structure. Routes are a good example. If the route pattern includes parameters, the type system can help keep navigation code honest.
+
+\`\`\`ts
+type Route = "/users/:userId" | "/posts/:postId/comments/:commentId";
+
+type ExtractParams<Path extends string> =
+  Path extends \`\${string}:\${infer Param}/\${infer Rest}\`
+    ? Param | ExtractParams<Rest>
+    : Path extends \`\${string}:\${infer Param}\`
+      ? Param
+      : never;
+
+type RouteParams<Path extends Route> = Record<ExtractParams<Path>, string>;
+\`\`\`
+
+This type is more advanced, but it protects a real relationship: a route and the parameters required by that route. If the route changes, TypeScript can point to navigation calls that need updates.
+
+## Practical example: event names from a model
+
+Template literal types can also create consistent event names without hand-writing every string:
+
+\`\`\`ts
+type UserEvents<T> = {
+  [Key in keyof T & string as \`user.\${Key}.changed\`]: {
+    field: Key;
+    value: T[Key];
+  };
+};
+\`\`\`
+
+This pattern is useful in analytics, form systems, and domain events. It is not necessary for every project, but it helps when string conventions are important and mistakes are easy to miss in review.
+
 ## Common mistakes
 
 - **Making types too clever.** If a type takes longer to understand than the runtime code, it may be overdesigned.
@@ -85,6 +119,20 @@ The \`infer\` keyword extracts the success data type from a result. This is usef
 - Pair TypeScript types with runtime validation for API, local storage, and user input.
 - Add examples near complex utility types.
 - Avoid exporting overly generic helpers unless several modules actually need them.
+
+## How to keep advanced types maintainable
+
+Advanced types should be reviewed like runtime code. Give important utilities names, add small examples, and avoid compressing too much logic into one line. If a type has multiple branches, formatting it clearly is not optional.
+
+A maintainable advanced type usually has:
+
+- A specific purpose that can be explained in one sentence.
+- A small example showing expected input and output.
+- A name that describes the business relationship, not the type trick.
+- Limited use of \`as\`, \`any\`, and deeply nested conditional branches.
+- Tests or type assertions for shared library utilities.
+
+For shared packages, type tests can be useful. A lightweight test can assert that a helper accepts the intended shape and rejects the wrong one. This prevents a future refactor from silently weakening the type.
 
 ## When to use and when to avoid
 
@@ -164,6 +212,40 @@ type UnwrapResult<T> = T extends { ok: true; data: infer Data }
 
 Từ khóa \`infer\` rút ra data type trong nhánh success. Cách này hữu ích trong shared helper, nhưng chỉ nên dùng khi nó làm code rõ hơn.
 
+## Ví dụ thực tế: route params có kiểu
+
+Template literal type hữu ích khi string key có cấu trúc. Route là một ví dụ tốt. Nếu route pattern có tham số, type system có thể giúp navigation code chính xác hơn.
+
+\`\`\`ts
+type Route = "/users/:userId" | "/posts/:postId/comments/:commentId";
+
+type ExtractParams<Path extends string> =
+  Path extends \`\${string}:\${infer Param}/\${infer Rest}\`
+    ? Param | ExtractParams<Rest>
+    : Path extends \`\${string}:\${infer Param}\`
+      ? Param
+      : never;
+
+type RouteParams<Path extends Route> = Record<ExtractParams<Path>, string>;
+\`\`\`
+
+Type này nâng cao hơn bình thường, nhưng nó bảo vệ một quan hệ thật: route nào cần params nào. Khi route thay đổi, TypeScript có thể chỉ ra các lời gọi navigation cần cập nhật.
+
+## Ví dụ thực tế: event name từ model
+
+Template literal type cũng có thể tạo event name nhất quán mà không cần viết tay từng chuỗi:
+
+\`\`\`ts
+type UserEvents<T> = {
+  [Key in keyof T & string as \`user.\${Key}.changed\`]: {
+    field: Key;
+    value: T[Key];
+  };
+};
+\`\`\`
+
+Pattern này hữu ích trong analytics, form system và domain event. Không phải project nào cũng cần, nhưng nó giúp khi quy ước string quan trọng và lỗi chính tả khó phát hiện trong review.
+
 ## Lỗi thường gặp
 
 - **Làm type quá thông minh.** Nếu type khó hiểu hơn runtime code, có thể nó đã bị overdesign.
@@ -180,6 +262,20 @@ Từ khóa \`infer\` rút ra data type trong nhánh success. Cách này hữu í
 - Kết hợp TypeScript type với runtime validation cho API, local storage và user input.
 - Thêm ví dụ gần utility type phức tạp.
 - Tránh export helper quá generic nếu chưa có nhiều module cần.
+
+## Giữ advanced types dễ bảo trì
+
+Advanced types nên được review như runtime code. Hãy đặt tên cho utility quan trọng, thêm ví dụ nhỏ và tránh nén quá nhiều logic vào một dòng. Nếu một type có nhiều nhánh, format rõ ràng là bắt buộc.
+
+Một advanced type dễ bảo trì thường có:
+
+- Mục đích cụ thể có thể giải thích trong một câu.
+- Ví dụ nhỏ thể hiện input và output mong muốn.
+- Tên mô tả quan hệ nghiệp vụ, không chỉ mô tả kỹ thuật type.
+- Ít dùng \`as\`, \`any\` và conditional branch lồng quá sâu.
+- Có type test hoặc type assertion cho utility dùng chung.
+
+Với shared package, type test rất hữu ích. Một test nhẹ có thể xác nhận helper nhận shape đúng và từ chối shape sai. Điều này ngăn refactor sau này vô tình làm yếu type.
 
 ## Khi nào nên dùng và khi nào nên tránh
 
@@ -199,6 +295,6 @@ Kiểu nâng cao trong TypeScript hữu ích nhất khi chúng bảo vệ các g
   category: "languages",
   tags: ["TypeScript", "Types", "JavaScript"],
   date: "2026-05-22",
-  readTime: "4 min",
-  readTimeVi: "4 phút",
+  readTime: "7 min",
+  readTimeVi: "7 phút",
 };

@@ -65,6 +65,20 @@ The original cause remains available while the calling layer receives an error t
 
 A reliable service should answer three questions: what happened, where did it happen, and which request was affected. Use structured logs, correlation IDs, metrics for important operations, and health checks that verify critical dependencies.
 
+## Know when a script has become an application
+
+Not every Python file needs architecture. A one-time migration, local utility, or small report can stay as a script. The threshold changes when the code becomes part of a recurring workflow, accepts untrusted input, writes important data, or is maintained by more than one person.
+
+Signals that the code needs stronger structure:
+
+- It has more than one execution path, such as import, export, retry, and cleanup.
+- It talks to more than one external system.
+- Failures require investigation instead of simply rerunning the command.
+- Configuration differs between local, staging, and production.
+- A future change is risky because the current behavior is not covered by tests.
+
+The goal is not to add folders early. The goal is to make risk visible before the code becomes operationally important.
+
 ## A practical project shape
 
 \`\`\`text
@@ -80,6 +94,50 @@ tests/
 \`\`\`
 
 The exact folders matter less than the dependency direction. Domain logic should not import the API or database layer.
+
+## Add configuration and startup checks
+
+Reliable applications fail early when required configuration is missing. Read configuration once at startup, validate it, and pass a typed settings object into the rest of the application. Avoid scattering \`os.environ\` reads across many files because it makes behavior hard to test and hard to audit.
+
+\`\`\`py
+from dataclasses import dataclass
+from collections.abc import Mapping
+
+@dataclass(frozen=True)
+class Settings:
+    database_url: str
+    request_timeout_seconds: float
+
+def load_settings(env: Mapping[str, str]) -> Settings:
+    return Settings(
+        database_url=env["DATABASE_URL"],
+        request_timeout_seconds=float(env.get("REQUEST_TIMEOUT_SECONDS", "10")),
+    )
+\`\`\`
+
+This gives the program a clear contract with its environment. It also makes tests simple because they can pass a dictionary instead of mutating global process state.
+
+## Test behavior at the right level
+
+Unit tests should cover pure rules, parsing, validation, and error translation. Integration tests should cover database queries, external adapters, and serialization boundaries. End-to-end tests should be few and focused on workflows that must not break.
+
+For Python applications, a practical testing mix usually looks like this:
+
+- Many fast tests for domain functions and services.
+- Focused adapter tests for database repositories and HTTP clients.
+- A small number of workflow tests that exercise the real application entry point.
+- Failure tests for timeouts, invalid payloads, missing configuration, and duplicate operations.
+
+The most valuable tests are often not the happiest path. They are the tests that explain what the system must do when inputs are incomplete, dependencies are slow, or a retry happens twice.
+
+## Common mistakes to avoid
+
+- Putting all logic inside route handlers, CLI commands, or notebook cells.
+- Returning raw dictionaries across the entire application.
+- Catching broad exceptions and losing the original cause.
+- Letting background jobs run without idempotency keys or retry limits.
+- Treating logs as text messages instead of operational data.
+- Adding an ORM model first and letting database shape dictate every domain rule.
 
 ## Reliability checklist
 
@@ -175,10 +233,68 @@ Tên thư mục không quan trọng bằng hướng phụ thuộc. Nghiệp vụ
 - Ghi log có cấu trúc và đủ ngữ cảnh.
 - Kiểm thử luồng thất bại, không chỉ luồng thành công.
 
+## Khi nào script đã trở thành ứng dụng?
+
+Không phải file Python nào cũng cần kiến trúc. Một script chạy một lần, tiện ích nội bộ nhỏ hoặc báo cáo đơn giản có thể giữ nguyên dạng script. Nhưng ngưỡng này thay đổi khi đoạn code trở thành workflow lặp lại, nhận input không đáng tin cậy, ghi dữ liệu quan trọng hoặc được nhiều người cùng bảo trì.
+
+Các dấu hiệu nên nâng cấp cấu trúc:
+
+- Code có nhiều luồng thực thi như import, export, retry và cleanup.
+- Code kết nối với nhiều hệ thống bên ngoài.
+- Khi lỗi xảy ra, team phải điều tra thay vì chỉ chạy lại.
+- Cấu hình khác nhau giữa local, staging và production.
+- Mỗi lần sửa đều rủi ro vì hành vi hiện tại chưa có test bảo vệ.
+
+Mục tiêu không phải là thêm thư mục cho đẹp. Mục tiêu là làm rủi ro trở nên rõ ràng trước khi code trở thành một phần quan trọng của hệ thống.
+
+## Thêm cấu hình và kiểm tra lúc khởi động
+
+Ứng dụng đáng tin cậy nên fail sớm khi thiếu cấu hình bắt buộc. Hãy đọc cấu hình một lần lúc khởi động, xác thực nó, rồi truyền một object cấu hình có kiểu rõ ràng vào các phần còn lại. Tránh đọc \`os.environ\` rải rác ở nhiều file vì cách đó khó test và khó audit.
+
+\`\`\`py
+from dataclasses import dataclass
+from collections.abc import Mapping
+
+@dataclass(frozen=True)
+class Settings:
+    database_url: str
+    request_timeout_seconds: float
+
+def load_settings(env: Mapping[str, str]) -> Settings:
+    return Settings(
+        database_url=env["DATABASE_URL"],
+        request_timeout_seconds=float(env.get("REQUEST_TIMEOUT_SECONDS", "10")),
+    )
+\`\`\`
+
+Cách này tạo ra hợp đồng rõ ràng giữa chương trình và môi trường chạy. Test cũng đơn giản hơn vì có thể truyền một dictionary thay vì sửa trạng thái global của process.
+
+## Kiểm thử đúng tầng
+
+Unit test nên bao phủ rule thuần, parsing, validation và chuyển đổi lỗi. Integration test nên kiểm tra database query, adapter bên ngoài và biên serialization. End-to-end test nên ít nhưng tập trung vào workflow không được phép hỏng.
+
+Một tỉ lệ test thực tế cho ứng dụng Python thường gồm:
+
+- Nhiều test nhanh cho domain function và service.
+- Adapter test có trọng tâm cho repository database và HTTP client.
+- Một số ít workflow test chạy qua entry point thật.
+- Test luồng lỗi cho timeout, payload sai, thiếu cấu hình và thao tác bị lặp.
+
+Những test có giá trị nhất thường không phải happy path. Chúng là các test mô tả hệ thống phải làm gì khi input thiếu, dependency chậm hoặc retry xảy ra nhiều lần.
+
+## Lỗi thường gặp cần tránh
+
+- Đặt toàn bộ logic trong route handler, CLI command hoặc notebook cell.
+- Trả raw dictionary xuyên suốt ứng dụng.
+- Bắt exception quá rộng và làm mất nguyên nhân gốc.
+- Chạy background job mà không có idempotency key hoặc giới hạn retry.
+- Xem log như câu chữ thông thường thay vì dữ liệu vận hành.
+- Tạo ORM model trước rồi để hình dạng database quyết định mọi rule nghiệp vụ.
+
 Python tốt vẫn nên dễ đọc và trực tiếp. Độ tin cậy đến từ ranh giới rõ ràng cùng vòng phản hồi kỷ luật, không phải từ việc biến ứng dụng nhỏ thành một framework trừu tượng.`,
   category: "languages",
   tags: ["Python", "Architecture", "Testing", "Maintainability"],
   date: "2026-06-10",
-  readTime: "6 min",
-  readTimeVi: "6 phút",
+  readTime: "9 min",
+  readTimeVi: "9 phút",
 };
