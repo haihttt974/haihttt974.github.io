@@ -53,7 +53,7 @@ export const ScrollToTopButton = () => {
 
   return (
     <m.div
-      className="fixed bottom-4 right-[4.75rem] z-[60] md:right-20"
+      className="fixed bottom-[4.75rem] right-4 z-[60]"
       initial={false}
       animate={
         visible
