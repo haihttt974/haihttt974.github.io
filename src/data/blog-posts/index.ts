@@ -32,11 +32,13 @@ import { blogPost as devopsRoadmapForDevelopers } from "./devops-roadmap-for-dev
 import { blogPost as databaseLearningRoadmap } from "./database-learning-roadmap";
 import { blogPost as mobileDeveloperRoadmap } from "./mobile-developer-roadmap";
 import { blogPost as angularFrameworkCompleteGuide } from "./angular-framework-complete-guide";
+import { blogPost as oracleDatabasePracticalGuide } from "./oracle-database-practical-guide";
 
 export type { BlogPost } from "./types";
 export { localizeBlogPost } from "./types";
 
 export const blogPosts = [
+  oracleDatabasePracticalGuide,
   angularFrameworkCompleteGuide,
   javascriptAsyncPatterns,
   pythonDataPipelineBasics,
