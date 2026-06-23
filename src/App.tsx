@@ -14,6 +14,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Projects from "./pages/Projects";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { ScrollToTopButton } from "@/components/layout/ScrollToTopButton";
@@ -43,6 +44,7 @@ export default function App() {
                     <Route path="/blog/:id" element={<PageTransition><BlogPost /></PageTransition>} />
                     <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
                     <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+                    <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
                     <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
                   </Routes>
                 </AnimatePresence>

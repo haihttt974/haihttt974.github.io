@@ -2,7 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { aboutData } from "@/data/blogData";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,6 +15,7 @@ export const Header = () => {
     { path: "/projects", label: t("nav.projects"), index: "01" },
     { path: "/blog", label: t("nav.blog"), index: "02" },
     { path: "/about", label: t("nav.about"), index: "03" },
+    { path: "/contact", label: t("nav.contact"), index: "04" },
   ];
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
@@ -62,9 +62,9 @@ export const Header = () => {
             <LanguageSwitcher />
             <ThemeSwitcher />
             <Button asChild variant="outline" size="sm" className="border-primary/30 font-mono text-xs">
-              <a href={`mailto:${aboutData.social.email}`}>
+              <Link to="/contact">
                 {t("nav.connect")} <ArrowUpRight className="ml-2 h-3.5 w-3.5" />
-              </a>
+              </Link>
             </Button>
           </div>
 

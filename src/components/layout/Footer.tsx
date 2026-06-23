@@ -21,6 +21,7 @@ export const Footer = () => {
             <Link className="block hover:text-primary" to="/projects">{t("footer.work")}</Link>
             <Link className="block hover:text-primary" to="/blog">{t("footer.notes")}</Link>
             <Link className="block hover:text-primary" to="/about">{t("footer.profile")}</Link>
+            <Link className="block hover:text-primary" to="/contact">{t("footer.contact")}</Link>
           </div>
         </div>
         <div className="font-mono text-xs">
@@ -28,6 +29,7 @@ export const Footer = () => {
           <div className="space-y-3">
             <a className="flex items-center gap-2 hover:text-primary" href={aboutData.social.github} target="_blank" rel="noreferrer"><Github className="h-3.5 w-3.5" />GitHub</a>
             <a className="flex items-center gap-2 hover:text-primary" href={aboutData.social.linkedin} target="_blank" rel="noreferrer"><Linkedin className="h-3.5 w-3.5" />LinkedIn</a>
+            <Link className="flex items-center gap-2 hover:text-primary" to="/contact"><Mail className="h-3.5 w-3.5" />{t("footer.feedback")} <ArrowUpRight className="h-3 w-3" /></Link>
             <a className="flex items-center gap-2 hover:text-primary" href={`mailto:${aboutData.social.email}`}><Mail className="h-3.5 w-3.5" />Email <ArrowUpRight className="h-3 w-3" /></a>
           </div>
         </div>
