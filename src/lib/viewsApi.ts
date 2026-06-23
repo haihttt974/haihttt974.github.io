@@ -25,12 +25,13 @@ export function fetchViewsJsonp(slug: string): Promise<number> {
   return new Promise((resolve) => {
     const cb = `__views_cb_${Math.random().toString(36).slice(2)}`;
     const url = buildUrl({ action: "views", slug, callback: cb });
+    const jsonpWindow = window as Window & Record<typeof cb, (data?: { views?: unknown }) => void>;
 
-    (window as any)[cb] = (data: any) => {
+    jsonpWindow[cb] = (data) => {
       try {
         resolve(Number(data?.views ?? 0));
       } finally {
-        delete (window as any)[cb];
+        delete jsonpWindow[cb];
         script.remove();
       }
     };
@@ -38,7 +39,7 @@ export function fetchViewsJsonp(slug: string): Promise<number> {
     const script = document.createElement("script");
     script.src = url;
     script.onerror = () => {
-      delete (window as any)[cb];
+      delete jsonpWindow[cb];
       script.remove();
       resolve(0);
     };
