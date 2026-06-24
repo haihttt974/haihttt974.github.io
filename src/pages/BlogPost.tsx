@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye } from "lucide-react";
+﻿import { useEffect, useState } from "react";
+import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye, Download } from "lucide-react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { BlogPost as BlogPostData, localizeBlogPost } from "@/data/blog-posts";
@@ -11,6 +11,7 @@ import { LoadingState } from "@/components/loading/LoadingState";
 import { cmsApi } from "@/lib/cmsApi";
 import { useToast } from "@/hooks/use-toast";
 import { copyToClipboard } from "@/lib/clipboard";
+import { downloadBlogPostPdf } from "@/lib/blogPdf";
 
 const BlogPost = () => {
   const { t, locale, language } = useLanguage();
@@ -85,6 +86,27 @@ const BlogPost = () => {
   }
 
   const categoryName = t(`category.${post.category}`) || post.category;
+  const downloadPost = async () => {
+    try {
+      await downloadBlogPostPdf(post, {
+        language,
+        locale,
+        categoryName,
+        sourceNote: t("post.sourceNote"),
+      });
+      toast({
+        variant: "success",
+        title: language === "vi" ? "Đã tải PDF bài viết" : "Article PDF downloaded",
+      });
+    } catch (error) {
+      console.error("Unable to export article PDF:", error);
+      toast({
+        variant: "destructive",
+        title: language === "vi" ? "Không thể tải PDF" : "Unable to download PDF",
+      });
+    }
+  };
+
   const copyPostLink = async () => {
     try {
       await copyToClipboard(window.location.href);
@@ -169,6 +191,22 @@ const BlogPost = () => {
                     </Link>
                   ))}
                 </div>
+              </div>
+
+              <div className="card-gradient border border-border/50 rounded-xl p-6">
+                <h3 className="font-semibold mb-4 flex items-center">
+                  <Download className="h-4 w-4 mr-2" />
+                  {language === "vi" ? "Tải bài viết" : "Download article"}
+                </h3>
+                <p className="mb-4 text-sm leading-6 text-muted-foreground">
+                  {language === "vi"
+                    ? "Tải phiên bản PDF được trình bày gọn gàng để lưu trữ và đọc lại khi cần."
+                    : "Save this article as a watermarked PDF for offline reading."}
+                </p>
+                <Button className="w-full" onClick={downloadPost}>
+                  <Download className="mr-2 h-4 w-4" />
+                  {language === "vi" ? "Tải PDF" : "Download PDF"}
+                </Button>
               </div>
 
               <div className="card-gradient border border-border/50 rounded-xl p-6">
