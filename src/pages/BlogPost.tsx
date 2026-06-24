@@ -1,5 +1,5 @@
-﻿import { useEffect, useState } from "react";
-import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye, Download } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye, Download, ArrowRight, BookOpenCheck } from "lucide-react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { BlogPost as BlogPostData, localizeBlogPost } from "@/data/blog-posts";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArticleContent } from "@/components/blog/ArticleContent";
 import { LoadingState } from "@/components/loading/LoadingState";
-import { cmsApi } from "@/lib/cmsApi";
+import { CmsPostListItem, cmsApi } from "@/lib/cmsApi";
 import { useToast } from "@/hooks/use-toast";
 import { copyToClipboard } from "@/lib/clipboard";
 import { downloadBlogPostPdf } from "@/lib/blogPdf";
@@ -25,6 +25,7 @@ const BlogPost = () => {
     id ? cmsApi.getCachedPost(id) : undefined,
   );
   const [loading, setLoading] = useState(!sourcePost);
+  const [relatedPosts, setRelatedPosts] = useState<CmsPostListItem[]>([]);
 
   const activeSourcePost = sourcePost?.id === id ? sourcePost : undefined;
   const post = activeSourcePost ? localizeBlogPost(activeSourcePost, language) : undefined;
@@ -55,6 +56,44 @@ const BlogPost = () => {
       cancelled = true;
     };
   }, [id, language]);
+
+  useEffect(() => {
+    if (!activeSourcePost) {
+      setRelatedPosts([]);
+      return;
+    }
+
+    let cancelled = false;
+    const loadRelatedPosts = async () => {
+      const posts = await cmsApi.getPosts(language, { pageSize: 100 });
+      const currentTags = new Set(activeSourcePost.tags.map((tag) => tag.toLowerCase()));
+
+      const related = posts
+        .filter((item) => item.id !== activeSourcePost.id)
+        .map((item) => {
+          const sharedTags = item.tags.filter((tag) => currentTags.has(tag.toLowerCase())).length;
+          const categoryScore = item.category === activeSourcePost.category ? 6 : 0;
+          return {
+            item,
+            score: categoryScore + sharedTags * 3 + (item.featured ? 1 : 0),
+          };
+        })
+        .filter(({ score }) => score > 0)
+        .sort((a, b) => b.score - a.score || new Date(b.item.date).getTime() - new Date(a.item.date).getTime())
+        .slice(0, 3)
+        .map(({ item }) => item);
+
+      if (!cancelled) setRelatedPosts(related);
+    };
+
+    loadRelatedPosts().catch(() => {
+      if (!cancelled) setRelatedPosts([]);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSourcePost, language]);
 
   if (loading && !activeSourcePost) {
     return (
@@ -173,6 +212,7 @@ const BlogPost = () => {
                 {t("post.sourceNote")}
               </p>
             </div>
+
           </div>
 
           <aside className="lg:col-span-1">
@@ -209,6 +249,67 @@ const BlogPost = () => {
                 </Button>
               </div>
 
+              {relatedPosts.length > 0 && (
+                <div className="card-gradient overflow-hidden rounded-xl border border-border/50">
+                  <div className="border-b border-border/60 bg-primary/[.04] p-5">
+                    <p className="mb-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[.14em] text-primary">
+                      <BookOpenCheck className="h-4 w-4" />
+                      {language === "vi" ? "Đọc tiếp" : "Next reads"}
+                    </p>
+                    <h3 className="text-lg font-semibold leading-6">
+                      {language === "vi" ? "Bài viết liên quan" : "Related articles"}
+                    </h3>
+                  </div>
+
+                  <div className="divide-y divide-border/60">
+                    {relatedPosts.map((relatedPost, index) => {
+                      const relatedCategoryName = t(`category.${relatedPost.category}`) || relatedPost.category;
+                      const sharedTags = relatedPost.tags.filter((tag) =>
+                        post.tags.some((currentTag) => currentTag.toLowerCase() === tag.toLowerCase()),
+                      );
+
+                      return (
+                        <Link
+                          key={relatedPost.id}
+                          to={`/blog/${relatedPost.id}`}
+                          state={{ from: fromBlog }}
+                          className="group block p-5 transition-colors hover:bg-primary/[.045]"
+                        >
+                          <div className="mb-3 flex items-start justify-between gap-3">
+                            <Badge variant="secondary" className="max-w-[10rem] truncate text-[11px]">
+                              {relatedCategoryName}
+                            </Badge>
+                            <span className="rounded-full border border-border/70 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+                              0{index + 1}
+                            </span>
+                          </div>
+
+                          <h4 className="line-clamp-2 text-sm font-semibold leading-6 transition-colors group-hover:text-primary">
+                            {relatedPost.title}
+                          </h4>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              {relatedPost.readTime}
+                            </span>
+                            {(sharedTags.length > 0 ? sharedTags : relatedPost.tags).slice(0, 1).map((tag) => (
+                              <span key={tag} className="max-w-[8rem] truncate rounded-full bg-muted px-2 py-0.5">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+
+                          <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary">
+                            {language === "vi" ? "Mở bài viết" : "Open article"}
+                            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               <div className="card-gradient border border-border/50 rounded-xl p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
                   <Share2 className="h-4 w-4 mr-2" />
