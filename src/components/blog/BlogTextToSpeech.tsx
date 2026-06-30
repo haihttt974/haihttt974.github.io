@@ -167,6 +167,79 @@ const splitMixedLanguageText = (text: string, baseLanguage: "vi" | "en") => {
   return chunks.map((chunk) => ({ ...chunk, text: chunk.text.trim() })).filter((chunk) => chunk.text.length > 0);
 };
 
+const edgeTrustedClientToken = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
+const edgeVietnameseVoice = "vi-VN-HoaiMyNeural";
+
+const createRequestId = () =>
+  (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).replace(/-/g, "");
+
+const escapeSsml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+const findHeaderEnd = (bytes: Uint8Array) => {
+  for (let index = 0; index < bytes.length - 3; index += 1) {
+    if (bytes[index] === 13 && bytes[index + 1] === 10 && bytes[index + 2] === 13 && bytes[index + 3] === 10) {
+      return index + 4;
+    }
+  }
+  return -1;
+};
+
+const synthesizeVietnameseOnline = (text: string, rate: number) =>
+  new Promise<Blob>((resolve, reject) => {
+    const connectionId = createRequestId();
+    const ws = new WebSocket(
+      `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=${edgeTrustedClientToken}&ConnectionId=${connectionId}`,
+    );
+    const chunks: BlobPart[] = [];
+    const timestamp = new Date().toISOString();
+    const ratePercent = Math.round((rate - 1) * 100);
+    const rateValue = ratePercent === 0 ? "+0%" : `${ratePercent > 0 ? "+" : ""}${ratePercent}%`;
+
+    ws.binaryType = "arraybuffer";
+    ws.onerror = () => reject(new Error("Unable to connect to Vietnamese TTS"));
+    ws.onopen = () => {
+      ws.send(
+        `X-Timestamp:${timestamp}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n` +
+          JSON.stringify({
+            context: {
+              synthesis: {
+                audio: {
+                  metadataoptions: { sentenceBoundaryEnabled: false, wordBoundaryEnabled: false },
+                  outputFormat: "audio-24khz-48kbitrate-mono-mp3",
+                },
+              },
+            },
+          }),
+      );
+
+      ws.send(
+        `X-RequestId:${connectionId}\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:${timestamp}\r\nPath:ssml\r\n\r\n` +
+          `<speak version="1.0" xml:lang="vi-VN"><voice name="${edgeVietnameseVoice}"><prosody rate="${rateValue}">${escapeSsml(text)}</prosody></voice></speak>`,
+      );
+    };
+
+    ws.onmessage = (event) => {
+      if (typeof event.data === "string") {
+        if (event.data.includes("Path:turn.end")) {
+          ws.close();
+          resolve(new Blob(chunks, { type: "audio/mpeg" }));
+        }
+        return;
+      }
+
+      const bytes = new Uint8Array(event.data);
+      const headerEnd = findHeaderEnd(bytes);
+      if (headerEnd === -1) return;
+      const header = new TextDecoder().decode(bytes.slice(0, headerEnd));
+      if (header.includes("Path:audio")) chunks.push(bytes.slice(headerEnd));
+    };
+  });
+
 export const BlogTextToSpeech = ({
   activeIndex,
   language,
@@ -182,6 +255,8 @@ export const BlogTextToSpeech = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [rate, setRate] = useState(1);
   const currentRunRef = useRef(0);
+  const currentAudioRef = useRef<HTMLAudioElement>();
+  const currentAudioUrlRef = useRef<string>();
   const requestedStopRef = useRef(false);
 
   const supported = typeof window !== "undefined" && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
@@ -189,7 +264,8 @@ export const BlogTextToSpeech = ({
   const viVoice = useMemo(() => getPreferredVoice(voices, "vi"), [voices]);
   const enVoice = useMemo(() => getPreferredVoice(voices, "en"), [voices]);
   const baseVoice = language === "vi" ? viVoice : enVoice;
-  const hasMatchingVoice = language !== "vi" || viVoice?.lang.toLowerCase().startsWith("vi");
+  const hasMatchingVoice = language !== "vi" || Boolean(viVoice?.lang.toLowerCase().startsWith("vi"));
+  const useOnlineVietnameseVoice = language === "vi";
 
   const labels = useMemo(
     () => ({
@@ -233,6 +309,23 @@ export const BlogTextToSpeech = ({
     onActiveIndexChange(undefined);
   };
 
+  const playAudioBlob = (blob: Blob, runId: number) =>
+    new Promise<void>((resolve, reject) => {
+      if (currentRunRef.current !== runId || requestedStopRef.current) {
+        resolve();
+        return;
+      }
+
+      if (currentAudioUrlRef.current) URL.revokeObjectURL(currentAudioUrlRef.current);
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      currentAudioRef.current = audio;
+      currentAudioUrlRef.current = audioUrl;
+      audio.onended = () => resolve();
+      audio.onerror = () => reject(new Error("Unable to play synthesized audio"));
+      audio.play().catch(reject);
+    });
+
   const speakSegmentParts = (runId: number, segmentIndex: number) => {
     if (currentRunRef.current !== runId) return;
     if (requestedStopRef.current || segmentIndex >= segments.length) {
@@ -243,13 +336,35 @@ export const BlogTextToSpeech = ({
     onSelectIndex(segmentIndex);
     onActiveIndexChange(segmentIndex);
 
-    const utterance = new SpeechSynthesisUtterance(
-      language === "vi" ? smoothVietnameseSpeechText(segments[segmentIndex].text) : segments[segmentIndex].text,
-    );
+    const segmentText = language === "vi" ? smoothVietnameseSpeechText(segments[segmentIndex].text) : segments[segmentIndex].text;
+
+    if (useOnlineVietnameseVoice) {
+      synthesizeVietnameseOnline(segmentText, rate)
+        .then((blob) => playAudioBlob(blob, runId))
+        .then(() => {
+          if (!requestedStopRef.current) speakSegmentParts(runId, segmentIndex + 1);
+        })
+        .catch(() => {
+          if (currentRunRef.current !== runId) return;
+          const utterance = new SpeechSynthesisUtterance(segmentText);
+          utterance.lang = "vi-VN";
+          utterance.rate = rate;
+          utterance.pitch = 1;
+          if (viVoice) utterance.voice = viVoice;
+          utterance.onend = () => {
+            if (!requestedStopRef.current) speakSegmentParts(runId, segmentIndex + 1);
+          };
+          utterance.onerror = () => finishRun(runId);
+          window.speechSynthesis.speak(utterance);
+        });
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(segmentText);
     utterance.lang = getSpeechLanguage(language);
     utterance.rate = rate;
     utterance.pitch = 1;
-    const voice = language === "vi" ? viVoice : enVoice;
+    const voice = enVoice;
     if (voice) utterance.voice = voice;
     utterance.onend = () => {
       if (!requestedStopRef.current) speakSegmentParts(runId, segmentIndex + 1);
@@ -265,6 +380,12 @@ export const BlogTextToSpeech = ({
     const runId = currentRunRef.current + 1;
     currentRunRef.current = runId;
     requestedStopRef.current = false;
+    currentAudioRef.current?.pause();
+    currentAudioRef.current = undefined;
+    if (currentAudioUrlRef.current) {
+      URL.revokeObjectURL(currentAudioUrlRef.current);
+      currentAudioUrlRef.current = undefined;
+    }
     window.speechSynthesis.cancel();
     onSelectIndex(startIndex);
     setIsPlaying(true);
@@ -282,6 +403,12 @@ export const BlogTextToSpeech = ({
     if (!supported) return;
     requestedStopRef.current = true;
     currentRunRef.current += 1;
+    currentAudioRef.current?.pause();
+    currentAudioRef.current = undefined;
+    if (currentAudioUrlRef.current) {
+      URL.revokeObjectURL(currentAudioUrlRef.current);
+      currentAudioUrlRef.current = undefined;
+    }
     window.speechSynthesis.cancel();
     setIsPlaying(false);
     setIsPaused(false);
@@ -291,11 +418,19 @@ export const BlogTextToSpeech = ({
   const pauseOrResume = () => {
     if (!supported) return;
     if (isPaused) {
-      window.speechSynthesis.resume();
+      if (currentAudioRef.current) {
+        currentAudioRef.current.play().catch(() => undefined);
+      } else {
+        window.speechSynthesis.resume();
+      }
       setIsPaused(false);
       return;
     }
-    window.speechSynthesis.pause();
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+    } else {
+      window.speechSynthesis.pause();
+    }
     setIsPaused(true);
   };
 
@@ -370,7 +505,7 @@ export const BlogTextToSpeech = ({
                 )}
               </div>
 
-              {!hasMatchingVoice && (
+              {language === "vi" && !hasMatchingVoice && !useOnlineVietnameseVoice && (
                 <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-700 dark:text-amber-300">
                   {labels.missingVoice}
                 </p>
@@ -405,7 +540,7 @@ export const BlogTextToSpeech = ({
 
               <p className="border-t border-border/60 pt-4 text-xs leading-5 text-muted-foreground">
                 {labels.provider}
-                {baseVoice ? ` · ${baseVoice.name}` : ""}
+                {useOnlineVietnameseVoice ? ` · ${edgeVietnameseVoice}` : baseVoice ? ` · ${baseVoice.name}` : ""}
               </p>
             </>
           )}
@@ -414,4 +549,5 @@ export const BlogTextToSpeech = ({
     </section>
   );
 };
+
 
