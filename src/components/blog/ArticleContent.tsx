@@ -3,6 +3,7 @@ import { Check, Copy } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { copyToClipboard } from "@/lib/clipboard";
+import { cn } from "@/lib/utils";
 
 const languageAliases: Record<string, string> = {
   javascript: "js",
@@ -188,10 +189,96 @@ const renderInline = (text: string): ReactNode[] =>
     return <Fragment key={index}>{part}</Fragment>;
   });
 
-export const ArticleContent = ({ content }: { content: string }) => {
+interface ArticleContentProps {
+  activeSpeechIndex?: number;
+  content: string;
+  onSpeechSegmentSelect?: (index: number) => void;
+  selectedSpeechIndex?: number;
+  speechEnabled?: boolean;
+}
+
+export const ArticleContent = ({
+  activeSpeechIndex,
+  content,
+  onSpeechSegmentSelect,
+  selectedSpeechIndex,
+  speechEnabled = false,
+}: ArticleContentProps) => {
+  const { language: currentLanguage } = useLanguage();
+  const [hoveredSpeechIndex, setHoveredSpeechIndex] = useState<number>();
   const lines = content.trim().split("\n");
   const blocks: ReactNode[] = [];
   let index = 0;
+  let speechIndex = 0;
+
+  const renderSpeechMarker = (currentSpeechIndex: number) => {
+    const selected = selectedSpeechIndex === currentSpeechIndex;
+    const active = activeSpeechIndex === currentSpeechIndex;
+    const hovered = hoveredSpeechIndex === currentSpeechIndex;
+    const enabled = speechEnabled || selected || active;
+    const visible = selected || active || hovered;
+
+    if (!enabled) return null;
+
+    return (
+      <button
+        key={`speech-marker-${currentSpeechIndex}`}
+        type="button"
+        className={cn(
+          "group my-0.5 flex min-h-8 w-full items-center gap-3 rounded-lg px-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+          speechEnabled ? "cursor-pointer hover:bg-primary/[.035]" : "cursor-default",
+        )}
+        onClick={() => speechEnabled && onSpeechSegmentSelect?.(currentSpeechIndex)}
+        onMouseEnter={() => setHoveredSpeechIndex(currentSpeechIndex)}
+        onMouseLeave={() => setHoveredSpeechIndex(undefined)}
+        disabled={!speechEnabled}
+        aria-label={currentLanguage === "vi" ? "Chọn đọc từ vị trí này" : "Select this start point"}
+      >
+        <span className={cn(
+          "h-px flex-1 transition-all duration-200",
+          active ? "bg-accent opacity-100" : visible ? "bg-primary opacity-100" : "bg-border/0 opacity-0 group-hover:bg-primary group-hover:opacity-100",
+        )} />
+        <span className={cn(
+          "rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[.14em] shadow-sm backdrop-blur transition-all duration-200",
+          visible ? "translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-1 scale-95 opacity-0",
+          active
+            ? "border-accent/45 bg-accent/15 text-accent"
+            : selected || hovered
+              ? "border-primary/40 bg-background/95 text-primary"
+              : "border-border bg-background/85 text-muted-foreground",
+        )}>
+          {currentLanguage === "vi" ? "Đọc từ đây" : "Read from here"}
+        </span>
+        <span className={cn(
+          "h-px flex-1 transition-all duration-200",
+          active ? "bg-accent opacity-100" : visible ? "bg-primary opacity-100" : "bg-border/0 opacity-0 group-hover:bg-primary group-hover:opacity-100",
+        )} />
+      </button>
+    );
+  };
+
+  const withSpeechMarker = (currentSpeechIndex: number, node: ReactNode) => (
+    <Fragment key={`speech-block-${currentSpeechIndex}`}>
+      {renderSpeechMarker(currentSpeechIndex)}
+      {node}
+    </Fragment>
+  );
+
+  const getSpeechBlockProps = () => {
+    const currentSpeechIndex = speechIndex;
+    speechIndex += 1;
+
+    return {
+      currentSpeechIndex,
+      blockProps: {
+        className: cn(
+          "rounded-lg transition-colors",
+          activeSpeechIndex === currentSpeechIndex && "bg-primary/[.09] ring-1 ring-primary/25",
+        ),
+        "data-speech-index": currentSpeechIndex,
+      },
+    };
+  };
 
   while (index < lines.length) {
     const line = lines[index].trim();
@@ -211,15 +298,18 @@ export const ArticleContent = ({ content }: { content: string }) => {
     }
 
     if (line.startsWith("# ")) {
-      blocks.push(<h2 key={index} className="mb-6 mt-2 text-3xl md:text-4xl">{renderInline(line.slice(2))}</h2>);
+      const speechProps = getSpeechBlockProps();
+      blocks.push(withSpeechMarker(speechProps.currentSpeechIndex, <h2 key={index} {...speechProps.blockProps} className={cn(speechProps.blockProps.className, "mb-6 mt-2 px-3 py-2 text-3xl md:text-4xl")}>{renderInline(line.slice(2))}</h2>));
       index += 1; continue;
     }
     if (line.startsWith("## ")) {
-      blocks.push(<h3 key={index} className="mb-4 mt-12 border-l-2 border-primary pl-4 text-2xl">{renderInline(line.slice(3))}</h3>);
+      const speechProps = getSpeechBlockProps();
+      blocks.push(withSpeechMarker(speechProps.currentSpeechIndex, <h3 key={index} {...speechProps.blockProps} className={cn(speechProps.blockProps.className, "mb-4 mt-12 border-l-2 border-primary py-2 pl-4 pr-3 text-2xl")}>{renderInline(line.slice(3))}</h3>));
       index += 1; continue;
     }
     if (line.startsWith("### ")) {
-      blocks.push(<h4 key={index} className="mb-3 mt-8 text-xl">{renderInline(line.slice(4))}</h4>);
+      const speechProps = getSpeechBlockProps();
+      blocks.push(withSpeechMarker(speechProps.currentSpeechIndex, <h4 key={index} {...speechProps.blockProps} className={cn(speechProps.blockProps.className, "mb-3 mt-8 px-3 py-2 text-xl")}>{renderInline(line.slice(4))}</h4>));
       index += 1; continue;
     }
 
@@ -229,12 +319,14 @@ export const ArticleContent = ({ content }: { content: string }) => {
         items.push(lines[index].trim().slice(2));
         index += 1;
       }
-      blocks.push(<ul key={`list-${index}`} className="my-6 space-y-3">{items.map((item) => <li key={item} className="flex gap-3 leading-7 text-muted-foreground"><span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /><span>{renderInline(item)}</span></li>)}</ul>);
+      const speechProps = getSpeechBlockProps();
+      blocks.push(withSpeechMarker(speechProps.currentSpeechIndex, <ul key={`list-${index}`} {...speechProps.blockProps} className={cn(speechProps.blockProps.className, "my-6 space-y-3 px-3 py-2")}>{items.map((item) => <li key={item} className="flex gap-3 leading-7 text-muted-foreground"><span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /><span>{renderInline(item)}</span></li>)}</ul>));
       continue;
     }
 
     if (line.startsWith("> ")) {
-      blocks.push(<blockquote key={index} className="my-8 border-l-2 border-primary bg-primary/[.04] px-5 py-4 text-lg italic leading-8 text-muted-foreground">{renderInline(line.slice(2))}</blockquote>);
+      const speechProps = getSpeechBlockProps();
+      blocks.push(withSpeechMarker(speechProps.currentSpeechIndex, <blockquote key={index} {...speechProps.blockProps} className={cn(speechProps.blockProps.className, "my-8 border-l-2 border-primary bg-primary/[.04] px-5 py-4 text-lg italic leading-8 text-muted-foreground")}>{renderInline(line.slice(2))}</blockquote>));
       index += 1; continue;
     }
 
@@ -244,7 +336,8 @@ export const ArticleContent = ({ content }: { content: string }) => {
       paragraph.push(lines[index].trim());
       index += 1;
     }
-    blocks.push(<p key={`p-${index}`} className="my-5 text-[1.02rem] leading-8 text-muted-foreground">{renderInline(paragraph.join(" "))}</p>);
+    const speechProps = getSpeechBlockProps();
+    blocks.push(withSpeechMarker(speechProps.currentSpeechIndex, <p key={`p-${index}`} {...speechProps.blockProps} className={cn(speechProps.blockProps.className, "my-5 px-3 py-2 text-[1.02rem] leading-8 text-muted-foreground")}>{renderInline(paragraph.join(" "))}</p>));
   }
 
   return <div className="article-content">{blocks}</div>;

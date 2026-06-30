@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Clock, Calendar, Tag, Share2, Eye, Download, ArrowRight, BookOpenCheck } from "lucide-react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -7,11 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ArticleContent } from "@/components/blog/ArticleContent";
+import { BlogTextToSpeech } from "@/components/blog/BlogTextToSpeech";
 import { LoadingState } from "@/components/loading/LoadingState";
 import { CmsPostListItem, cmsApi } from "@/lib/cmsApi";
 import { useToast } from "@/hooks/use-toast";
 import { copyToClipboard } from "@/lib/clipboard";
 import { downloadBlogPostPdf } from "@/lib/blogPdf";
+import { buildArticleSpeechSegments } from "@/lib/articleSpeech";
 
 const BlogPost = () => {
   const { t, locale, language } = useLanguage();
@@ -29,6 +31,25 @@ const BlogPost = () => {
 
   const activeSourcePost = sourcePost?.id === id ? sourcePost : undefined;
   const post = activeSourcePost ? localizeBlogPost(activeSourcePost, language) : undefined;
+  const speechSegments = useMemo(() => (post ? buildArticleSpeechSegments(post.content) : []), [post?.content]);
+  const [selectedSpeechIndex, setSelectedSpeechIndex] = useState<number | undefined>(undefined);
+  const [activeSpeechIndex, setActiveSpeechIndex] = useState<number | undefined>(undefined);
+  const [speechEnabled, setSpeechEnabled] = useState(false);
+  const [speechPlayRequest, setSpeechPlayRequest] = useState<{ index: number; nonce: number }>();
+
+  useEffect(() => {
+    setSelectedSpeechIndex(undefined);
+    setActiveSpeechIndex(undefined);
+    setSpeechEnabled(false);
+    setSpeechPlayRequest(undefined);
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, [id, language]);
+
+  const selectSpeechSegment = (index: number | undefined) => {
+    setSelectedSpeechIndex(index);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -207,7 +228,13 @@ const BlogPost = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
           <div className="lg:col-span-3">
             <div className="card-gradient rounded-xl border border-border/50 p-6 md:p-12">
-              <ArticleContent content={post.content} />
+              <ArticleContent
+                activeSpeechIndex={activeSpeechIndex}
+                content={post.content}
+                onSpeechSegmentSelect={(index) => selectSpeechSegment(index)}
+                selectedSpeechIndex={selectedSpeechIndex}
+                speechEnabled={speechEnabled}
+              />
               <p className="mt-10 border-t border-border/50 pt-4 text-xs leading-5 text-muted-foreground/80">
                 {t("post.sourceNote")}
               </p>
@@ -217,6 +244,18 @@ const BlogPost = () => {
 
           <aside className="lg:col-span-1">
             <div className="sticky top-24 space-y-8">
+              <BlogTextToSpeech
+                activeIndex={activeSpeechIndex}
+                language={language}
+                onActiveIndexChange={setActiveSpeechIndex}
+                onEnabledChange={setSpeechEnabled}
+                onSelectIndex={selectSpeechSegment}
+                playRequest={speechPlayRequest}
+                selectedIndex={selectedSpeechIndex}
+                segments={speechSegments}
+                speechEnabled={speechEnabled}
+              />
+
               <div className="card-gradient border border-border/50 rounded-xl p-6">
                 <h3 className="font-semibold mb-4 flex items-center">
                   <Tag className="h-4 w-4 mr-2" />
