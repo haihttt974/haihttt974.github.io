@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Headphones, Pause, Play, SkipBack, SkipForward, Square, Volume2, Wand2, X } from "lucide-react";
 import { ArticleSpeechSegment } from "@/lib/articleSpeech";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,19 @@ interface BlogTextToSpeechProps {
 }
 
 type SpeechLang = "vi" | "en";
+
+interface ResponsiveVoiceApi {
+  speak: (text: string, voice: string, options?: { rate?: number; onend?: () => void }) => void;
+  cancel: () => void;
+  pause: () => void;
+  resume: () => void;
+}
+
+declare global {
+  interface Window {
+    responsiveVoice?: ResponsiveVoiceApi;
+  }
+}
 
 const getSpeechLanguage = (language: SpeechLang) => (language === "vi" ? "vi-VN" : "en-US");
 const vietnameseAsciiWords = new Set([
@@ -180,13 +193,16 @@ const escapeSsml = (value: string) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-const findHeaderEnd = (bytes: Uint8Array) => {
-  for (let index = 0; index < bytes.length - 3; index += 1) {
-    if (bytes[index] === 13 && bytes[index + 1] === 10 && bytes[index + 2] === 13 && bytes[index + 3] === 10) {
-      return index + 4;
-    }
-  }
-  return -1;
+const parseEdgeAudioMessage = (bytes: Uint8Array) => {
+  if (bytes.length < 2) return undefined;
+  const headerLength = (bytes[0] << 8) | bytes[1];
+  const audioOffset = 2 + headerLength;
+  if (audioOffset > bytes.length) return undefined;
+
+  const header = new TextDecoder().decode(bytes.slice(2, audioOffset));
+  if (!header.includes("Path:audio")) return undefined;
+
+  return bytes.slice(audioOffset);
 };
 
 const synthesizeVietnameseOnline = (text: string, rate: number) =>
@@ -200,8 +216,23 @@ const synthesizeVietnameseOnline = (text: string, rate: number) =>
     const ratePercent = Math.round((rate - 1) * 100);
     const rateValue = ratePercent === 0 ? "+0%" : `${ratePercent > 0 ? "+" : ""}${ratePercent}%`;
 
+    let settled = false;
+    const timeout = window.setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        ws.close();
+        reject(new Error("Vietnamese TTS timed out"));
+      }
+    }, 15000);
+
     ws.binaryType = "arraybuffer";
-    ws.onerror = () => reject(new Error("Unable to connect to Vietnamese TTS"));
+    ws.onerror = () => {
+      if (!settled) {
+        settled = true;
+        window.clearTimeout(timeout);
+        reject(new Error("Unable to connect to Vietnamese TTS"));
+      }
+    };
     ws.onopen = () => {
       ws.send(
         `X-Timestamp:${timestamp}\r\nContent-Type:application/json; charset=utf-8\r\nPath:speech.config\r\n\r\n` +
@@ -227,18 +258,75 @@ const synthesizeVietnameseOnline = (text: string, rate: number) =>
       if (typeof event.data === "string") {
         if (event.data.includes("Path:turn.end")) {
           ws.close();
-          resolve(new Blob(chunks, { type: "audio/mpeg" }));
+          window.clearTimeout(timeout);
+          if (!settled) {
+            settled = true;
+            if (chunks.length > 0) {
+              resolve(new Blob(chunks, { type: "audio/mpeg" }));
+            } else {
+              reject(new Error("Vietnamese TTS returned no audio"));
+            }
+          }
         }
         return;
       }
 
-      const bytes = new Uint8Array(event.data);
-      const headerEnd = findHeaderEnd(bytes);
-      if (headerEnd === -1) return;
-      const header = new TextDecoder().decode(bytes.slice(0, headerEnd));
-      if (header.includes("Path:audio")) chunks.push(bytes.slice(headerEnd));
+      const audio = parseEdgeAudioMessage(new Uint8Array(event.data));
+      if (audio && audio.length > 0) chunks.push(audio);
     };
   });
+
+
+const splitTextForTts = (text: string, maxLength = 180) => {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  const chunks: string[] = [];
+  let remaining = normalized;
+
+  while (remaining.length > maxLength) {
+    const slice = remaining.slice(0, maxLength);
+    const sentenceBreak = Math.max(slice.lastIndexOf(". "), slice.lastIndexOf("! "), slice.lastIndexOf("? "), slice.lastIndexOf("; "));
+    const spaceBreak = slice.lastIndexOf(" ");
+    const breakAt = sentenceBreak > 80 ? sentenceBreak + 1 : spaceBreak > 80 ? spaceBreak : maxLength;
+    chunks.push(remaining.slice(0, breakAt).trim());
+    remaining = remaining.slice(breakAt).trim();
+  }
+
+  if (remaining) chunks.push(remaining);
+  return chunks;
+};
+
+const createGoogleVietnameseTtsUrl = (text: string) =>
+  `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=vi&total=1&idx=0&textlen=${text.length}&prev=input&q=${encodeURIComponent(text)}`;
+
+let responsiveVoicePromise: Promise<ResponsiveVoiceApi> | undefined;
+
+const loadResponsiveVoice = () => {
+  if (window.responsiveVoice) return Promise.resolve(window.responsiveVoice);
+  if (responsiveVoicePromise) return responsiveVoicePromise;
+
+  responsiveVoicePromise = new Promise<ResponsiveVoiceApi>((resolve, reject) => {
+    const existingScript = document.querySelector<HTMLScriptElement>("script[data-responsive-voice]");
+    const script = existingScript ?? document.createElement("script");
+    const timeout = window.setTimeout(() => reject(new Error("ResponsiveVoice timed out")), 12000);
+
+    script.setAttribute("data-responsive-voice", "true");
+    script.src = "https://code.responsivevoice.org/responsivevoice.js";
+    script.async = true;
+    script.onload = () => {
+      window.clearTimeout(timeout);
+      if (window.responsiveVoice) resolve(window.responsiveVoice);
+      else reject(new Error("ResponsiveVoice did not initialize"));
+    };
+    script.onerror = () => {
+      window.clearTimeout(timeout);
+      reject(new Error("Unable to load ResponsiveVoice"));
+    };
+
+    if (!existingScript) document.head.appendChild(script);
+  });
+
+  return responsiveVoicePromise;
+};
 
 export const BlogTextToSpeech = ({
   activeIndex,
@@ -254,9 +342,11 @@ export const BlogTextToSpeech = ({
   const [isPaused, setIsPaused] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [rate, setRate] = useState(1);
+  const [playbackError, setPlaybackError] = useState<string>();
   const currentRunRef = useRef(0);
   const currentAudioRef = useRef<HTMLAudioElement>();
   const currentAudioUrlRef = useRef<string>();
+  const responsiveVoiceRef = useRef<ResponsiveVoiceApi>();
   const requestedStopRef = useRef(false);
 
   const supported = typeof window !== "undefined" && "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
@@ -288,12 +378,12 @@ export const BlogTextToSpeech = ({
       next: language === "vi" ? "Đoạn tiếp" : "Next section",
       rate: language === "vi" ? "Tốc độ" : "Speed",
       current: language === "vi" ? "Điểm đọc" : "Start point",
-      noPoint: language === "vi" ? "Chưa chọn vị trí" : "No start point selected",
+      noPoint: language === "vi" ? "Chưa chọn vị trí, sẽ phát từ đầu" : "No start point selected, starts from the top",
       unsupported: language === "vi" ? "Trình duyệt này chưa hỗ trợ đọc văn bản miễn phí." : "This browser does not support free text-to-speech.",
       missingVoice: language === "vi"
         ? "Chưa tìm thấy giọng vi-VN trong trình duyệt này. Hãy cài/cho phép giọng tiếng Việt để phát đúng tiếng Việt."
         : "No matching voice was found for this language.",
-      provider: language === "vi" ? "TTS · tự chuyển giọng Việt/Anh" : "TTS · automatic VI/EN voice switching",
+      provider: language === "vi" ? "TTS · giọng Việt online" : "TTS · automatic VI/EN voice switching",
     }),
     [language],
   );
@@ -322,9 +412,80 @@ export const BlogTextToSpeech = ({
       currentAudioRef.current = audio;
       currentAudioUrlRef.current = audioUrl;
       audio.onended = () => resolve();
-      audio.onerror = () => reject(new Error("Unable to play synthesized audio"));
+      audio.onerror = () => reject(new Error("Unable to play Vietnamese TTS audio"));
       audio.play().catch(reject);
     });
+
+
+  const playAudioUrl = (audioUrl: string, runId: number) =>
+    new Promise<void>((resolve, reject) => {
+      if (currentRunRef.current !== runId || requestedStopRef.current) {
+        resolve();
+        return;
+      }
+
+      const audio = new Audio(audioUrl);
+      currentAudioRef.current = audio;
+      audio.preload = "auto";
+      audio.onended = () => resolve();
+      audio.onerror = () => reject(new Error("Unable to play Vietnamese TTS URL"));
+      audio.play().catch(reject);
+    });
+
+  const speakLocalVietnameseChunk = (text: string, runId: number) =>
+    new Promise<void>((resolve, reject) => {
+      if (!viVoice) {
+        reject(new Error("No local Vietnamese voice"));
+        return;
+      }
+      if (currentRunRef.current !== runId || requestedStopRef.current) {
+        resolve();
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "vi-VN";
+      utterance.voice = viVoice;
+      utterance.rate = rate;
+      utterance.pitch = 1;
+      utterance.onend = () => resolve();
+      utterance.onerror = () => reject(new Error("Local Vietnamese voice failed"));
+      window.speechSynthesis.speak(utterance);
+    });
+  const speakResponsiveVietnameseChunk = (text: string, runId: number) =>
+    new Promise<void>((resolve, reject) => {
+      loadResponsiveVoice()
+        .then((responsiveVoice) => {
+          if (currentRunRef.current !== runId || requestedStopRef.current) {
+            resolve();
+            return;
+          }
+
+          responsiveVoiceRef.current = responsiveVoice;
+          responsiveVoice.cancel();
+          responsiveVoice.speak(text, "Vietnamese Female", {
+            rate,
+            onend: () => resolve(),
+          });
+        })
+        .catch(reject);
+    });
+
+  const playVietnameseOnline = async (text: string, runId: number) => {
+    const chunks = splitTextForTts(text, 220);
+    for (const chunk of chunks) {
+      if (currentRunRef.current !== runId || requestedStopRef.current) return;
+      try {
+        await speakLocalVietnameseChunk(chunk, runId);
+      } catch {
+        try {
+          await speakResponsiveVietnameseChunk(chunk, runId);
+        } catch {
+          await playAudioUrl(createGoogleVietnameseTtsUrl(chunk), runId);
+        }
+      }
+    }
+  };
 
   const speakSegmentParts = (runId: number, segmentIndex: number) => {
     if (currentRunRef.current !== runId) return;
@@ -339,23 +500,14 @@ export const BlogTextToSpeech = ({
     const segmentText = language === "vi" ? smoothVietnameseSpeechText(segments[segmentIndex].text) : segments[segmentIndex].text;
 
     if (useOnlineVietnameseVoice) {
-      synthesizeVietnameseOnline(segmentText, rate)
-        .then((blob) => playAudioBlob(blob, runId))
+      playVietnameseOnline(segmentText, runId)
         .then(() => {
           if (!requestedStopRef.current) speakSegmentParts(runId, segmentIndex + 1);
         })
-        .catch(() => {
-          if (currentRunRef.current !== runId) return;
-          const utterance = new SpeechSynthesisUtterance(segmentText);
-          utterance.lang = "vi-VN";
-          utterance.rate = rate;
-          utterance.pitch = 1;
-          if (viVoice) utterance.voice = viVoice;
-          utterance.onend = () => {
-            if (!requestedStopRef.current) speakSegmentParts(runId, segmentIndex + 1);
-          };
-          utterance.onerror = () => finishRun(runId);
-          window.speechSynthesis.speak(utterance);
+        .catch((error) => {
+          console.error("Vietnamese TTS failed:", error);
+          setPlaybackError(language === "vi" ? "Không thể phát giọng tiếng Việt trên trình duyệt này. Vui lòng thử Chrome/Edge hoặc tắt tiện ích chặn script/audio." : "Unable to play audio.");
+          finishRun(runId);
         });
       return;
     }
@@ -375,11 +527,14 @@ export const BlogTextToSpeech = ({
   };
 
   const speakFrom = (startIndex: number | undefined) => {
-    if (!supported || segments.length === 0 || startIndex === undefined) return;
+    if (!supported || segments.length === 0) return;
+    const resolvedStartIndex = startIndex ?? 0;
 
     const runId = currentRunRef.current + 1;
     currentRunRef.current = runId;
     requestedStopRef.current = false;
+    responsiveVoiceRef.current?.cancel();
+    responsiveVoiceRef.current?.cancel();
     currentAudioRef.current?.pause();
     currentAudioRef.current = undefined;
     if (currentAudioUrlRef.current) {
@@ -387,10 +542,11 @@ export const BlogTextToSpeech = ({
       currentAudioUrlRef.current = undefined;
     }
     window.speechSynthesis.cancel();
-    onSelectIndex(startIndex);
+    setPlaybackError(undefined);
+    onSelectIndex(resolvedStartIndex);
     setIsPlaying(true);
     setIsPaused(false);
-    speakSegmentParts(runId, startIndex);
+    speakSegmentParts(runId, resolvedStartIndex);
   };
 
   useEffect(() => {
@@ -420,6 +576,8 @@ export const BlogTextToSpeech = ({
     if (isPaused) {
       if (currentAudioRef.current) {
         currentAudioRef.current.play().catch(() => undefined);
+      } else if (responsiveVoiceRef.current) {
+        responsiveVoiceRef.current.resume();
       } else {
         window.speechSynthesis.resume();
       }
@@ -428,6 +586,8 @@ export const BlogTextToSpeech = ({
     }
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
+    } else if (responsiveVoiceRef.current) {
+      responsiveVoiceRef.current.pause();
     } else {
       window.speechSynthesis.pause();
     }
@@ -516,7 +676,7 @@ export const BlogTextToSpeech = ({
                   <SkipBack className="h-4 w-4" />
                   <span className="sr-only">{labels.previous}</span>
                 </Button>
-                <Button type="button" onClick={() => (isPlaying ? pauseOrResume() : speakFrom(selectedIndex))} disabled={selectedIndex === undefined} className="min-w-[7.75rem] flex-1">
+                <Button type="button" onClick={() => (isPlaying ? pauseOrResume() : speakFrom(selectedIndex))} disabled={segments.length === 0} className="min-w-[7.75rem] flex-1">
                   {isPlaying && !isPaused ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
                   {isPlaying ? (isPaused ? labels.resume : labels.pause) : labels.play}
                 </Button>
@@ -540,7 +700,7 @@ export const BlogTextToSpeech = ({
 
               <p className="border-t border-border/60 pt-4 text-xs leading-5 text-muted-foreground">
                 {labels.provider}
-                {useOnlineVietnameseVoice ? ` · ${edgeVietnameseVoice}` : baseVoice ? ` · ${baseVoice.name}` : ""}
+                {useOnlineVietnameseVoice ? " · Edge Vietnamese TTS" : baseVoice ? ` · ${baseVoice.name}` : ""}
               </p>
             </>
           )}
@@ -549,5 +709,8 @@ export const BlogTextToSpeech = ({
     </section>
   );
 };
+
+
+
 
 
