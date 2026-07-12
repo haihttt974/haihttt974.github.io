@@ -18,25 +18,28 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { ScrollToTopButton } from "@/components/layout/ScrollToTopButton";
+import { lazy, Suspense } from "react";
 
 const queryClient = new QueryClient();
+const Graduation = lazy(() => import("./pages/Graduation"));
 
 export default function App() {
   const location = useLocation();
+  const isGraduationRoute = location.pathname === "/graduation" || location.pathname.startsWith("/graduation/");
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="haiit-theme">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="haiit-theme" forcedTheme={isGraduationRoute ? "light" : undefined}>
       <ThemeColorSync />
       <LanguageProvider>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <EffectsProvider>
               <Toaster />
-              <EffectsRenderer />
-              <EffectsController />
+              {!isGraduationRoute && <EffectsRenderer />}
+              {!isGraduationRoute && <EffectsController />}
 
               <LazyMotion features={domAnimation} strict>
-                <ScrollToTopButton />
+                {!isGraduationRoute && <ScrollToTopButton />}
                 <AnimatePresence mode="wait" initial={false}>
                   <Routes location={location} key={location.pathname}>
                     <Route path="/" element={<PageTransition><Index /></PageTransition>} />
@@ -45,6 +48,7 @@ export default function App() {
                     <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
                     <Route path="/about" element={<PageTransition><About /></PageTransition>} />
                     <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+                    <Route path="/graduation" element={<Suspense fallback={<div className="min-h-screen bg-[#f7f3ea]" />}><Graduation /></Suspense>} />
                     <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
                   </Routes>
                 </AnimatePresence>

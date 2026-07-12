@@ -7,14 +7,14 @@ declare global {
       track(): Promise<void> | void;
 
       // event
-      track(eventName: string, data?: Record<string, any>): Promise<void> | void;
+      track(eventName: string, data?: Record<string, unknown>): Promise<void> | void;
 
       // custom payload (set url, referrer, ...)
       track(
-        callback: (props: Record<string, any>) => Record<string, any>
+        callback: (props: Record<string, unknown>) => Record<string, unknown>
       ): Promise<void> | void;
 
-      identify(data?: Record<string, any>): Promise<void> | void;
+      identify(data?: Record<string, unknown>): Promise<void> | void;
     };
   }
 }
