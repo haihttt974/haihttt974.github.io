@@ -8,6 +8,7 @@ import { GratitudeLetter } from "@/components/graduation/GratitudeLetter";
 import { GraduationMap } from "@/components/graduation/GraduationMap";
 import { GraduationClosing } from "@/components/graduation/GraduationClosing";
 import { GraduationExperience } from "@/components/graduation/GraduationExperience";
+import { GraduationMessage } from "@/components/graduation/GraduationMessage";
 import "@/styles/graduation.css";
 
 const escapeIcs = (value: string) => value.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
@@ -58,5 +59,5 @@ export default function Graduation() {
     }
   };
 
-  return <div className="graduation-page"><GraduationExperience /><a className="grad-skip-link" href="#graduation-content">Bỏ qua đến nội dung chính</a><header className="grad-masthead"><span>HAIIT / SPECIAL ISSUE</span><span>CLASS OF {data.classYear}</span></header><main id="graduation-content" className="grad-shell"><GraduationHero data={data} onAddCalendar={addToCalendar} canAddCalendar={Boolean(ceremonyDate)} /><InvitationStatement data={data} /><CeremonyDetails data={data} /><EventDateCalendar eventDate={data.eventDate} /><JourneyTimeline journey={data.journey} /><GratitudeLetter letter={data.letter} /><PhotoContactSheet data={data} /><GraduationMap location={data.mapLocation} eventDate={data.eventDate} /><GraduationClosing data={data} shared={shared} onShare={share} /></main></div>;
+  return <div className="graduation-page"><GraduationExperience /><a className="grad-skip-link" href="#graduation-content">Bỏ qua đến nội dung chính</a><header className="grad-masthead"><span>HAIIT / SPECIAL ISSUE</span><span>CLASS OF {data.classYear}</span></header><main id="graduation-content" className="grad-shell"><GraduationHero data={data} onAddCalendar={addToCalendar} canAddCalendar={Boolean(ceremonyDate)} /><InvitationStatement data={data} /><CeremonyDetails data={data} /><EventDateCalendar eventDate={data.eventDate} /><JourneyTimeline journey={data.journey} /><GratitudeLetter letter={data.letter} /><PhotoContactSheet data={data} /><GraduationMap location={data.mapLocation} eventDate={data.eventDate} /><GraduationMessage /><GraduationClosing data={data} shared={shared} onShare={share} /></main></div>;
 }
