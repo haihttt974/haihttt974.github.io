@@ -11,6 +11,7 @@ import { GraduationClosing } from "@/components/graduation/GraduationClosing";
 import { GraduationExperience } from "@/components/graduation/GraduationExperience";
 import { GraduationMessage } from "@/components/graduation/GraduationMessage";
 import "@/styles/graduation.css";
+import "@/styles/graduation-anchors.css";
 
 const escapeIcs = (value: string) => value.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
 const toIcsDate = (date: Date) => date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
@@ -40,15 +41,13 @@ export default function Graduation() {
   }, [data.classYear, data.graduateName]);
 
   useEffect(() => {
-    const routeState = location.state as { scrollToPercent?: number } | null;
-    if (routeState?.scrollToPercent !== 0.92) return;
+    const chapter = location.hash.match(/^#(0[1-8])$/)?.[1];
+    if (!chapter) return;
 
     let secondFrame = 0;
     const firstFrame = window.requestAnimationFrame(() => {
       secondFrame = window.requestAnimationFrame(() => {
-        const maximumScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-        window.scrollTo({ top: maximumScroll * 0.92, behavior: "smooth" });
-        window.history.replaceState({}, document.title, location.pathname);
+        document.getElementById(chapter)?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
 
@@ -56,7 +55,7 @@ export default function Graduation() {
       window.cancelAnimationFrame(firstFrame);
       window.cancelAnimationFrame(secondFrame);
     };
-  }, [location.pathname, location.state]);
+  }, [location.hash]);
 
   const addToCalendar = () => {
     if (!ceremonyDate) return;

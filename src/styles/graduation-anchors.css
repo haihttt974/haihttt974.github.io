@@ -1,0 +1,5 @@
+.grad-chapter-marker[id]{scroll-margin-top:88px}
+
+@media(max-width:800px){
+  .grad-chapter-marker[id]{scroll-margin-top:20px}
+}
