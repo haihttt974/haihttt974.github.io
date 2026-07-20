@@ -54,7 +54,7 @@ export function GraduationMessage() {
 
   return (
     <section className="grad-section grad-message-section" aria-labelledby="graduation-message-title">
-      <ChapterMarker number="08" label="A NOTE FOR HAI" />
+      <ChapterMarker number="08" label="A NOTE FOR HAI" action={{ href: "/graduation/questions", label: "Xem Q&A" }} />
       <div className="grad-message-content">
         <header className="grad-message-heading">
           <p><MessageCircleHeart aria-hidden="true" /> A QUIET SPACE / FOR YOU</p>

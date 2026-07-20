@@ -22,6 +22,7 @@ import { lazy, Suspense } from "react";
 
 const queryClient = new QueryClient();
 const Graduation = lazy(() => import("./pages/Graduation"));
+const GraduationQuestions = lazy(() => import("./pages/GraduationQuestions"));
 
 export default function App() {
   const location = useLocation();
@@ -49,6 +50,7 @@ export default function App() {
                     <Route path="/about" element={<PageTransition><About /></PageTransition>} />
                     <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
                     <Route path="/graduation" element={<Suspense fallback={<div className="min-h-screen bg-[#f7f3ea]" />}><Graduation /></Suspense>} />
+                    <Route path="/graduation/questions" element={<Suspense fallback={<div className="min-h-screen bg-[#f7f3ea]" />}><GraduationQuestions /></Suspense>} />
                     <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
                   </Routes>
                 </AnimatePresence>
