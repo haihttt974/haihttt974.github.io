@@ -1,4 +1,4 @@
-import { CalendarPlus, MapPin } from "lucide-react";
+import { Braces, CalendarPlus, Code2, Cpu, MapPin } from "lucide-react";
 import { m, useReducedMotion } from "framer-motion";
 import type { GraduationData } from "@/data/graduation";
 
@@ -29,5 +29,13 @@ export function GraduationHero({ data, onAddCalendar, canAddCalendar }: Props) {
       {data.heroImage ? <img src={data.heroImage} alt={data.heroImageAlt || ""} width="900" height="1125" fetchPriority="high" style={{ objectPosition: data.heroImagePosition }} /> : <div className="grad-image-placeholder" role="img" aria-label="Vị trí dành cho ảnh chân dung tốt nghiệp"><span>PORTRAIT / 01</span><strong>Thêm ảnh<br />hero.webp</strong></div>}
       <figcaption>THE GRADUATE · PERSONAL FIELD NOTES</figcaption>
     </m.figure>
+    <m.aside className="grad-tech-hud" aria-label="Dấu ấn công nghệ" initial={{ opacity: 0, x: reduceMotion ? 0 : 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reduceMotion ? 0 : .55, delay: reduceMotion ? 0 : .2 }}>
+      <span className="grad-tech-hud-label"><i /> SYSTEM PROFILE / ONLINE</span>
+      <ul>
+        <li><Code2 aria-hidden="true" /><span><small>FOCUS</small><strong>Full-stack</strong></span></li>
+        <li><Braces aria-hidden="true" /><span><small>MAJOR</small><strong>Information Tech</strong></span></li>
+        <li><Cpu aria-hidden="true" /><span><small>STATUS</small><strong>Ready for next</strong></span></li>
+      </ul>
+    </m.aside>
   </section>;
 }

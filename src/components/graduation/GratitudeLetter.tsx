@@ -1,7 +1,8 @@
 ﻿import { useState } from "react";
-import { AnimatePresence, m, useReducedMotion } from "framer-motion";
-import { ChevronDown, Heart, Mail, PenLine, Sparkles } from "lucide-react";
+import { m, useReducedMotion } from "framer-motion";
+import { ChevronDown, Heart, Mail, Sparkles } from "lucide-react";
 import type { GraduationLetter } from "@/data/graduation";
+import { ChapterMarker } from "./ChapterMarker";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -12,24 +13,7 @@ export function GratitudeLetter({ letter }: { letter: GraduationLetter }) {
 
   return (
     <section className="grad-section grad-letter-section" aria-labelledby="letter-title">
-      <m.aside
-        className="grad-letter-rail"
-        aria-label="Chương 05 — Thư cảm ơn"
-        initial={{ opacity: 0, x: reduce ? 0 : -18 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: reduce ? 0 : 0.7, ease }}
-      >
-        <span className="grad-letter-rail-kicker">CHAPTER</span>
-        <strong>05</strong>
-        <span className="grad-letter-rail-rule" aria-hidden="true"><i /><i /><i /></span>
-        <span className="grad-letter-rail-label">A NOTE<br />OF GRATITUDE</span>
-        <span className="grad-letter-rail-mark" aria-hidden="true"><PenLine /></span>
-        <span className="grad-letter-rail-meta">
-          <small>PERSONAL LETTER</small>
-          <b>MMXXVI</b>
-        </span>
-      </m.aside>
+      <ChapterMarker number="05" label="A NOTE OF GRATITUDE" />
       <m.div
         className={`grad-letter-experience ${open ? "is-open" : ""}`}
         initial={{ opacity: 0, y: reduce ? 0 : 24, scale: reduce ? 1 : 0.98 }}
@@ -70,21 +54,16 @@ export function GratitudeLetter({ letter }: { letter: GraduationLetter }) {
           <span className="grad-envelope-corner grad-envelope-corner-b" aria-hidden="true" />
         </button>
 
-        <AnimatePresence initial={false}>
-          {open && (
-            <m.div
+        <div
               id={contentId}
               className="grad-letter-reveal"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: reduce ? 0 : 0.72, ease }}
+              aria-hidden={!open}
             >
+              <div className="grad-letter-reveal-inner">
               <m.article
                 className="grad-letter"
-                initial={{ y: reduce ? 0 : -70, rotateX: reduce ? 0 : -4, scale: reduce ? 1 : 0.97 }}
-                animate={{ y: 0, rotateX: 0, scale: 1 }}
-                exit={{ y: reduce ? 0 : -28, opacity: 0 }}
+                initial={false}
+                animate={{ y: open || reduce ? 0 : -54, rotateX: open || reduce ? 0 : -3, scale: open || reduce ? 1 : 0.975, opacity: open ? 1 : 0 }}
                 transition={{ duration: reduce ? 0 : 0.8, ease }}
               >
                 <span className="grad-letter-shine" aria-hidden="true" />
@@ -110,9 +89,8 @@ export function GratitudeLetter({ letter }: { letter: GraduationLetter }) {
                 </div>
                 <span className="grad-postal-mark" aria-hidden="true">ISSUE<br />05 / 26</span>
               </m.article>
-            </m.div>
-          )}
-        </AnimatePresence>
+              </div>
+            </div>
       </m.div>
     </section>
   );

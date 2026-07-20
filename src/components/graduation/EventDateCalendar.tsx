@@ -1,9 +1,8 @@
 ﻿import { CalendarDays, Clock3, Sparkles } from "lucide-react";
-import { vi } from "date-fns/locale";
-import { Calendar } from "@/components/ui/calendar";
 import type { GraduationEventDate } from "@/data/graduation";
 import { datesShareCalendarDay, parseLocalCalendarDate } from "@/lib/graduation-date";
 import { GraduationCountdown } from "./GraduationCountdown";
+import { ChapterMarker } from "./ChapterMarker";
 
 export function EventDateCalendar({ eventDate }: { eventDate: GraduationEventDate }) {
   let selected: Date;
@@ -21,16 +20,22 @@ export function EventDateCalendar({ eventDate }: { eventDate: GraduationEventDat
   const day = String(selected.getDate()).padStart(2, "0");
   const year = selected.getFullYear();
   const ceremonyTime = eventDate.displayTime.split("·")[0].trim();
+  const calendarYear = selected.getFullYear();
+  const calendarMonth = selected.getMonth();
+  const firstDayOffset = (new Date(calendarYear, calendarMonth, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const calendarCellCount = Math.ceil((firstDayOffset + daysInMonth) / 7) * 7;
+  const today = new Date();
+  const weekdays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+  const calendarDays = Array.from({ length: calendarCellCount }, (_, index) => {
+    const date = index - firstDayOffset + 1;
+    return date > 0 && date <= daysInMonth ? date : null;
+  });
 
   return (
     <section className="grad-section grad-date-section" aria-labelledby="event-date-title">
       <header className="grad-date-hero">
-        <div className="grad-date-index" aria-hidden="true">
-          <span>CHAPTER</span>
-          <strong>03</strong>
-          <i />
-          <small>SAVE<br />THE DATE</small>
-        </div>
+        <ChapterMarker number="03" label="SAVE THE DATE" />
         <div className="grad-date-heading-copy">
           <p><Sparkles aria-hidden="true" /> NGÀY HẸN · A DAY TO REMEMBER</p>
           <h2 id="event-date-title">Một ngày để khép lại hành trình cũ<br />và bắt đầu một chương mới.</h2>
@@ -59,27 +64,19 @@ export function EventDateCalendar({ eventDate }: { eventDate: GraduationEventDat
           <div className="grad-calendar-shell">
             <span className="grad-calendar-corner grad-calendar-corner-a" aria-hidden="true" />
             <span className="grad-calendar-corner grad-calendar-corner-b" aria-hidden="true" />
-            <Calendar
-            mode="single"
-            selected={selected}
-            month={selected}
-            locale={vi}
-            weekStartsOn={1}
-            disableNavigation
-            showOutsideDays={false}
-            disabled
-            className="grad-calendar"
-            classNames={{
-              day_selected: "grad-calendar-selected",
-              day_today: "grad-calendar-today",
-              day_outside: "grad-calendar-outside",
-            }}
-            />
+            <div className="grad-calendar-grid" role="grid" aria-label={`Lịch ${monthLong.toLocaleLowerCase("vi-VN")} năm ${year}`}>
+              {weekdays.map((weekdayLabel) => <span className="grad-calendar-weekday" role="columnheader" key={weekdayLabel}>{weekdayLabel}</span>)}
+              {calendarDays.map((date, index) => {
+                if (date === null) return <span className="grad-calendar-blank" aria-hidden="true" key={`blank-${index}`} />;
+                const isEvent = date === selected.getDate();
+                const isToday = date === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear();
+                return <span className={`grad-calendar-day ${isEvent ? "is-event" : ""} ${isToday ? "is-today" : ""}`} role="gridcell" aria-selected={isEvent} aria-label={`${date} ${monthLong.toLocaleLowerCase("vi-VN")} ${year}${isEvent ? ", ngày diễn ra lễ tốt nghiệp" : ""}`} key={date}>{String(date).padStart(2, "0")}</span>;
+              })}
+            </div>
           </div>
           <div className="grad-calendar-legend" aria-hidden="true">
             <span><i className="is-event" /> Ngày diễn ra</span>
             <span><i className="is-today" /> Hôm nay</span>
-            <span><i className="is-muted" /> Ngoài tháng</span>
           </div>
           <div className="grad-calendar-caption">
             <span>{weekday.toLocaleUpperCase("vi-VN")}</span>
