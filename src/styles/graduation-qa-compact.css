@@ -1,0 +1,12 @@
+.grad-qa-hero{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(28px,5vw,64px);padding-block:clamp(42px,5.8vw,68px)}
+.grad-qa-hero>div{position:relative;display:grid;grid-template-columns:minmax(210px,.72fr) minmax(260px,1fr);align-items:end;gap:14px clamp(24px,4vw,54px)}
+.grad-qa-hero>div:after{content:"";position:absolute;left:0;bottom:-20px;width:min(100%,520px);height:1px;background:linear-gradient(90deg,var(--grad-blue) 0 18%,var(--grad-ochre) 18% 28%,var(--grad-border) 28% 100%)}
+.grad-qa-hero>div>p:first-child{grid-column:1/-1}
+.grad-qa-hero h1{grid-column:1;margin-top:4px;font-size:clamp(2.65rem,5.2vw,5rem);line-height:.94;letter-spacing:-.055em}
+.grad-qa-lead{grid-column:2;max-width:43ch;margin:0;padding-left:clamp(18px,2.5vw,32px);border-left:1px solid var(--grad-border-strong);font-size:clamp(.88rem,1.15vw,1rem);line-height:1.7}
+.grad-qa-hero-meta{grid-column:1/-1;display:flex;align-items:center;flex-wrap:wrap;gap:8px 17px;margin-top:4px;color:var(--grad-muted);font-size:6px;font-weight:700;letter-spacing:.13em}.grad-qa-hero-meta span{display:flex;align-items:center;gap:7px}.grad-qa-hero-meta span+span:before{content:"";width:3px;height:3px;border-radius:50%;background:var(--grad-ochre)}.grad-qa-hero-meta i{width:7px;height:7px;border-radius:50%;background:#63856a;box-shadow:0 0 0 4px rgba(99,133,106,.1)}
+.grad-qa-hero dl{grid-template-columns:repeat(2,94px)}
+.grad-qa-hero dl>div{gap:9px;padding:15px}
+.grad-qa-hero dd{font-size:1.9rem}
+@media(max-width:900px){.grad-qa-hero{grid-template-columns:1fr auto}.grad-qa-hero>div{grid-template-columns:1fr}.grad-qa-hero>div>p:first-child,.grad-qa-hero h1,.grad-qa-lead,.grad-qa-hero-meta{grid-column:1}.grad-qa-lead{max-width:50ch;padding-left:0;border-left:0}.grad-qa-hero dl{grid-template-columns:repeat(2,86px)}}
+@media(max-width:620px){.grad-qa-hero{grid-template-columns:1fr;gap:38px;padding-block:36px 44px}.grad-qa-hero h1{font-size:clamp(2.55rem,13vw,3.7rem)}.grad-qa-hero>div:after{bottom:-17px}.grad-qa-hero-meta{display:grid;gap:8px}.grad-qa-hero-meta span+span:before{display:none}.grad-qa-hero dl{width:100%;grid-template-columns:repeat(2,1fr)}.grad-qa-hero dl>div{padding:14px 16px}}
