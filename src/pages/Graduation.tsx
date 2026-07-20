@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { graduationData } from "@/data/graduation";
 import { GraduationHero } from "@/components/graduation/GraduationHero";
 import { CeremonyDetails, InvitationStatement, PhotoContactSheet } from "@/components/graduation/GraduationSections";
@@ -16,6 +17,7 @@ const toIcsDate = (date: Date) => date.toISOString().replace(/[-:]/g, "").replac
 
 export default function Graduation() {
   const data = graduationData;
+  const location = useLocation();
   const [shared, setShared] = useState(false);
   const ceremonyDate = useMemo(() => {
     if (!data.ceremonyDateISO) return null;
@@ -36,6 +38,25 @@ export default function Graduation() {
       document.body.classList.remove("graduation-active");
     };
   }, [data.classYear, data.graduateName]);
+
+  useEffect(() => {
+    const routeState = location.state as { scrollToPercent?: number } | null;
+    if (routeState?.scrollToPercent !== 0.92) return;
+
+    let secondFrame = 0;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        const maximumScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.scrollTo({ top: maximumScroll * 0.92, behavior: "smooth" });
+        window.history.replaceState({}, document.title, location.pathname);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+    };
+  }, [location.pathname, location.state]);
 
   const addToCalendar = () => {
     if (!ceremonyDate) return;

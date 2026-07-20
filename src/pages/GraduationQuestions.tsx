@@ -79,7 +79,7 @@ export default function GraduationQuestions() {
 
         {state === "error" && <section className="grad-qa-state"><RefreshCw aria-hidden="true" /><h2>Chưa thể tải cuộc trò chuyện.</h2><p>Bạn có thể thử lại sau một chút.</p><button type="button" onClick={reload}>Tải lại câu hỏi</button></section>}
 
-        {state === "ready" && questions.length === 0 && <section className="grad-qa-state"><MessageSquareQuote aria-hidden="true" /><h2>Chưa có câu hỏi nào ở đây.</h2><p>Không gian này đang chờ câu hỏi đầu tiên.</p><Link to="/graduation">Gửi điều bạn muốn hỏi Hải</Link></section>}
+        {state === "ready" && questions.length === 0 && <section className="grad-qa-state"><MessageSquareQuote aria-hidden="true" /><h2>Chưa có câu hỏi nào ở đây.</h2><p>Không gian này đang chờ câu hỏi đầu tiên.</p><Link to="/graduation" state={{ scrollToPercent: 0.92 }}>Gửi điều bạn muốn hỏi Hải</Link></section>}
 
         {state === "ready" && questions.length > 0 && <section className="grad-qa-list" aria-label="Câu hỏi dành cho Hải">{questions.map((item, index) => {
           const dateLabel = formatSubmittedAt(item.submittedAt);
