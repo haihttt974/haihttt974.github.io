@@ -5,6 +5,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f172a" />
+    <style>
+      html { background: #f7f4eb; }
+      html.dark { background: #090c11; }
+    </style>
+    <script>
+      try {
+        const graduationRoute = location.pathname === "/graduation" || location.pathname.startsWith("/graduation/");
+        const savedTheme = localStorage.getItem("haiit-theme");
+        const dark = !graduationRoute && (
+          savedTheme === "dark" ||
+          (savedTheme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)
+        );
+        document.documentElement.classList.toggle("dark", dark);
+      } catch {}
+    </script>
 
     <!-- Primary SEO -->
     <title>haiit.dev | Blog lập trình & System Design</title>
@@ -55,10 +70,10 @@
       src="https://cloud.umami.is/script.js"
       data-website-id="e37e60f6-6200-48ce-a3fd-5991e267efeb">
     </script>
-    <script type="module" crossorigin src="/assets/index-BV2H7lIF.js"></script>
+    <script type="module" crossorigin src="/assets/index-DUfaAnOt.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/motion-Cki7feKP.js">
     <link rel="modulepreload" crossorigin href="/assets/three-DfGjiPv-.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-pwhMg-Sl.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-Chu5fc98.css">
   </head>
 
   <body>
