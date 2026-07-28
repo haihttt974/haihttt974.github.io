@@ -1,0 +1,15 @@
+.signature-mark--route .signature-mark__node {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.signature-mark--route .signature-mark__node--origin { fill: var(--signature-point); }
+.signature-mark--route .signature-mark__node--end { fill: var(--signature-stroke); }
+.signature-mark--inline .signature-mark__lead { stroke-width: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .signature-mark--route .signature-mark__stroke,
+  .signature-mark--inline .signature-mark__stroke {
+    stroke-dashoffset: .05;
+  }
+}

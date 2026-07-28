@@ -7,14 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { m, useReducedMotion } from "framer-motion";
-import { staggerContainer, staggerItem } from "@/lib/motion";
 import { CmsCategory, CmsPostListItem, CmsTag, cmsApi } from "@/lib/cmsApi";
 import { LoadingState } from "@/components/loading/LoadingState";
 
 const Blog = () => {
   const { t, locale, language } = useLanguage();
-  const reduceMotion = useReducedMotion();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const restoredScrollRef = useRef(false);
@@ -490,17 +487,13 @@ const Blog = () => {
           <LoadingState className="min-h-[36rem]" label={language === "vi" ? "Đang tải" : "Loading"} />
         ) : filteredPosts.length > 0 ? (
           <>
-            <m.div
+            <div
               key={`${selectedCategory}-${tagParam}-${searchQuery}-${language}-${currentPage}`}
               className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 lg:grid-cols-3"
-              variants={reduceMotion ? undefined : staggerContainer}
-              initial={reduceMotion ? false : "hidden"}
-              animate="visible"
             >
               {paginatedPosts.map((post) => (
-                <m.article
+                <article
                   key={post.id}
-                  variants={reduceMotion ? undefined : staggerItem}
                   className="group card-gradient flex h-full flex-col overflow-hidden rounded-xl border border-border/50 transition-all duration-300 hover:border-primary/50"
                 >
                   <div className="flex h-full flex-col p-6">
@@ -568,9 +561,9 @@ const Blog = () => {
                       </Link>
                     </div>
                   </div>
-                </m.article>
+                </article>
               ))}
-            </m.div>
+            </div>
 
             {totalPages > 1 && (
               <nav className="mt-10 flex flex-col items-center justify-between gap-4 rounded-xl border border-border/70 bg-background/75 p-3 shadow-sm backdrop-blur sm:flex-row">

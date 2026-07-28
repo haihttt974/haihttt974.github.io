@@ -4,7 +4,7 @@ import { categories } from "@/data/blogData";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { m, useReducedMotion } from "framer-motion";
-import { revealSection, staggerContainer, staggerItem, viewportOnce } from "@/lib/motion";
+import { revealSection, viewportOnce } from "@/lib/motion";
 import { CmsPostListItem, cmsApi } from "@/lib/cmsApi";
 import { LoadingState } from "@/components/loading/LoadingState";
 
@@ -51,9 +51,9 @@ export const FeaturedPosts = () => {
         {isLoading ? (
           <LoadingState className="min-h-[28rem]" label={language === "vi" ? "Đang tải" : "Loading"} />
         ) : (
-          <m.div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]" variants={reduceMotion ? undefined : staggerContainer}>
+          <div className="grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
           {featuredPosts.map((post, index) => (
-            <m.article key={post.id} variants={reduceMotion ? undefined : staggerItem} className={`group journal-card p-6 md:p-8 ${index === 0 ? "lg:row-span-2" : ""}`}>
+            <article key={post.id} className={`group journal-card p-6 md:p-8 ${index === 0 ? "lg:row-span-2" : ""}`}>
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 pb-5 font-mono text-xs uppercase tracking-[.14em] text-muted-foreground">
                 <span className="text-primary">Note / 0{index + 1}</span>
                 <span>{categoryName(post.category)}</span>
@@ -68,9 +68,9 @@ export const FeaturedPosts = () => {
                 <span className="flex items-center gap-1.5"><Eye className="h-3 w-3" />{(post.viewCount ?? 0).toLocaleString(locale)}</span>
                 <Link to={`/blog/${post.id}`} className="ml-auto flex items-center gap-1.5 text-primary">{t("home.notes.read")} <ArrowRight className="h-3 w-3" /></Link>
               </div>
-            </m.article>
+            </article>
           ))}
-          </m.div>
+          </div>
         )}
       </div>
     </m.section>

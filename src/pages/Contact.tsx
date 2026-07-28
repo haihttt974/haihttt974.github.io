@@ -6,7 +6,6 @@ import {
   Github,
   Instagram,
   Linkedin,
-  Loader2,
   Mail,
   MessageSquareText,
   Music2,
@@ -22,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { aboutData } from "@/data/blogData";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
+import { SignatureMark } from "@/components/loading";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xzdlzdwy";
 
@@ -279,7 +279,7 @@ const Contact = () => {
               </div>
             </div>
 
-            <form action={FORMSPREE_ENDPOINT} className="space-y-4" method="POST" onSubmit={submitFeedback}>
+            <form action={FORMSPREE_ENDPOINT} aria-busy={isSubmitting} className="space-y-4" method="POST" onSubmit={submitFeedback}>
               <input
                 aria-hidden="true"
                 autoComplete="off"
@@ -320,7 +320,7 @@ const Contact = () => {
               </label>
 
               <Button type="submit" className="w-full gap-2" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {isSubmitting ? <SignatureMark variant="inline" className="h-4 w-8" /> : <Send className="h-4 w-4" />}
                 {isSubmitting ? text.sending : text.send}
               </Button>
             </form>

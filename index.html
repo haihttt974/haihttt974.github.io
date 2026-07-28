@@ -5,6 +5,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0f172a" />
+    <style>
+      html { background: #f7f4eb; }
+      html.dark { background: #090c11; }
+    </style>
+    <script>
+      try {
+        const graduationRoute = location.pathname === "/graduation" || location.pathname.startsWith("/graduation/");
+        const savedTheme = localStorage.getItem("haiit-theme");
+        const dark = !graduationRoute && (
+          savedTheme === "dark" ||
+          (savedTheme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)
+        );
+        document.documentElement.classList.toggle("dark", dark);
+      } catch {}
+    </script>
 
     <!-- Primary SEO -->
     <title>haiit.dev | Blog lập trình & System Design</title>
